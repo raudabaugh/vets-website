@@ -9,8 +9,6 @@ import {
   deepEquals,
 } from '@department-of-veterans-affairs/react-jsonschema-form/lib/utils';
 
-import scrollTo from 'platform/utilities/ui/scrollTo';
-import set from 'platform/utilities/data/set';
 import {
   scrollToFirstError,
   focusElement,
@@ -18,7 +16,12 @@ import {
 } from '../utilities/ui';
 import { setArrayRecordTouched } from '../helpers';
 import { errorSchemaIsValid } from '../validation';
-import { getScrollOptions, isReactComponent } from '../../../../utilities/ui';
+import {
+  scrollTo,
+  getScrollOptions,
+  isReactComponent,
+} from '../../../../utilities/ui';
+import set from '../../../../utilities/data/set';
 
 const { Element } = Scroll;
 
@@ -290,7 +293,7 @@ export default class ArrayField extends React.Component {
     });
 
     return (
-      <div className={containerClassNames}>
+      <fieldset className={containerClassNames}>
         {hasTitleOrDescription && (
           <div className="schemaform-block-header">
             {title && !hideTitle ? (
@@ -341,8 +344,8 @@ export default class ArrayField extends React.Component {
                   <div className="row small-collapse">
                     <div className="small-12 columns va-growable-expanded">
                       {isLast && items.length > 1 ? (
-                        <h3 className="vads-u-font-size--h5">
-                          New {uiOptions.itemName}
+                        <h3 className="vads-u-font-size--h5 vads-u-margin-top--0">
+                          New {itemName}
                         </h3>
                       ) : null}
                       <div className="input-section">
@@ -441,21 +444,22 @@ export default class ArrayField extends React.Component {
               `You’ve entered the maximum number of items allowed.`}
           </p>
         </div>
-      </div>
+      </fieldset>
     );
   }
 }
 
 ArrayField.propTypes = {
   schema: PropTypes.object.isRequired,
-  uiSchema: PropTypes.object,
-  errorSchema: PropTypes.object,
-  requiredSchema: PropTypes.object,
-  idSchema: PropTypes.object,
   onChange: PropTypes.func.isRequired,
-  onBlur: PropTypes.func,
-  formData: PropTypes.array,
   disabled: PropTypes.bool,
+  errorSchema: PropTypes.object,
+  formContext: PropTypes.shape({
+    setTouched: PropTypes.func,
+  }),
+  formData: PropTypes.array,
+  idSchema: PropTypes.object,
+  name: PropTypes.string,
   readonly: PropTypes.bool,
   registry: PropTypes.shape({
     widgets: PropTypes.objectOf(
@@ -465,4 +469,7 @@ ArrayField.propTypes = {
     definitions: PropTypes.object.isRequired,
     formContext: PropTypes.object.isRequired,
   }),
+  requiredSchema: PropTypes.object,
+  uiSchema: PropTypes.object,
+  onBlur: PropTypes.func,
 };
