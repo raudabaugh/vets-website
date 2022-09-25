@@ -84,7 +84,11 @@ const mockUser = {
             isCerner: false,
           },
           {
-            facilityId: '983GB',
+            facilityId: '983',
+            isCerner: false,
+          },
+          {
+            facilityId: '984',
             isCerner: false,
           },
         ],
@@ -312,14 +316,20 @@ export function mockRequestLimitsApi(id = '983') {
   ).as('v0:get:limits');
 }
 
-export function mockSupportedSitesApi() {
+export function mockSupportedSitesApi({ facilityId = null } = {}) {
+  let { data } = supportedSites;
+
+  if (facilityId) {
+    data = data.filter(facility => facility.id === facilityId);
+  }
+
   cy.intercept(
     {
       method: 'GET',
       pathname: '/vaos/v0/community_care/supported_sites',
     },
     req => {
-      req.reply(supportedSites);
+      req.reply({ data });
     },
   ).as('v0:get:supported_sites');
 }
@@ -335,6 +345,8 @@ export function mockRequestEligibilityCriteriaApi() {
 }
 
 export function mockDirectBookingEligibilityCriteriaApi({
+  facilityIds,
+  typeOfCareId = '349',
   unableToScheduleCovid = false,
 } = {}) {
   if (unableToScheduleCovid) {
@@ -344,27 +356,58 @@ export function mockDirectBookingEligibilityCriteriaApi({
         pathname: '/vaos/v0/direct_booking_eligibility_criteria',
       },
       req =>
+        // req.reply({
+        //   data: directEligibilityCriteria.data.map(facility => ({
+        //     ...facility,
+        //     attributes: {
+        //       ...facility.attributes,
+        //       coreSettings: facility.attributes.coreSettings.filter(
+        //         f => f.id !== 'covid',
+        //       ),
+        //     },
+        //   })),
+        // }),
         req.reply({
-          data: directEligibilityCriteria.data.map(facility => ({
-            ...facility,
-            attributes: {
-              ...facility.attributes,
-              coreSettings: facility.attributes.coreSettings.filter(
-                f => f.id !== 'covid',
-              ),
-            },
-          })),
+          data: [],
         }),
     ).as('v0:get:direct_booking_eligibility_criteria');
   } else {
+    let data;
+
+    if (facilityIds && typeOfCareId) {
+      data = directEligibilityCriteria.data
+        .filter(facility => facilityIds.some(id => id === facility.id))
+        .map(facility => {
+          const coreSettings = facility.attributes.coreSettings
+            .map(
+              setting =>
+                setting.id === typeOfCareId
+                  ? { ...setting, patientHistoryRequired: 'no' }
+                  : null,
+            )
+            // Remove all falsey values from array
+            .filter(Boolean);
+
+          return {
+            ...facility,
+            attributes: {
+              ...facility.attributes,
+              coreSettings,
+            },
+          };
+        });
+    } else {
+      data = [...directEligibilityCriteria.data];
+    }
+
     cy.intercept(
       {
         method: 'GET',
-        // url: '/vaos/v0/direct_booking_eligibility_criteria/*',
         pathname: '/vaos/v0/direct_booking_eligibility_criteria',
       },
       req => {
-        req.reply(directEligibilityCriteria);
+        // req.reply(directEligibilityCriteria);
+        req.reply({ data });
       },
     ).as('v0:get:direct_booking_eligibility_criteria');
   }
@@ -387,7 +430,7 @@ export function mockVisitsApi({ facilityId = '983' } = {}) {
           },
         },
       }),
-  );
+  ).as('v0:get:visits:direct');
   cy.intercept(
     {
       method: 'GET',
@@ -404,7 +447,7 @@ export function mockVisitsApi({ facilityId = '983' } = {}) {
           },
         },
       }),
-  );
+  ).as('v0:get:visits:request');
 }
 
 export function mockCCProvidersApi() {
@@ -464,23 +507,31 @@ export function mockAppointmentsApi({
       {
         method: 'GET',
         pathname: '/vaos/v0/appointments',
-        query: { start_date: '*', end_date: '*', type: '*' },
+        query: { start_date: '*', end_date: '*', type: 'va' },
       },
       req => {
-        if (req.query.type === 'va') {
-          const data = updateConfirmedVADates(confirmedVA).data.concat(
-            createPastVAAppointments().data,
-          );
-          req.reply({
-            data,
-          });
-        } else if (req.query.type === 'cc') {
-          req.reply({
-            data: updateConfirmedCCDates(confirmedCC).data,
-          });
-        }
+        const data = updateConfirmedVADates(confirmedVA).data.concat(
+          createPastVAAppointments().data,
+        );
+        req.reply({
+          data,
+        });
       },
-    ).as('v0:get:appointments');
+    ).as('v0:get:appointments:va');
+
+    cy.intercept(
+      {
+        method: 'GET',
+        pathname: '/vaos/v0/appointments',
+        query: { start_date: '*', end_date: '*', type: 'cc' },
+      },
+      req => {
+        req.reply({
+          data: updateConfirmedCCDates(confirmedCC).data,
+        });
+      },
+    ).as('v0:get:appointments:cc');
+
     cy.intercept(
       {
         method: 'POST',
@@ -673,7 +724,7 @@ export function mockFacilityApi({ id, apiVersion = 1 } = {}) {
   }
 }
 
-export function mockFacilitiesApi({ count, apiVersion = 0 }) {
+export function mockFacilitiesApi({ facilityIds, count, apiVersion = 0 }) {
   if (apiVersion === 0) {
     cy.intercept(
       {
@@ -699,9 +750,15 @@ export function mockFacilitiesApi({ count, apiVersion = 0 }) {
       },
       req => {
         const tokens = req.query.ids.split(',');
-        const data = tokens.map(token => {
-          return facilityData.data.find(f => f.id === token);
+        let data = tokens.map(token => {
+          // NOTE: Convert test facility ids to real ids
+          return facilityData.data.find(f => {
+            return f.id === token.replace('983', '442').replace('984', '552');
+          });
         });
+
+        // Remove 'falsey' values
+        data = data.filter(Boolean);
         // TODO: remove the harded coded id.
         // req.reply({
         //   data: facilityData.data.filter(f => f.id === 'vha_442GC'),
@@ -711,6 +768,14 @@ export function mockFacilitiesApi({ count, apiVersion = 0 }) {
       },
     ).as(`v1:get:facilities`);
   } else if (apiVersion === 2) {
+    let { data } = facilitiesV2;
+
+    if (Array.isArray(facilityIds)) {
+      data = facilitiesV2.data.filter(facility =>
+        facilityIds.includes(facility.id),
+      );
+    }
+
     cy.intercept(
       {
         method: 'GET',
@@ -721,15 +786,16 @@ export function mockFacilitiesApi({ count, apiVersion = 0 }) {
         },
       },
       req => {
-        req.reply(facilitiesV2);
+        // req.reply(facilitiesV2);
+        req.reply({ data });
       },
     ).as('v2:get:facilities');
   }
 }
 
 export function mockSchedulingConfigurationApi({
-  facilityId = null,
-  typeOfCare = null,
+  facilityIds,
+  typeOfCareId = null,
   isDirect = false,
   isRequest = false,
 } = {}) {
@@ -739,23 +805,90 @@ export function mockSchedulingConfigurationApi({
       pathname: '/vaos/v2/scheduling/configurations*',
     },
     req => {
-      if (facilityId && typeOfCare) {
-        schedulingConfigurations.data.forEach(config => {
-          config.attributes.services.forEach(service => {
-            if (service.id === typeOfCare) {
-              service.direct.enabled = isDirect;
-              service.request.enabled = isRequest;
-            }
+      let data;
+
+      if (
+        Array.isArray(facilityIds) &&
+        facilityIds.length > 0 &&
+        typeOfCareId
+      ) {
+        data = schedulingConfigurations.data
+          .filter(facility => facilityIds.some(id => id === facility.id))
+          .map(facility => {
+            const services = facility.attributes.services
+              .map(
+                service =>
+                  service.id === typeOfCareId
+                    ? {
+                        ...service,
+                        direct: { ...service.direct, enabled: isDirect },
+                        request: { ...service.request, enabled: isRequest },
+                      }
+                    : null,
+              )
+              // Remove all falsey values from array
+              .filter(Boolean);
+
+            return {
+              ...facility,
+              attributes: {
+                ...facility.attributes,
+                services,
+              },
+            };
           });
-        });
-        req.reply({
-          data: schedulingConfigurations.data.filter(
-            config => config.id === facilityId || config.id === '983',
-          ),
+      } else if (Array.isArray(facilityIds) && facilityIds.length === 0) {
+        data = schedulingConfigurations.data.map(facility => {
+          const services = facility.attributes.services.map(service => ({
+            ...service,
+            direct: { ...service.direct, enabled: isDirect },
+            request: { ...service.request, enabled: isRequest },
+          }));
+
+          return {
+            ...facility,
+            attributes: {
+              ...facility.attributes,
+              services,
+            },
+          };
         });
       } else {
-        req.reply({ data: schedulingConfigurations.data });
+        data = schedulingConfigurations.data;
       }
+
+      req.reply({ data });
+
+      // if (facilityIds && typeOfCareId) {
+      //   let data = facilityIds.map(facilityId => {
+      //     const config = schedulingConfigurations.data.find(
+      //       facility => facility.id === facilityId,
+      //     );
+
+      //     if (config) {
+      //       const services = config.attributes.services.map(
+      //         setting =>
+      //           setting.id === typeOfCareId
+      //             ? {
+      //                 ...setting,
+      //                 direct: { ...setting.direct, enabled: isDirect },
+      //                 request: { ...setting.request, enabled: isRequest },
+      //               }
+      //             : setting,
+      //       );
+      //       config.attributes.services = services;
+
+      //       return config;
+      //     }
+
+      //     return null;
+      //   });
+
+      //   // Remove all falsey values from array
+      //   data = data.filter(Boolean);
+      // req.reply({
+      //   data,
+      // });
     },
   ).as('scheduling-configurations');
 }
@@ -819,7 +952,8 @@ export function mockCCEligibilityApi({
 export function mockClinicApi({
   clinicId,
   facilityId,
-  locations = [],
+  locations = ['983'],
+  hasClinics = true,
   apiVersion = 2,
 } = {}) {
   if (apiVersion === 0) {
@@ -840,27 +974,35 @@ export function mockClinicApi({
       cy.intercept(
         {
           method: 'GET',
-          path: `/vaos/v2/locations/${locationId}/clinics?clinical_service*`,
+          // path: `/vaos/v2/locations/${locationId}/clinics?clinical_service*`,
+          pathname: `/vaos/v2/locations/${locationId}/clinics`,
+          query: {
+            clinical_service: '*',
+          },
         },
         req => {
           req.reply({
-            data,
+            data: [],
           });
         },
-      ).as(`v2:get:clinics`);
+      ).as(`v2:get:clinics:clincial_service`);
 
       cy.intercept(
         {
           method: 'GET',
           // path: `/vaos/v2/locations/${locationId}/clinics\\?clinic_ids[]**`,
-          path: `/vaos/v2/locations/${locationId}/clinics\\?clinic_ids%5B%5D**`,
+          // path: `/vaos/v2/locations/${locationId}/clinics\\?clinic_ids%5B%5D**`,
+          pathname: `/vaos/v2/locations/${locationId}/clinics`,
+          query: {
+            'clinic_ids[]': '*',
+          },
         },
         req => {
           req.reply({
-            data,
+            data: hasClinics ? data : [],
           });
         },
-      ).as('v2:get:clinic');
+      ).as('v2:get:clinics');
     });
   }
 }
@@ -940,7 +1082,7 @@ export function mockLoginApi({
     cy.login(mockCernerUser);
   } else if (withoutAddress) {
     const mockUserWithoutAddress = unset(
-      'data.attributes.vet360ContactInformation.residentialAddress.addressLine1',
+      'data.attributes.vet360ContactInformation.residentialAddress',
       mockUser,
     );
     cy.login(mockUserWithoutAddress);
