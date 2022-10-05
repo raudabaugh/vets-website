@@ -1,5 +1,6 @@
 import AppointmentListPage from '../../page-objects/AppointmentList/AppointmentListPage';
 import AudiologyPageObject from '../../page-objects/AudiologyPageObject';
+import ClosestCityPageObject from '../../page-objects/ClosestCityPageObject';
 import CommunityCarePreferencesPage from '../../page-objects/CommunityCarePreferencesPageObject';
 import ConfirmationPageObject from '../../page-objects/ConfirmationPageObject';
 import ContactInfoPageObject from '../../page-objects/ContactInfoPageObject';
@@ -64,6 +65,10 @@ describe('C21978 - VAOS community care schedule flow', () => {
         .selectFirstAvailableDate()
         .clickNextButton();
 
+      ClosestCityPageObject.assertUrl()
+        .selectFacility()
+        .clickNextButton();
+
       CommunityCarePreferencesPage.assertUrl()
         .expandAccordian()
         .selectProvider()
@@ -113,6 +118,10 @@ describe('C21978 - VAOS community care schedule flow', () => {
 
       RequestDatePageObject.assertUrl()
         .selectFirstAvailableDate()
+        .clickNextButton();
+
+      ClosestCityPageObject.assertUrl()
+        .selectFacility()
         .clickNextButton();
 
       CommunityCarePreferencesPage.assertUrl()
@@ -179,6 +188,10 @@ describe('C21978 - VAOS community care schedule flow', () => {
         .selectFirstAvailableDate()
         .clickNextButton();
 
+      ClosestCityPageObject.assertUrl()
+        .selectFacility()
+        .clickNextButton();
+
       CommunityCarePreferencesPage.assertUrl()
         .expandAccordian()
         .selectProvider()
@@ -229,6 +242,10 @@ describe('C21978 - VAOS community care schedule flow', () => {
 
       RequestDatePageObject.assertUrl()
         .selectFirstAvailableDate()
+        .clickNextButton();
+
+      ClosestCityPageObject.assertUrl()
+        .selectFacility()
         .clickNextButton();
 
       CommunityCarePreferencesPage.assertUrl()
