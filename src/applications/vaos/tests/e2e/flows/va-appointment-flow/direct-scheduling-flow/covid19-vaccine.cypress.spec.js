@@ -1,6 +1,8 @@
+import moment from 'moment';
 import AppointmentListPage from '../../../page-objects/AppointmentList/AppointmentListPage';
 import ClinicChoicePage from '../../../page-objects/ClinicChoicePageObject';
 import ContactInfoPage from '../../../page-objects/ContactInfoPageObject';
+import CovidConfirmationPageObject from '../../../page-objects/CovidConfirmationPageObject';
 import PlanAheadPage from '../../../page-objects/PlanAheadPageObject';
 import ReceivedDoseScreenerPage from '../../../page-objects/ReceivedDoseScreenerPageObject';
 import ReviewPage from '../../../page-objects/ReviewPageObject';
@@ -23,6 +25,15 @@ import {
 } from '../../../vaos-cypress-helpers';
 
 describe('VAOS COVID-19 vaccine appointment flow', () => {
+  const start = moment()
+    // Adding number months to account for the test clicking the 'next' button to
+    // advance to the next month.
+    .add(1, 'days')
+    .add(1, 'months')
+    .startOf('month')
+    .day(9);
+  const end = moment(start).add(60, 'minutes');
+
   beforeEach(() => {
     vaosSetup();
 
@@ -30,7 +41,7 @@ describe('VAOS COVID-19 vaccine appointment flow', () => {
     mockAppointmentsApi({ apiVersion: 0 });
     mockClinicApi({ facilityId: '983', apiVersion: 0 });
     mockDirectBookingEligibilityCriteriaApi();
-    mockDirectScheduleSlotsApi(); // TODO: rename mockAppointmentSlots
+    mockDirectScheduleSlotsApi({ start, end }); // TODO: rename mockAppointmentSlots
     mockFacilitiesApi({ apiVersion: 1 });
     mockFacilityApi({ id: '983', apiVersion: 1 });
     mockFeatureToggles();
@@ -77,6 +88,20 @@ describe('VAOS COVID-19 vaccine appointment flow', () => {
 
     // Review
     ReviewPage.assertUrl().clickConfirmButton();
+    // Check form requestBody is as expected
+    cy.wait('@v0:create:appointment').should(xhr => {
+      const { body } = xhr.request;
+      expect(body.clinic.siteCode).to.eq('983');
+      expect(body.clinic.clinicId).to.eq('455');
+      expect(body).to.have.property(
+        'desiredDate',
+        `${start.format('YYYY-MM-DD')}T00:00:00+00:00`,
+      );
+      expect(body).to.have.property('dateTime');
+      expect(body).to.have.property('preferredEmail', 'veteran@gmail.com');
+    });
+
+    CovidConfirmationPageObject.assertUrl().assertPage();
 
     cy.axeCheckBestPractice();
   });
