@@ -32,6 +32,7 @@ describe('VAOS community care flow', () => {
   });
 
   it('should fill out community care form and submit request', () => {
+    mockFacilityApi({ id: 'vha_442' });
     mockLoginApi({ withoutAddress: true });
 
     cy.visit(

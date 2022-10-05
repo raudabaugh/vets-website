@@ -84,11 +84,11 @@ const mockUser = {
             isCerner: false,
           },
           {
-            facilityId: '983',
+            facilityId: '983QA',
             isCerner: false,
           },
           {
-            facilityId: '984',
+            facilityId: '983GB',
             isCerner: false,
           },
         ],
@@ -316,20 +316,14 @@ export function mockRequestLimitsApi(id = '983') {
   ).as('v0:get:limits');
 }
 
-export function mockSupportedSitesApi({ facilityId = null } = {}) {
-  let { data } = supportedSites;
-
-  if (facilityId) {
-    data = data.filter(facility => facility.id === facilityId);
-  }
-
+export function mockSupportedSitesApi() {
   cy.intercept(
     {
       method: 'GET',
       pathname: '/vaos/v0/community_care/supported_sites',
     },
     req => {
-      req.reply({ data });
+      req.reply(supportedSites);
     },
   ).as('v0:get:supported_sites');
 }
@@ -807,11 +801,7 @@ export function mockSchedulingConfigurationApi({
     req => {
       let data;
 
-      if (
-        Array.isArray(facilityIds) &&
-        facilityIds.length > 0 &&
-        typeOfCareId
-      ) {
+      if (facilityIds && typeOfCareId) {
         data = schedulingConfigurations.data
           .filter(facility => facilityIds.some(id => id === facility.id))
           .map(facility => {
@@ -837,22 +827,6 @@ export function mockSchedulingConfigurationApi({
               },
             };
           });
-      } else if (Array.isArray(facilityIds) && facilityIds.length === 0) {
-        data = schedulingConfigurations.data.map(facility => {
-          const services = facility.attributes.services.map(service => ({
-            ...service,
-            direct: { ...service.direct, enabled: isDirect },
-            request: { ...service.request, enabled: isRequest },
-          }));
-
-          return {
-            ...facility,
-            attributes: {
-              ...facility.attributes,
-              services,
-            },
-          };
-        });
       } else {
         data = schedulingConfigurations.data;
       }
@@ -1136,21 +1110,10 @@ export function vaosSetup() {
     // Using custom momentjs wrapper functions 'addBusinessDay' and 'addBusinessMonth'. These functions
     // will check to see if adding 5 days to the current date falls on a Sat or Sun. If so, add 1 or 2
     // days to get to Mon since appointment request are only available Mon thru Fri.
-    //
-    // NOTE: This can result in date shifting to the next month. When this happens add 2 months to the date:
-    //
-    // 1 month to account for the shift due to adding 5 days
-    // 1 month to account for the test clicking the 'next' button
-    //
-    // For all other use cases, add 1 month to account for the test clicking the 'next' button.
     let testDate = moment().addBusinessDay(5, 'd');
 
-    // Did the date flip to the next month?
-    if (testDate.isSame(moment(), 'month')) {
-      testDate.addBusinessMonth(1);
-    } else {
-      testDate.addBusinessMonth(2);
-    }
+    // Add 1 month to account for the test clicking the 'next' button.
+    testDate.addBusinessMonth(1);
 
     // Convert date timezone to that of the facility for scheduled appointment
     if (timezone) {

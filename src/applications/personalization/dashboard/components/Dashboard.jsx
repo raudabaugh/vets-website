@@ -11,6 +11,7 @@ import {
 import { toggleValues } from 'platform/site-wide/feature-toggles/selectors';
 import FEATURE_FLAG_NAMES from 'platform/utilities/feature-toggles/featureFlagNames';
 import PropTypes from 'prop-types';
+import API_NAMES from '../utils/apiNames';
 import recordEvent from '~/platform/monitoring/record-event';
 import { focusElement } from '~/platform/utilities/ui';
 import {
@@ -44,9 +45,12 @@ import ClaimsAndAppeals from './claims-and-appeals/ClaimsAndAppeals';
 import HealthCare from './health-care/HealthCare';
 import CTALink from './CTALink';
 import BenefitPaymentsAndDebt from './benefit-payments-and-debts/BenefitPaymentsAndDebt';
+import BenefitPaymentsV2 from './benefit-payments-v2/BenefitPaymentsV2';
+import DebtsV2 from './debts-v2/DebtsV2';
 import DashboardWidgetWrapper from './DashboardWidgetWrapper';
 import { getAllPayments } from '../actions/payments';
 import Notifications from './notifications/Notifications';
+import { canAccess } from '../selectors';
 
 const renderWidgetDowntimeNotification = (downtime, children) => {
   if (downtime.status === externalServiceStatus.down) {
@@ -133,6 +137,7 @@ const Dashboard = ({
   showNameTag,
   showNotInMPIError,
   showBenefitPaymentsAndDebt,
+  showBenefitPaymentsAndDebtV2,
   showNotifications,
   ...props
 }) => {
@@ -181,11 +186,11 @@ const Dashboard = ({
   // fetch data when we determine they are LOA3
   useEffect(
     () => {
-      if (showBenefitPaymentsAndDebt) {
+      if (showBenefitPaymentsAndDebt || showBenefitPaymentsAndDebtV2) {
         getPayments();
       }
     },
-    [getPayments, showBenefitPaymentsAndDebt],
+    [getPayments, showBenefitPaymentsAndDebt, showBenefitPaymentsAndDebtV2],
   );
 
   return (
@@ -265,11 +270,20 @@ const Dashboard = ({
 
               {props.showHealthCare ? <HealthCare /> : null}
 
-              {showBenefitPaymentsAndDebt ? (
+              {showBenefitPaymentsAndDebt && !showBenefitPaymentsAndDebtV2 ? (
                 <BenefitPaymentsAndDebt
                   payments={payments}
                   showNotifications={showNotifications}
                 />
+              ) : null}
+              {showBenefitPaymentsAndDebtV2 ? (
+                <>
+                  <DebtsV2 />
+                  <BenefitPaymentsV2
+                    payments={payments}
+                    showNotifications={showNotifications}
+                  />
+                </>
               ) : null}
 
               <ApplyForBenefits />
@@ -327,8 +341,14 @@ const mapStateToProps = state => {
     !showNotInMPIError &&
     isLOA3 &&
     isVAPatient;
+  const canAccessPaymentHistory = canAccess(state)[API_NAMES.PAYMENT_HISTORY];
   const showBenefitPaymentsAndDebt =
-    !showMPIConnectionError && !showNotInMPIError && isLOA3;
+    canAccessPaymentHistory === undefined
+      ? !showMPIConnectionError && !showNotInMPIError && isLOA3
+      : canAccessPaymentHistory;
+  const showBenefitPaymentsAndDebtV2 =
+    showBenefitPaymentsAndDebt &&
+    toggleValues(state)[FEATURE_FLAG_NAMES.showPaymentAndDebtSection];
 
   const hasNotificationFeature = toggleValues(state)[
     FEATURE_FLAG_NAMES.showDashboardNotifications
@@ -354,8 +374,9 @@ const mapStateToProps = state => {
     showMPIConnectionError,
     showNotInMPIError,
     showBenefitPaymentsAndDebt,
+    showBenefitPaymentsAndDebtV2,
     showNotifications,
-    payments: state.allPayments.payments?.payments || [],
+    payments: state.allPayments.payments || [],
     paymentsError: state.allPayments.error,
   };
 };
@@ -380,6 +401,7 @@ Dashboard.propTypes = {
   ),
   paymentsError: PropTypes.bool,
   showBenefitPaymentsAndDebt: PropTypes.bool,
+  showBenefitPaymentsAndDebtV2: PropTypes.bool,
   showClaimsAndAppeals: PropTypes.bool,
   showHealthCare: PropTypes.bool,
   showLoader: PropTypes.bool,
