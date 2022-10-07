@@ -4,7 +4,7 @@ import CommunityCarePreferencesPage from '../../page-objects/CommunityCarePrefer
 import ConfirmationPageObject from '../../page-objects/ConfirmationPageObject';
 import ContactInfoPageObject from '../../page-objects/ContactInfoPageObject';
 import PreferredLanguagePage from '../../page-objects/PreferredLanguagePageObject';
-import ReasonForAppointmentPageObject from '../../page-objects/ReasonForAppointmentPageObject';
+import AppointmentReasonPageObject from '../../page-objects/AppointmentReasonPageObject';
 import RequestDatePage from '../../page-objects/RequestDatePageObject';
 import ReviewPageObject from '../../page-objects/ReviewPageObject';
 import TypeOfCarePage from '../../page-objects/TypeOfCarePageObject';
@@ -68,7 +68,7 @@ describe('VAOS community care flow using VAOS services', () => {
           .selectLanguage('english')
           .clickNextButton();
 
-        ReasonForAppointmentPageObject.assertUrl().clickNextButton();
+        AppointmentReasonPageObject.assertUrl().clickNextButton();
 
         ContactInfoPageObject.assertUrl()
           .selectPreferredTime()
@@ -121,7 +121,7 @@ describe('VAOS community care flow using VAOS services', () => {
           .selectProvider()
           .clickNextButton();
 
-        ReasonForAppointmentPageObject.assertUrl().clickNextButton();
+        AppointmentReasonPageObject.assertUrl().clickNextButton();
 
         ContactInfoPageObject.assertUrl()
           .selectPreferredTime()

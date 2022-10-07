@@ -5,7 +5,7 @@ import ConfirmationPage from '../../../page-objects/ConfirmationPageObject';
 import ContactInfoPageObject from '../../../page-objects/ContactInfoPageObject';
 import FacilityTypePage from '../../../page-objects/FacilityTypePage';
 import PreferredDatePage from '../../../page-objects/PreferredDatePage';
-import ReasonForAppointmentPage from '../../../page-objects/ReasonForAppointmentPageObject';
+import ReasonForAppointmentPage from '../../../page-objects/AppointmentReasonPageObject';
 import ReviewPage from '../../../page-objects/ReviewPageObject';
 import SelectDatePage from '../../../page-objects/SelectDatePageObject';
 import TypeOfCarePage from '../../../page-objects/TypeOfCarePageObject';

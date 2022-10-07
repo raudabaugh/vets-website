@@ -6,7 +6,7 @@ import ConfirmationPageObject from '../../page-objects/ConfirmationPageObject';
 import ContactInfoPageObject from '../../page-objects/ContactInfoPageObject';
 import FacilityTypePage from '../../page-objects/FacilityTypePage';
 import PreferredLanguagePageObject from '../../page-objects/PreferredLanguagePageObject';
-import ReasonForAppointmentPageObject from '../../page-objects/ReasonForAppointmentPageObject';
+import AppointmentReasonPageObject from '../../page-objects/AppointmentReasonPageObject';
 import RequestDatePageObject from '../../page-objects/RequestDatePageObject';
 import ReviewPageObject from '../../page-objects/ReviewPageObject';
 import TypeOfCarePageObject from '../../page-objects/TypeOfCarePageObject';
@@ -78,7 +78,7 @@ describe('VAOS community care schedule flow', () => {
         .selectLanguage('english')
         .clickNextButton();
 
-      ReasonForAppointmentPageObject.assertUrl()
+      AppointmentReasonPageObject.assertUrl()
         .typeAdditionalText({
           content: 'cough',
           label: /Please let us know any additional details/i,
@@ -129,7 +129,7 @@ describe('VAOS community care schedule flow', () => {
         .selectProvider()
         .clickNextButton();
 
-      ReasonForAppointmentPageObject.assertUrl()
+      AppointmentReasonPageObject.assertUrl()
         .typeAdditionalText({
           content: 'cough',
           label: /Please let us know any additional details/i,
@@ -201,7 +201,7 @@ describe('VAOS community care schedule flow', () => {
         .selectLanguage('english')
         .clickNextButton();
 
-      ReasonForAppointmentPageObject.assertUrl()
+      AppointmentReasonPageObject.assertUrl()
         .typeAdditionalText({
           content: 'cough',
           label: /Please let us know any additional details/i,
@@ -253,7 +253,7 @@ describe('VAOS community care schedule flow', () => {
         .selectProvider()
         .clickNextButton();
 
-      ReasonForAppointmentPageObject.assertUrl()
+      AppointmentReasonPageObject.assertUrl()
         .typeAdditionalText({
           content: 'cough',
           label: /Please let us know any additional details/i,

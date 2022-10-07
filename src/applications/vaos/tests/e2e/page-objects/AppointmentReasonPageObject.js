@@ -1,6 +1,6 @@
 import PageObject from './PageObject';
 
-class ReasonForAppointmentPage extends PageObject {
+class AppointmentReasonPage extends PageObject {
   assertUrl() {
     cy.url().should('include', '/reason-appointment');
     cy.axeCheckBestPractice();
@@ -23,4 +23,4 @@ class ReasonForAppointmentPage extends PageObject {
   }
 }
 
-export default new ReasonForAppointmentPage();
+export default new AppointmentReasonPage();

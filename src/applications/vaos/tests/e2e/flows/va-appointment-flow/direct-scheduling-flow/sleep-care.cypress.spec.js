@@ -6,7 +6,7 @@ import ClinicChoicePage from '../../../page-objects/ClinicChoicePageObject';
 import ConfirmationPageObject from '../../../page-objects/ConfirmationPageObject';
 import ContactInfoPageObject from '../../../page-objects/ContactInfoPageObject';
 import PreferredDatePage from '../../../page-objects/PreferredDatePage';
-import ReasonForAppointmentPageObject from '../../../page-objects/ReasonForAppointmentPageObject';
+import AppointmentReasonPageObject from '../../../page-objects/AppointmentReasonPageObject';
 import RequestDatePageObject from '../../../page-objects/RequestDatePageObject';
 import ReviewPageObject from '../../../page-objects/ReviewPageObject';
 import SelectDatePageObject from '../../../page-objects/SelectDatePageObject';
@@ -91,7 +91,7 @@ describe('VAOS direct scheudle flow', () => {
       .selectFirstAvailableDate()
       .clickNextButton();
 
-    ReasonForAppointmentPageObject.assertUrl()
+    AppointmentReasonPageObject.assertUrl()
       .selectReasonForAppointment()
       .typeAdditionalText({ content: 'insomnia' })
       .clickNextButton();
@@ -177,7 +177,7 @@ describe('VAOS direct scheudle flow using VAOS services', () => {
           .selectFirstAvailableDate()
           .clickNextButton();
 
-        ReasonForAppointmentPageObject.assertUrl()
+        AppointmentReasonPageObject.assertUrl()
           .selectReasonForAppointment()
           .typeAdditionalText({ content: 'insomnia' })
           .clickNextButton();
@@ -228,7 +228,7 @@ describe('VAOS direct scheudle flow using VAOS services', () => {
           .selectFirstAvailableDate()
           .clickNextButton();
 
-        ReasonForAppointmentPageObject.assertUrl()
+        AppointmentReasonPageObject.assertUrl()
           .selectReasonForAppointment()
           .typeAdditionalText({ content: 'insomnia' })
           .clickNextButton();
@@ -270,7 +270,7 @@ describe('VAOS direct scheudle flow using VAOS services', () => {
           .selectFirstAvailableDate()
           .clickNextButton();
 
-        ReasonForAppointmentPageObject.assertUrl()
+        AppointmentReasonPageObject.assertUrl()
           .selectReasonForAppointment()
           .typeAdditionalText({ content: 'insomnia' })
           .clickNextButton();
@@ -396,7 +396,7 @@ describe('VAOS direct scheudle flow using VAOS services', () => {
           .selectFirstAvailableDate()
           .clickNextButton();
 
-        ReasonForAppointmentPageObject.assertUrl()
+        AppointmentReasonPageObject.assertUrl()
           .selectReasonForAppointment()
           .typeAdditionalText({ content: 'insomnia' })
           .clickNextButton();
@@ -484,7 +484,7 @@ describe('VAOS direct scheudle flow using VAOS services', () => {
           .selectFirstAvailableDate()
           .clickNextButton();
 
-        ReasonForAppointmentPageObject.assertUrl()
+        AppointmentReasonPageObject.assertUrl()
           .selectReasonForAppointment()
           .typeAdditionalText({ content: 'insomnia' })
           .clickNextButton();

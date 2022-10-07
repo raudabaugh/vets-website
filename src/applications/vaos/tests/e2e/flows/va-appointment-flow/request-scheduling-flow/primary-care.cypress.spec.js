@@ -2,7 +2,7 @@ import AppointmentListPage from '../../../page-objects/AppointmentList/Appointme
 import ConfirmationPage from '../../../page-objects/ConfirmationPageObject';
 import ContactInfoPageObject from '../../../page-objects/ContactInfoPageObject';
 import FacilityTypePage from '../../../page-objects/FacilityTypePage';
-import ReasonForAppointmentPage from '../../../page-objects/ReasonForAppointmentPageObject';
+import ReasonForAppointmentPage from '../../../page-objects/AppointmentReasonPageObject';
 import ReviewPage from '../../../page-objects/ReviewPageObject';
 import RequestDatePage from '../../../page-objects/RequestDatePageObject';
 import TypeOfCarePage from '../../../page-objects/TypeOfCarePageObject';

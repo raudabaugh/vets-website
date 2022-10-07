@@ -2,7 +2,7 @@ import AppointmentListPage from '../../../page-objects/AppointmentList/Appointme
 import ChooseSleepCarePage from '../../../page-objects/ChooseSleepCarePageObject';
 import ConfirmationPageObject from '../../../page-objects/ConfirmationPageObject';
 import ContactInfoPageObject from '../../../page-objects/ContactInfoPageObject';
-import ReasonForAppointmentPageObject from '../../../page-objects/ReasonForAppointmentPageObject';
+import AppointmentReasonPageObject from '../../../page-objects/AppointmentReasonPageObject';
 import RequestDatePageObject from '../../../page-objects/RequestDatePageObject';
 import ReviewPageObject from '../../../page-objects/ReviewPageObject';
 import TypeOfCarePage from '../../../page-objects/TypeOfCarePageObject';
@@ -68,7 +68,7 @@ describe('VAOS request schedule flow', () => {
           .selectFirstAvailableDate()
           .clickNextButton();
 
-        ReasonForAppointmentPageObject.assertUrl()
+        AppointmentReasonPageObject.assertUrl()
           .selectReasonForAppointment()
           .typeAdditionalText({ content: 'insomnia' })
           .clickNextButton();
@@ -133,7 +133,7 @@ describe('VAOS request schedule flow using VAOS services', () => {
           .selectFirstAvailableDate()
           .clickNextButton();
 
-        ReasonForAppointmentPageObject.assertUrl()
+        AppointmentReasonPageObject.assertUrl()
           .selectReasonForAppointment()
           .typeAdditionalText({ content: 'insomnia' })
           .clickNextButton();
