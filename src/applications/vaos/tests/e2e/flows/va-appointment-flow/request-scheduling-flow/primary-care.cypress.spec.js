@@ -27,6 +27,7 @@ import {
 } from '../../../vaos-cypress-helpers';
 import ClosestCityPage from '../../../page-objects/ClosestCityPageObject';
 import PreferredLanguagePage from '../../../page-objects/PreferredLanguagePageObject';
+import CommunityCarePreferencesPageObject from '../../../page-objects/CommunityCarePreferencesPageObject';
 
 describe('VAOS request schedule flow', () => {
   describe('community care eligible', () => {
@@ -71,6 +72,11 @@ describe('VAOS request schedule flow', () => {
 
       ClosestCityPage.assertUrl()
         .selectFacility()
+        .clickNextButton();
+
+      CommunityCarePreferencesPageObject.assertUrl()
+        .expandAccordian()
+        .selectProvider()
         .clickNextButton();
 
       PreferredLanguagePage.assertUrl()

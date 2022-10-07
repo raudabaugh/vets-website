@@ -249,6 +249,10 @@ export function mockFeatureToggles({
               value: false,
             },
             {
+              name: 'vaOnlineSchedulingClinicFilter',
+              value: true,
+            },
+            {
               name: 'vaOnlineSchedulingVAOSServiceRequests',
               value: v2Requests,
             },

@@ -1,5 +1,6 @@
 import AppointmentListPage from '../../../page-objects/AppointmentList/AppointmentListPage';
 import ClosestCityPageObject from '../../../page-objects/ClosestCityPageObject';
+import CommunityCarePreferencesPageObject from '../../../page-objects/CommunityCarePreferencesPageObject';
 import ConfirmationPageObject from '../../../page-objects/ConfirmationPageObject';
 import ContactInfoPageObject from '../../../page-objects/ContactInfoPageObject';
 import EyeCarePageObject from '../../../page-objects/EyeCarePageObject';
@@ -12,6 +13,7 @@ import TypeOfCarePageObject from '../../../page-objects/TypeOfCarePageObject';
 import {
   mockAppointmentsApi,
   mockCCEligibilityApi,
+  mockCCProvidersApi,
   mockEligibilityApi,
   mockFacilitiesApi,
   mockFeatureToggles,
@@ -29,6 +31,7 @@ describe('VAOS request schedule flow using VAOS services', () => {
 
         mockAppointmentsApi({ apiVersion: 0 });
         mockAppointmentsApi({ apiVersion: 2 });
+        mockCCProvidersApi();
         mockEligibilityApi({ isEligible: true });
         mockFacilitiesApi({ apiVersion: 2 });
         mockFeatureToggles({
@@ -70,6 +73,11 @@ describe('VAOS request schedule flow using VAOS services', () => {
 
         ClosestCityPageObject.assertUrl()
           .selectFacility()
+          .clickNextButton();
+
+        CommunityCarePreferencesPageObject.assertUrl()
+          .expandAccordian()
+          .selectProvider()
           .clickNextButton();
 
         PreferredLanguagePageObject.assertUrl()

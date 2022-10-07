@@ -25,7 +25,7 @@ import {
   vaosSetup,
 } from '../../vaos-cypress-helpers';
 
-describe('C21978 - VAOS community care schedule flow', () => {
+describe('VAOS community care schedule flow', () => {
   describe('When veteran is registered at more than one facility', () => {
     beforeEach(() => {
       vaosSetup();
@@ -42,7 +42,7 @@ describe('C21978 - VAOS community care schedule flow', () => {
       mockCCEligibilityApi({ typeOfCare: 'Audiology' });
     });
 
-    it('C21978 - should submit form when veteran has an address', () => {
+    it('C22814 - should submit form when veteran has an address', () => {
       mockLoginApi();
 
       AppointmentListPage.visit()
@@ -96,7 +96,7 @@ describe('C21978 - VAOS community care schedule flow', () => {
       cy.axeCheckBestPractice();
     });
 
-    it('should submit form when veteran has no address', () => {
+    it('C23005 - should submit form when veteran has no address', () => {
       mockFacilityApi({ id: 'vha_442' });
       mockLoginApi({ withoutAddress: true });
 
@@ -163,7 +163,7 @@ describe('C21978 - VAOS community care schedule flow', () => {
       mockCCEligibilityApi({ typeOfCare: 'Audiology' });
     });
 
-    it('should submit form when veteran has an address', () => {
+    it('C23006 - should submit form when veteran has an address', () => {
       mockCCProvidersApi();
       mockFacilityApi({ id: 'vha_442' });
       mockLoginApi();
@@ -219,7 +219,7 @@ describe('C21978 - VAOS community care schedule flow', () => {
       cy.axeCheckBestPractice();
     });
 
-    it('should submit form when veteran has no address', () => {
+    it('C23007 - should submit form when veteran has no address', () => {
       mockCCProvidersApi();
       mockFacilityApi({ id: 'vha_442' });
       mockLoginApi({ withoutAddress: true });

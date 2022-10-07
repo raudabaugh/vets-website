@@ -1,3 +1,4 @@
+import moment from 'moment';
 import AppointmentListPage from '../../../page-objects/AppointmentList/AppointmentListPage';
 import CernerPageObject from '../../../page-objects/CernerPageObject';
 import ChooseSleepCarePage from '../../../page-objects/ChooseSleepCarePageObject';
@@ -31,6 +32,15 @@ import {
 } from '../../../vaos-cypress-helpers';
 
 describe('VAOS direct scheudle flow', () => {
+  const start = moment()
+    // Adding number months to account for the test clicking the 'next' button to
+    // advance to the next month.
+    .add(1, 'days')
+    .add(1, 'months')
+    .startOf('month')
+    .day(9);
+  const end = moment(start).add(60, 'minutes');
+
   beforeEach(() => {
     vaosSetup();
 
@@ -41,7 +51,7 @@ describe('VAOS direct scheudle flow', () => {
       facilityIds: ['983'],
       typeOfCareId: '349',
     });
-    mockDirectScheduleSlotsApi({ apiVersion: 0 });
+    mockDirectScheduleSlotsApi({ start, end, apiVersion: 0 });
     mockFacilitiesApi({ apiVersion: 1 });
     mockFeatureToggles();
     mockPreferencesApi();
@@ -98,6 +108,15 @@ describe('VAOS direct scheudle flow', () => {
 
 describe('VAOS direct scheudle flow using VAOS services', () => {
   describe('When more than one facility supports online scheduling', () => {
+    const start = moment()
+      // Adding number months to account for the test clicking the 'next' button to
+      // advance to the next month.
+      .add(5, 'days')
+      .add(1, 'months')
+      .startOf('month')
+      .day(9);
+    const end = moment(start).add(60, 'minutes');
+
     beforeEach(() => {
       vaosSetup();
 
@@ -106,7 +125,12 @@ describe('VAOS direct scheudle flow using VAOS services', () => {
       mockAppointmentsApi({ apiVersion: 0 });
       mockAppointmentsApi({ apiVersion: 2 });
       mockClinicApi({ locations: ['983'], apiVersion: 2 });
-      mockDirectScheduleSlotsApi({ clinicId: '848', apiVersion: 2 });
+      mockDirectScheduleSlotsApi({
+        start,
+        end,
+        clinicId: '455',
+        apiVersion: 2,
+      });
       mockEligibilityApi({ typeOfCare: 'cpap', isEligible: true });
       mockFacilitiesApi({ apiVersion: 2 });
       mockFeatureToggles({
@@ -120,7 +144,7 @@ describe('VAOS direct scheudle flow using VAOS services', () => {
     });
 
     describe('And one clinic supports direct scheduling', () => {
-      it('should submit form', () => {
+      it('C23481 - should submit form', () => {
         mockSchedulingConfigurationApi({
           facilityIds: ['983'],
           typeOfCareId: 'cpap',
@@ -169,7 +193,7 @@ describe('VAOS direct scheudle flow using VAOS services', () => {
     });
 
     describe('And more than one clinic supports direct scheduling', () => {
-      it('should submit form', () => {
+      it('C23482 - should submit form', () => {
         mockSchedulingConfigurationApi({
           facilityIds: ['983', '983GB'],
           typeOfCareId: 'cpap',
@@ -219,8 +243,8 @@ describe('VAOS direct scheudle flow using VAOS services', () => {
       });
     });
 
-    describe('And no clinic supports direct, clinic supports request scheduling', () => {
-      it('should submit form', () => {
+    describe('And no clinic supports direct scheduling, clinic supports request scheduling', () => {
+      it('C23483 - should submit form', () => {
         mockSchedulingConfigurationApi({
           facilityIds: ['983'],
           typeOfCareId: 'cpap',
@@ -268,7 +292,7 @@ describe('VAOS direct scheudle flow using VAOS services', () => {
     });
 
     describe('And clinic does not support direct or request scheduling, veteran not eligible, or errors', () => {
-      it('should not submit form', () => {
+      it('C23484 - should not submit form', () => {
         mockSchedulingConfigurationApi({
           facilityIds: [],
           typeOfCareId: 'cpap',
@@ -302,6 +326,15 @@ describe('VAOS direct scheudle flow using VAOS services', () => {
   });
 
   describe('When one facility supports online scheduling', () => {
+    const start = moment()
+      // Adding number months to account for the test clicking the 'next' button to
+      // advance to the next month.
+      .add(5, 'days')
+      .add(1, 'months')
+      .startOf('month')
+      .day(9);
+    const end = moment(start).add(60, 'minutes');
+
     beforeEach(() => {
       vaosSetup();
 
@@ -310,7 +343,12 @@ describe('VAOS direct scheudle flow using VAOS services', () => {
       mockAppointmentsApi({ apiVersion: 0 });
       mockAppointmentsApi({ apiVersion: 2 });
       mockClinicApi({ locations: ['983'], apiVersion: 2 });
-      mockDirectScheduleSlotsApi({ clinicId: '848', apiVersion: 2 });
+      mockDirectScheduleSlotsApi({
+        start,
+        end,
+        clinicId: '455',
+        apiVersion: 2,
+      });
       mockEligibilityApi({ typeOfCare: 'cpap', isEligible: true });
       mockFacilitiesApi({ facilityIds: ['983'], apiVersion: 2 });
       mockFeatureToggles({
@@ -375,6 +413,15 @@ describe('VAOS direct scheudle flow using VAOS services', () => {
   });
 
   describe('When more than one facility supports online scheduling and no home address', () => {
+    const start = moment()
+      // Adding number months to account for the test clicking the 'next' button to
+      // advance to the next month.
+      .add(5, 'days')
+      .add(1, 'months')
+      .startOf('month')
+      .day(9);
+    const end = moment(start).add(60, 'minutes');
+
     beforeEach(() => {
       vaosSetup();
 
@@ -383,7 +430,12 @@ describe('VAOS direct scheudle flow using VAOS services', () => {
       mockAppointmentsApi({ apiVersion: 0 });
       mockAppointmentsApi({ apiVersion: 2 });
       mockClinicApi({ locations: ['983'], apiVersion: 2 });
-      mockDirectScheduleSlotsApi({ clinicId: '848', apiVersion: 2 });
+      mockDirectScheduleSlotsApi({
+        start,
+        end,
+        clinicId: '455',
+        apiVersion: 2,
+      });
       mockEligibilityApi({ typeOfCare: 'cpap', isEligible: true });
       mockFacilitiesApi({ apiVersion: 2 });
       mockFeatureToggles({
@@ -457,7 +509,7 @@ describe('VAOS direct scheudle flow using VAOS services', () => {
       mockAppointmentsApi({ apiVersion: 0 });
       mockAppointmentsApi({ apiVersion: 2 });
       mockClinicApi({ locations: ['983'], apiVersion: 2 });
-      mockDirectScheduleSlotsApi({ clinicId: '848', apiVersion: 2 });
+      mockDirectScheduleSlotsApi({ clinicId: '455', apiVersion: 2 });
       mockEligibilityApi({ typeOfCare: 'cpap', isEligible: true });
       mockFacilitiesApi({ apiVersion: 2 });
       mockFeatureToggles({
