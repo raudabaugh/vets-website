@@ -3,7 +3,6 @@ import AppointmentListPage from '../../../page-objects/AppointmentList/Appointme
 import ClinicChoicePageObject from '../../../page-objects/ClinicChoicePageObject';
 import ConfirmationPage from '../../../page-objects/ConfirmationPageObject';
 import ContactInfoPageObject from '../../../page-objects/ContactInfoPageObject';
-import FacilityTypePage from '../../../page-objects/FacilityTypePage';
 import PreferredDatePage from '../../../page-objects/PreferredDatePage';
 import ReasonForAppointmentPage from '../../../page-objects/AppointmentReasonPageObject';
 import ReviewPage from '../../../page-objects/ReviewPageObject';
@@ -11,11 +10,8 @@ import SelectDatePage from '../../../page-objects/SelectDatePageObject';
 import TypeOfCarePage from '../../../page-objects/TypeOfCarePageObject';
 import VAFacilityPageObject from '../../../page-objects/VAFacilityPageObject';
 import {
-  mockAppointmentRequestMessagesApi,
   mockAppointmentRequestsApi,
   mockAppointmentsApi,
-  mockCCEligibilityApi,
-  mockCCProvidersApi,
   mockClinicApi,
   mockDirectBookingEligibilityCriteriaApi,
   mockDirectScheduleSlotsApi,
@@ -25,89 +21,100 @@ import {
   mockPreferencesApi,
   mockRequestEligibilityCriteriaApi,
   mockRequestLimitsApi,
-  mockSupportedSitesApi,
   mockVisitsApi,
   vaosSetup,
 } from '../../../vaos-cypress-helpers';
 
-describe('VAOS direct schedule flow', () => {
-  const start = moment()
-    .day(6)
-    .add(1, 'month')
-    .startOf('month')
-    .day(8);
-  // const start = moment()
+// Business rule
+const start = moment()
+  .add(1, 'days')
   // Adding number months to account for the test clicking the 'next' button to
   // advance to the next month.
-  // .add(1, 'days')
-  // .add(1, 'months')
-  // .startOf('month')
-  // .day(9);
-  const end = moment(start).add(60, 'minutes');
+  .add(1, 'months')
+  .startOf('month')
+  .day(9);
+const end = moment(start).add(60, 'minutes');
 
-  beforeEach(() => {
-    vaosSetup();
+describe('VAOS primary care direct schedule flow', () => {
+  describe('When more than one facility supports online scheduling', () => {
+    beforeEach(() => {
+      vaosSetup();
 
-    mockAppointmentRequestMessagesApi();
-    mockAppointmentRequestsApi();
-    mockAppointmentsApi({ apiVersion: 0 });
-    mockCCProvidersApi();
-    mockClinicApi({ facilityId: '983', apiVersion: 0 });
-    mockDirectBookingEligibilityCriteriaApi();
-    mockDirectScheduleSlotsApi({ start, end, apiVersion: 0 });
-    mockFacilitiesApi({ apiVersion: 0 });
-    mockFacilitiesApi({ apiVersion: 1 });
-    mockFeatureToggles();
-    mockLoginApi();
-    mockPreferencesApi();
-    mockPreferencesApi();
-    mockRequestEligibilityCriteriaApi();
-    mockRequestLimitsApi();
-    mockSupportedSitesApi();
-    mockVisitsApi();
-    mockCCEligibilityApi();
-  });
+      mockAppointmentRequestsApi();
+      mockAppointmentsApi({ apiVersion: 0 });
+      mockDirectBookingEligibilityCriteriaApi({
+        facilityIds: ['983', '984'],
+        typeOfCareId: '323',
+      });
+      mockDirectScheduleSlotsApi({ start, end, apiVersion: 0 });
+      mockFacilitiesApi({
+        facilityIds: ['vha_442', 'vha_552'],
+        apiVersion: 0,
+      });
+      mockFacilitiesApi({
+        facilityIds: ['vha_442', 'vha_552'],
+        apiVersion: 1,
+      });
+      mockFeatureToggles();
+      mockLoginApi();
+      mockRequestEligibilityCriteriaApi();
+      mockRequestLimitsApi();
+      mockPreferencesApi();
+      mockVisitsApi();
+    });
 
-  it('should submit form', () => {
-    AppointmentListPage.visit()
-      .validate()
-      .scheduleAppointment();
+    describe('And one clinic supports direct scheduling', () => {
+      it('should schedule primary care appointment', () => {
+        mockClinicApi({ clinicId: '308', apiVersion: 0 });
 
-    TypeOfCarePage.assertUrl()
-      .selectTypeOfCare('Primary care')
-      .clickNextButton();
+        AppointmentListPage.visit()
+          .validate()
+          .scheduleAppointment();
 
-    FacilityTypePage.assertUrl()
-      .selectFacility(/VA medical center/)
-      .clickNextButton();
+        TypeOfCarePage.assertUrl()
+          .selectTypeOfCare('Primary care')
+          .clickNextButton();
 
-    VAFacilityPageObject.assertUrl('/va-facility-2')
-      .selectVAFacility(/Cheyenne VA Medical Center/)
-      .clickNextButton();
+        // Only when CC eligible
+        // FacilityTypePage.assertUrl()
+        //   .selectFacility(/VA medical center/)
+        //   .clickNextButton();
 
-    ClinicChoicePageObject.assertUrl('/clinics')
-      .selectClinic()
-      .clickNextButton();
+        VAFacilityPageObject.assertUrl('/va-facility-2')
+          .selectVAFacility(/Cheyenne VA Medical Center/)
+          .clickNextButton();
 
-    PreferredDatePage.assertUrl()
-      .typeDate()
-      .clickNextButton();
+        ClinicChoicePageObject.assertUrl('/clinics')
+          .selectClinic()
+          .clickNextButton();
 
-    SelectDatePage.assertUrl()
-      .selectFirstAvailableDate()
-      .clickNextButton();
+        PreferredDatePage.assertUrl()
+          .typeDate()
+          .clickNextButton();
 
-    ReasonForAppointmentPage.assertUrl()
-      .selectReasonForAppointment()
-      .typeAdditionalText({ content: 'cough' })
-      .clickNextButton();
+        SelectDatePage.assertUrl()
+          .selectFirstAvailableDate()
+          .clickNextButton();
 
-    ContactInfoPageObject.assertUrl().clickNextButton();
+        ReasonForAppointmentPage.assertUrl()
+          .selectReasonForAppointment()
+          .typeAdditionalText({ content: 'cough' })
+          .clickNextButton();
 
-    ReviewPage.assertUrl().clickNextButton('Confirm appointment');
+        ContactInfoPageObject.assertUrl().clickNextButton();
 
-    ConfirmationPage.assertUrl();
+        ReviewPage.assertUrl().clickNextButton('Confirm appointment');
 
-    cy.axeCheckBestPractice();
+        ConfirmationPage.assertUrl();
+
+        cy.axeCheckBestPractice();
+      });
+    });
+
+    describe.skip('And more than one clinic supports direct scheduling', () => {});
+    describe.skip('And no clinic supports direct, clinic supports request scheduling', () => {});
+    describe.skip('And clinic does not support direct or request scheduling, veteran not eligible, or errors', () => {});
+    describe.skip('And is Cerner', () => {});
+    describe.skip('And veteran has no home address', () => {});
   });
 });

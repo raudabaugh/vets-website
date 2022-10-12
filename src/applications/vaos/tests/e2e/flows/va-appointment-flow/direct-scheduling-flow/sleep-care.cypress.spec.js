@@ -1,7 +1,7 @@
 import moment from 'moment';
 import AppointmentListPage from '../../../page-objects/AppointmentList/AppointmentListPage';
 import CernerPageObject from '../../../page-objects/CernerPageObject';
-import ChooseSleepCarePage from '../../../page-objects/ChooseSleepCarePageObject';
+import SleepCarePageObject from '../../../page-objects/SleepCarePageObject';
 import ClinicChoicePage from '../../../page-objects/ClinicChoicePageObject';
 import ConfirmationPageObject from '../../../page-objects/ConfirmationPageObject';
 import ContactInfoPageObject from '../../../page-objects/ContactInfoPageObject';
@@ -31,7 +31,7 @@ import {
   vaosSetup,
 } from '../../../vaos-cypress-helpers';
 
-describe('VAOS direct scheudle flow', () => {
+describe('VAOS sleep care direct scheudle flow', () => {
   const start = moment()
     // Adding number months to account for the test clicking the 'next' button to
     // advance to the next month.
@@ -71,7 +71,7 @@ describe('VAOS direct scheudle flow', () => {
       .selectTypeOfCare('Sleep medicine')
       .clickNextButton();
 
-    ChooseSleepCarePage.assertUrl()
+    SleepCarePageObject.assertUrl()
       .selectTypeOfCare(/Continuous/)
       .clickNextButton();
 
@@ -159,7 +159,7 @@ describe('VAOS direct scheudle flow using VAOS services', () => {
           .selectTypeOfCare('Sleep medicine')
           .clickNextButton();
 
-        ChooseSleepCarePage.assertUrl()
+        SleepCarePageObject.assertUrl()
           .selectTypeOfCare(/Continuous/)
           .clickNextButton();
 
@@ -208,7 +208,7 @@ describe('VAOS direct scheudle flow using VAOS services', () => {
           .selectTypeOfCare('Sleep medicine')
           .clickNextButton();
 
-        ChooseSleepCarePage.assertUrl()
+        SleepCarePageObject.assertUrl()
           .selectTypeOfCare(/Continuous/)
           .clickNextButton();
 
@@ -260,7 +260,7 @@ describe('VAOS direct scheudle flow using VAOS services', () => {
           .selectTypeOfCare('Sleep medicine')
           .clickNextButton();
 
-        ChooseSleepCarePage.assertUrl()
+        SleepCarePageObject.assertUrl()
           .selectTypeOfCare(/Continuous/)
           .clickNextButton();
 
@@ -307,7 +307,7 @@ describe('VAOS direct scheudle flow using VAOS services', () => {
           .selectTypeOfCare('Sleep medicine')
           .clickNextButton();
 
-        ChooseSleepCarePage.assertUrl()
+        SleepCarePageObject.assertUrl()
           .selectTypeOfCare(/Continuous/)
           .clickNextButton();
 
@@ -376,7 +376,7 @@ describe('VAOS direct scheudle flow using VAOS services', () => {
           .selectTypeOfCare('Sleep medicine')
           .clickNextButton();
 
-        ChooseSleepCarePage.assertUrl()
+        SleepCarePageObject.assertUrl()
           .selectTypeOfCare(/Continuous/)
           .clickNextButton();
 
@@ -463,7 +463,7 @@ describe('VAOS direct scheudle flow using VAOS services', () => {
           .selectTypeOfCare('Sleep medicine')
           .clickNextButton();
 
-        ChooseSleepCarePage.assertUrl()
+        SleepCarePageObject.assertUrl()
           .selectTypeOfCare(/Continuous/)
           .clickNextButton();
 
@@ -537,7 +537,7 @@ describe('VAOS direct scheudle flow using VAOS services', () => {
           .selectTypeOfCare('Sleep medicine')
           .clickNextButton();
 
-        ChooseSleepCarePage.assertUrl()
+        SleepCarePageObject.assertUrl()
           .selectTypeOfCare(/Continuous/)
           .clickNextButton();
 
@@ -589,7 +589,7 @@ describe('VAOS direct scheudle flow using VAOS services', () => {
           .selectTypeOfCare('Sleep medicine')
           .clickNextButton();
 
-        ChooseSleepCarePage.assertUrl()
+        SleepCarePageObject.assertUrl()
           .selectTypeOfCare(/Continuous/)
           .clickNextButton();
 
@@ -615,7 +615,7 @@ describe('VAOS direct scheudle flow using VAOS services', () => {
           .selectTypeOfCare('Sleep medicine')
           .clickNextButton();
 
-        ChooseSleepCarePage.assertUrl()
+        SleepCarePageObject.assertUrl()
           .selectTypeOfCare(/Continuous/)
           .clickNextButton();
 
@@ -633,7 +633,7 @@ describe('VAOS direct scheudle flow using VAOS services', () => {
           .selectTypeOfCare('Sleep medicine')
           .clickNextButton();
 
-        ChooseSleepCarePage.assertUrl()
+        SleepCarePageObject.assertUrl()
           .selectTypeOfCare(/Continuous/)
           .clickNextButton();
 
@@ -651,7 +651,7 @@ describe('VAOS direct scheudle flow using VAOS services', () => {
           .selectTypeOfCare('Sleep medicine')
           .clickNextButton();
 
-        ChooseSleepCarePage.assertUrl()
+        SleepCarePageObject.assertUrl()
           .selectTypeOfCare(/Continuous/)
           .clickNextButton();
 
@@ -676,7 +676,7 @@ describe('VAOS direct scheudle flow using VAOS services', () => {
           .selectTypeOfCare('Sleep medicine')
           .clickNextButton();
 
-        ChooseSleepCarePage.assertUrl()
+        SleepCarePageObject.assertUrl()
           .selectTypeOfCare(/Continuous/)
           .clickNextButton();
 

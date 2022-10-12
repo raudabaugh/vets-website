@@ -25,6 +25,7 @@ class VAFacilityPageObject extends PageObject {
     return this;
   }
 
+  // TODO: Who's using this????
   selectFacility() {
     cy.findByLabelText(/cheyenne/i).click();
     cy.findByText(/Continue/).click();
@@ -33,7 +34,7 @@ class VAFacilityPageObject extends PageObject {
   }
 
   selectVAFacility(label) {
-    cy.url().should('include', '/va-facility-2');
+    // cy.url().should('include', '/va-facility-2');
     // cy.axeCheckBestPractice();
     cy.findByLabelText(label)
       .focus()

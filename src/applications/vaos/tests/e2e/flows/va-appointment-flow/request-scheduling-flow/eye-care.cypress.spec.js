@@ -23,9 +23,9 @@ import {
   vaosSetup,
 } from '../../../vaos-cypress-helpers';
 
-describe('VAOS request schedule flow using VAOS services', () => {
+describe('VAOS eye care request schedule flow using VAOS services', () => {
   describe('When more than one facility supports online scheduling', () => {
-    describe('And no clinics supports direct schedule, but request schedule is supported', () => {
+    describe('And no clinics supports direct schedule', () => {
       beforeEach(() => {
         vaosSetup();
 

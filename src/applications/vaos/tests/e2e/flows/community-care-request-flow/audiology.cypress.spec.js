@@ -25,8 +25,8 @@ import {
   vaosSetup,
 } from '../../vaos-cypress-helpers';
 
-describe('VAOS community care schedule flow', () => {
-  describe('When veteran is registered at more than one facility', () => {
+describe('VAOS audiology community care schedule flow', () => {
+  describe('When more than one facility where veteran is registered supports CC', () => {
     beforeEach(() => {
       vaosSetup();
 
@@ -42,113 +42,117 @@ describe('VAOS community care schedule flow', () => {
       mockCCEligibilityApi({ typeOfCare: 'Audiology' });
     });
 
-    it('C22814 - should submit form when veteran has an address', () => {
-      mockLoginApi();
+    describe('And veteran does have a home address', () => {
+      it('C22814 - should schedule appointment', () => {
+        mockLoginApi();
 
-      AppointmentListPage.visit()
-        .validate()
-        .scheduleAppointment();
+        AppointmentListPage.visit()
+          .validate()
+          .scheduleAppointment();
 
-      TypeOfCarePageObject.assertUrl()
-        .selectTypeOfCare(/Audiology/i)
-        .clickNextButton();
+        TypeOfCarePageObject.assertUrl()
+          .selectTypeOfCare(/Audiology/i)
+          .clickNextButton();
 
-      FacilityTypePage.assertUrl()
-        .selectFacility(/Community care facility/)
-        .clickNextButton();
+        FacilityTypePage.assertUrl()
+          .selectFacility(/Community care facility/)
+          .clickNextButton();
 
-      AudiologyPageObject.assertUrl()
-        .selectTypeOfCare(/Routine hearing exam/i)
-        .clickNextButton();
+        AudiologyPageObject.assertUrl()
+          .selectTypeOfCare(/Routine hearing exam/i)
+          .clickNextButton();
 
-      RequestDatePageObject.assertUrl()
-        .selectFirstAvailableDate()
-        .clickNextButton();
+        RequestDatePageObject.assertUrl()
+          .selectFirstAvailableDate()
+          .clickNextButton();
 
-      ClosestCityPageObject.assertUrl()
-        .selectFacility()
-        .clickNextButton();
+        ClosestCityPageObject.assertUrl()
+          .selectFacility()
+          .clickNextButton();
 
-      CommunityCarePreferencesPage.assertUrl()
-        .expandAccordian()
-        .selectProvider()
-        .clickNextButton();
+        CommunityCarePreferencesPage.assertUrl()
+          .expandAccordian()
+          .selectProvider()
+          .clickNextButton();
 
-      PreferredLanguagePageObject.assertUrl()
-        .selectLanguage('english')
-        .clickNextButton();
+        PreferredLanguagePageObject.assertUrl()
+          .selectLanguage('english')
+          .clickNextButton();
 
-      AppointmentReasonPageObject.assertUrl()
-        .typeAdditionalText({
-          content: 'cough',
-          label: /Please let us know any additional details/i,
-        })
-        .clickNextButton();
+        AppointmentReasonPageObject.assertUrl()
+          .typeAdditionalText({
+            content: 'cough',
+            label: /Please let us know any additional details/i,
+          })
+          .clickNextButton();
 
-      ContactInfoPageObject.assertUrl()
-        .selectPreferredTime()
-        .clickNextButton();
+        ContactInfoPageObject.assertUrl()
+          .selectPreferredTime()
+          .clickNextButton();
 
-      ReviewPageObject.assertUrl().clickNextButton('Request appointment');
+        ReviewPageObject.assertUrl().clickNextButton('Request appointment');
 
-      ConfirmationPageObject.assertUrl({ url: '/request' });
+        ConfirmationPageObject.assertUrl({ url: '/request' });
 
-      cy.axeCheckBestPractice();
+        cy.axeCheckBestPractice();
+      });
     });
 
-    it('C23005 - should submit form when veteran has no address', () => {
-      mockFacilityApi({ id: 'vha_442' });
-      mockLoginApi({ withoutAddress: true });
+    describe('And veteran does have a home address', () => {
+      it('C23005 - should schedule appointment', () => {
+        mockFacilityApi({ id: 'vha_442' });
+        mockLoginApi({ withoutAddress: true });
 
-      AppointmentListPage.visit()
-        .validate()
-        .scheduleAppointment();
+        AppointmentListPage.visit()
+          .validate()
+          .scheduleAppointment();
 
-      TypeOfCarePageObject.assertUrl()
-        .selectTypeOfCare(/Audiology/i)
-        .clickNextButton();
+        TypeOfCarePageObject.assertUrl()
+          .selectTypeOfCare(/Audiology/i)
+          .clickNextButton();
 
-      FacilityTypePage.assertUrl()
-        .selectFacility(/Community care facility/)
-        .clickNextButton();
+        FacilityTypePage.assertUrl()
+          .selectFacility(/Community care facility/)
+          .clickNextButton();
 
-      AudiologyPageObject.assertUrl()
-        .selectTypeOfCare(/Routine hearing exam/i)
-        .clickNextButton();
+        AudiologyPageObject.assertUrl()
+          .selectTypeOfCare(/Routine hearing exam/i)
+          .clickNextButton();
 
-      RequestDatePageObject.assertUrl()
-        .selectFirstAvailableDate()
-        .clickNextButton();
+        RequestDatePageObject.assertUrl()
+          .selectFirstAvailableDate()
+          .clickNextButton();
 
-      ClosestCityPageObject.assertUrl()
-        .selectFacility()
-        .clickNextButton();
+        ClosestCityPageObject.assertUrl()
+          .selectFacility()
+          .clickNextButton();
 
-      CommunityCarePreferencesPage.assertUrl()
-        .expandAccordian()
-        .selectProvider()
-        .clickNextButton();
+        CommunityCarePreferencesPage.assertUrl()
+          .expandAccordian()
+          .selectProvider()
+          .clickNextButton();
 
-      AppointmentReasonPageObject.assertUrl()
-        .typeAdditionalText({
-          content: 'cough',
-          label: /Please let us know any additional details/i,
-        })
-        .clickNextButton();
+        AppointmentReasonPageObject.assertUrl()
+          .typeAdditionalText({
+            content: 'cough',
+            label: /Please let us know any additional details/i,
+          })
+          .clickNextButton();
 
-      ContactInfoPageObject.assertUrl()
-        .selectPreferredTime()
-        .clickNextButton();
+        ContactInfoPageObject.assertUrl()
+          .selectPreferredTime()
+          .clickNextButton();
 
-      ReviewPageObject.assertUrl().clickNextButton('Request appointment');
+        ReviewPageObject.assertUrl().clickNextButton('Request appointment');
 
-      ConfirmationPageObject.assertUrl({ url: '/request' });
+        ConfirmationPageObject.assertUrl({ url: '/request' });
 
-      cy.axeCheckBestPractice();
+        cy.axeCheckBestPractice();
+      });
     });
   });
 
-  describe('When veteran is registered at one facility', () => {
+  describe('When one facility where veteran is registered supports CC', () => {
     beforeEach(() => {
       vaosSetup();
 
@@ -163,112 +167,116 @@ describe('VAOS community care schedule flow', () => {
       mockCCEligibilityApi({ typeOfCare: 'Audiology' });
     });
 
-    it('C23006 - should submit form when veteran has an address', () => {
-      mockCCProvidersApi();
-      mockFacilityApi({ id: 'vha_442' });
-      mockLoginApi();
+    describe('And veteran does have a home address', () => {
+      it('C23006 - should schedule appointment', () => {
+        mockCCProvidersApi();
+        mockFacilityApi({ id: 'vha_442' });
+        mockLoginApi();
 
-      AppointmentListPage.visit()
-        .validate()
-        .scheduleAppointment();
+        AppointmentListPage.visit()
+          .validate()
+          .scheduleAppointment();
 
-      TypeOfCarePageObject.assertUrl()
-        .selectTypeOfCare(/Audiology/i)
-        .clickNextButton();
+        TypeOfCarePageObject.assertUrl()
+          .selectTypeOfCare(/Audiology/i)
+          .clickNextButton();
 
-      FacilityTypePage.assertUrl()
-        .selectFacility(/Community care facility/)
-        .clickNextButton();
+        FacilityTypePage.assertUrl()
+          .selectFacility(/Community care facility/)
+          .clickNextButton();
 
-      AudiologyPageObject.assertUrl()
-        .selectTypeOfCare(/Routine hearing exam/i)
-        .clickNextButton();
+        AudiologyPageObject.assertUrl()
+          .selectTypeOfCare(/Routine hearing exam/i)
+          .clickNextButton();
 
-      RequestDatePageObject.assertUrl()
-        .selectFirstAvailableDate()
-        .clickNextButton();
+        RequestDatePageObject.assertUrl()
+          .selectFirstAvailableDate()
+          .clickNextButton();
 
-      ClosestCityPageObject.assertUrl()
-        .selectFacility()
-        .clickNextButton();
+        ClosestCityPageObject.assertUrl()
+          .selectFacility()
+          .clickNextButton();
 
-      CommunityCarePreferencesPage.assertUrl()
-        .expandAccordian()
-        .selectProvider()
-        .clickNextButton();
+        CommunityCarePreferencesPage.assertUrl()
+          .expandAccordian()
+          .selectProvider()
+          .clickNextButton();
 
-      PreferredLanguagePageObject.assertUrl()
-        .selectLanguage('english')
-        .clickNextButton();
+        PreferredLanguagePageObject.assertUrl()
+          .selectLanguage('english')
+          .clickNextButton();
 
-      AppointmentReasonPageObject.assertUrl()
-        .typeAdditionalText({
-          content: 'cough',
-          label: /Please let us know any additional details/i,
-        })
-        .clickNextButton();
+        AppointmentReasonPageObject.assertUrl()
+          .typeAdditionalText({
+            content: 'cough',
+            label: /Please let us know any additional details/i,
+          })
+          .clickNextButton();
 
-      ContactInfoPageObject.assertUrl()
-        .selectPreferredTime()
-        .clickNextButton();
+        ContactInfoPageObject.assertUrl()
+          .selectPreferredTime()
+          .clickNextButton();
 
-      ReviewPageObject.assertUrl().clickNextButton('Request appointment');
+        ReviewPageObject.assertUrl().clickNextButton('Request appointment');
 
-      ConfirmationPageObject.assertUrl({ url: '/request' });
+        ConfirmationPageObject.assertUrl({ url: '/request' });
 
-      cy.axeCheckBestPractice();
+        cy.axeCheckBestPractice();
+      });
     });
 
-    it('C23007 - should submit form when veteran has no address', () => {
-      mockCCProvidersApi();
-      mockFacilityApi({ id: 'vha_442' });
-      mockLoginApi({ withoutAddress: true });
+    describe('And veteran does not have a home address', () => {
+      it('C23007 - should schedule appointment', () => {
+        mockCCProvidersApi();
+        mockFacilityApi({ id: 'vha_442' });
+        mockLoginApi({ withoutAddress: true });
 
-      AppointmentListPage.visit()
-        .validate()
-        .scheduleAppointment();
+        AppointmentListPage.visit()
+          .validate()
+          .scheduleAppointment();
 
-      TypeOfCarePageObject.assertUrl()
-        .selectTypeOfCare(/Audiology/i)
-        .clickNextButton();
+        TypeOfCarePageObject.assertUrl()
+          .selectTypeOfCare(/Audiology/i)
+          .clickNextButton();
 
-      FacilityTypePage.assertUrl()
-        .selectFacility(/Community care facility/)
-        .clickNextButton();
+        FacilityTypePage.assertUrl()
+          .selectFacility(/Community care facility/)
+          .clickNextButton();
 
-      AudiologyPageObject.assertUrl()
-        .selectTypeOfCare(/Routine hearing exam/i)
-        .clickNextButton();
+        AudiologyPageObject.assertUrl()
+          .selectTypeOfCare(/Routine hearing exam/i)
+          .clickNextButton();
 
-      RequestDatePageObject.assertUrl()
-        .selectFirstAvailableDate()
-        .clickNextButton();
+        RequestDatePageObject.assertUrl()
+          .selectFirstAvailableDate()
+          .clickNextButton();
 
-      ClosestCityPageObject.assertUrl()
-        .selectFacility()
-        .clickNextButton();
+        ClosestCityPageObject.assertUrl()
+          .selectFacility()
+          .clickNextButton();
 
-      CommunityCarePreferencesPage.assertUrl()
-        .expandAccordian()
-        .selectProvider()
-        .clickNextButton();
+        CommunityCarePreferencesPage.assertUrl()
+          .expandAccordian()
+          .selectProvider()
+          .clickNextButton();
 
-      AppointmentReasonPageObject.assertUrl()
-        .typeAdditionalText({
-          content: 'cough',
-          label: /Please let us know any additional details/i,
-        })
-        .clickNextButton();
+        AppointmentReasonPageObject.assertUrl()
+          .typeAdditionalText({
+            content: 'cough',
+            label: /Please let us know any additional details/i,
+          })
+          .clickNextButton();
 
-      ContactInfoPageObject.assertUrl()
-        .selectPreferredTime()
-        .clickNextButton();
+        ContactInfoPageObject.assertUrl()
+          .selectPreferredTime()
+          .clickNextButton();
 
-      ReviewPageObject.assertUrl().clickNextButton('Request appointment');
+        ReviewPageObject.assertUrl().clickNextButton('Request appointment');
 
-      ConfirmationPageObject.assertUrl({ url: '/request' });
+        ConfirmationPageObject.assertUrl({ url: '/request' });
 
-      cy.axeCheckBestPractice();
+        cy.axeCheckBestPractice();
+      });
     });
   });
 });

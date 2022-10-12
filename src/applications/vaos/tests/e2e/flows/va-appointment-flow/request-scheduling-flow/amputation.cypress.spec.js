@@ -1,4 +1,4 @@
-describe(`VAOS audiology request scheudle flow`, () => {
+describe(`VAOS amputation request scheudle flow`, () => {
   describe('When more than one facility supports online scheduling', () => {
     describe('And more than one clinics support direct schedule', () => {
       describe('And veteran selects "I need a different clinic"', () => {

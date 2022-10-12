@@ -23,9 +23,9 @@ import {
   vaosSetup,
 } from '../../vaos-cypress-helpers';
 
-describe('VAOS community care flow using VAOS services', () => {
-  describe('When one facility supports CC online scheduling', () => {
-    describe('And veteran has a home address', () => {
+describe('VAOS eye care community care flow using VAOS services', () => {
+  describe('When one facility where veteran is registered supports CC', () => {
+    describe('And veteran does have a home address', () => {
       beforeEach(() => {
         vaosSetup();
 
@@ -44,7 +44,7 @@ describe('VAOS community care flow using VAOS services', () => {
         mockCCEligibilityApi({ typeOfCare: 'Optometry' });
       });
 
-      it('should submit form', () => {
+      it('should schedule appointment', () => {
         mockLoginApi();
 
         AppointmentListPage.visit()
@@ -95,7 +95,7 @@ describe('VAOS community care flow using VAOS services', () => {
       });
     });
 
-    describe('And veteran has no home address', () => {
+    describe('And veteran does not have a home address', () => {
       beforeEach(() => {
         vaosSetup();
 
@@ -114,7 +114,7 @@ describe('VAOS community care flow using VAOS services', () => {
         mockCCEligibilityApi({ typeOfCare: 'Optometry' });
       });
 
-      it('should submit form', () => {
+      it('should schedule appointment', () => {
         mockLoginApi({ withoutAddress: true });
 
         AppointmentListPage.visit()
@@ -162,7 +162,7 @@ describe('VAOS community care flow using VAOS services', () => {
     });
   });
 
-  describe('When more than one facility supports CC online scheduling', () => {
+  describe('When more than one facility where veteran is registered supports CC', () => {
     describe('And veteran does have a home address', () => {
       beforeEach(() => {
         vaosSetup();
@@ -182,7 +182,7 @@ describe('VAOS community care flow using VAOS services', () => {
         mockCCEligibilityApi({ typeOfCare: 'Optometry' });
       });
 
-      it('should submit form', () => {
+      it('should schedule appointment', () => {
         mockLoginApi();
 
         AppointmentListPage.visit()
@@ -256,7 +256,7 @@ describe('VAOS community care flow using VAOS services', () => {
         mockCCEligibilityApi({ typeOfCare: 'Optometry' });
       });
 
-      it('should submit form', () => {
+      it('should schedule appointment', () => {
         mockLoginApi({ withoutAddress: true });
 
         AppointmentListPage.visit()

@@ -20,7 +20,7 @@ import {
   vaosSetup,
 } from '../../vaos-cypress-helpers';
 
-describe('VAOS community care flow using VAOS services', () => {
+describe('VAOS podiatry community care flow using VAOS services', () => {
   beforeEach(() => {
     vaosSetup();
 
@@ -36,9 +36,9 @@ describe('VAOS community care flow using VAOS services', () => {
     mockPreferencesApi();
   });
 
-  describe('When one facility supports CC online scheduling', () => {
-    describe('And veteran has a home address', () => {
-      it('should submit form', () => {
+  describe('When one facility where veteran is registered supports CC', () => {
+    describe('And veteran does have a home address', () => {
+      it('should schedule appointment', () => {
         mockCCEligibilityApi({ typeOfCare: 'Podiatry' });
         mockLoginApi();
         mockSchedulingConfigurationApi({
@@ -86,11 +86,17 @@ describe('VAOS community care flow using VAOS services', () => {
         cy.axeCheckBestPractice();
       });
     });
+
+    describe('And veteran does not have a home address', () => {});
   });
 
-  describe('When more than one facility supports CC online scheduling', () => {
+  describe('When more than one facility where veteran is registered supports CC', () => {
+    describe('And veteran does have a home address', () => {
+      it('should schedule appointment', () => {});
+    });
+
     describe('And veteran does not have a home address', () => {
-      it('should submit form', () => {
+      it('should schedule appointment', () => {
         mockCCEligibilityApi({ typeOfCare: 'Podiatry' });
         mockLoginApi({ withoutAddress: true });
         mockSchedulingConfigurationApi({

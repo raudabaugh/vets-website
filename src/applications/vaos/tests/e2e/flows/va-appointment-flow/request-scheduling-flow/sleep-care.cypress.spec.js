@@ -1,5 +1,5 @@
 import AppointmentListPage from '../../../page-objects/AppointmentList/AppointmentListPage';
-import ChooseSleepCarePage from '../../../page-objects/ChooseSleepCarePageObject';
+import ChooseSleepCarePage from '../../../page-objects/SleepCarePageObject';
 import ConfirmationPageObject from '../../../page-objects/ConfirmationPageObject';
 import ContactInfoPageObject from '../../../page-objects/ContactInfoPageObject';
 import AppointmentReasonPageObject from '../../../page-objects/AppointmentReasonPageObject';
@@ -25,9 +25,15 @@ import {
   vaosSetup,
 } from '../../../vaos-cypress-helpers';
 
-describe('VAOS request schedule flow', () => {
+describe('VAOS sleep care request schedule flow', () => {
   describe('When more than one facility supports online scheduling', () => {
-    describe('No clinics supports direct schedule, but request schedule is supported', () => {
+    describe('And more than one clinics support direct schedule', () => {
+      describe('And veteran selects "I need a different clinic"', () => {
+        it('should schedule appointment', () => {});
+      });
+    });
+
+    describe('And no clinics supports direct schedule', () => {
       beforeEach(() => {
         vaosSetup();
 
@@ -91,9 +97,15 @@ describe('VAOS request schedule flow', () => {
   });
 });
 
-describe('VAOS request schedule flow using VAOS services', () => {
+describe('VAOS sleep care request schedule flow using VAOS services', () => {
   describe('When more than one facility supports online scheduling', () => {
-    describe('And no clinics supports direct schedule, but request schedule is supported', () => {
+    describe('And more than one clinics support direct schedule', () => {
+      describe('And veteran selects "I need a different clinic"', () => {
+        it('should schedule appointment', () => {});
+      });
+    });
+
+    describe('And no clinics supports direct schedule', () => {
       beforeEach(() => {
         vaosSetup();
 

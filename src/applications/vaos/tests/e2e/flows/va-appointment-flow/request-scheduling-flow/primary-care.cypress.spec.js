@@ -29,7 +29,7 @@ import ClosestCityPage from '../../../page-objects/ClosestCityPageObject';
 import PreferredLanguagePage from '../../../page-objects/PreferredLanguagePageObject';
 import CommunityCarePreferencesPageObject from '../../../page-objects/CommunityCarePreferencesPageObject';
 
-describe('VAOS request schedule flow', () => {
+describe('VAOS primary care request schedule flow', () => {
   describe('community care eligible', () => {
     beforeEach(() => {
       vaosSetup();

@@ -9,6 +9,11 @@ class ClinicChoicePageObject extends PageObject {
     return this;
   }
 
+  assertOneClinicFound() {
+    cy.contains(/Would you like to make an appointment at/);
+    return this;
+  }
+
   selectClinic() {
     // cy.findByText(/Choose where you’d like to get your vaccine/);
     // cy.findByText(label);
@@ -24,6 +29,22 @@ class ClinicChoicePageObject extends PageObject {
     // cy.get('#root_clinicId_0')
     //   .focus()
     //   .click();
+
+    return this;
+  }
+
+  selectMakeAppointment() {
+    cy.get('#root_clinicId_0')
+      .focus()
+      .click();
+
+    return this;
+  }
+
+  selectDifferentClinic() {
+    cy.get('#root_clinicId_1')
+      .focus()
+      .click();
 
     return this;
   }

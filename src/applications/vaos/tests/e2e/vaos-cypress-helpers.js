@@ -346,27 +346,46 @@ export function mockDirectBookingEligibilityCriteriaApi({
     let data;
 
     if (facilityIds && typeOfCareId) {
-      data = directEligibilityCriteria.data
-        .filter(facility => facilityIds.some(id => id === facility.id))
-        .map(facility => {
-          const coreSettings = facility.attributes.coreSettings
-            .map(
-              setting =>
-                setting.id === typeOfCareId
-                  ? { ...setting, patientHistoryRequired: 'no' }
-                  : null,
-            )
-            // Remove all falsey values from array
-            .filter(Boolean);
+      // data = directEligibilityCriteria.data
+      //   .filter(facility => facilityIds.some(id => id === facility.id))
+      //   .map(facility => {
+      //     const coreSettings = facility.attributes.coreSettings
+      //       .map(
+      //         setting =>
+      //           setting.id === typeOfCareId
+      //             ? { ...setting, patientHistoryRequired: 'no' }
+      //             : null,
+      //       )
+      //       // Remove all falsey values from array
+      //       .filter(Boolean);
 
-          return {
-            ...facility,
-            attributes: {
-              ...facility.attributes,
-              coreSettings,
-            },
-          };
-        });
+      //     return {
+      //       ...facility,
+      //       attributes: {
+      //         ...facility.attributes,
+      //         coreSettings,
+      //       },
+      //     };
+      //   });
+      data = facilityIds.map(id => {
+        return {
+          id,
+          type: 'direct_booking_eligibility_criteria',
+          attributes: {
+            coreSettings: [
+              {
+                id: typeOfCareId,
+                typeOfCare: 'Ophthalmology', // TODO: Make this dynamic
+                patientHistoryRequired: 'No',
+                patientHistoryDuration: 0,
+                canCancel: true,
+                submittedRequestLimit: 2,
+                enterpriseSubmittedRequestLimit: 2,
+              },
+            ],
+          },
+        };
+      });
     } else {
       data = [...directEligibilityCriteria.data];
     }
@@ -695,8 +714,14 @@ export function mockFacilityApi({ id, apiVersion = 1 } = {}) {
   }
 }
 
-export function mockFacilitiesApi({ facilityIds, count, apiVersion = 0 }) {
+export function mockFacilitiesApi({ facilityIds, apiVersion = 0 }) {
   if (apiVersion === 0) {
+    let { data } = facilities;
+
+    if (Array.isArray(facilityIds)) {
+      data = data.filter(facility => facilityIds.includes(facility.id));
+    }
+
     cy.intercept(
       {
         method: 'GET',
@@ -706,11 +731,16 @@ export function mockFacilitiesApi({ facilityIds, count, apiVersion = 0 }) {
         },
       },
       req => {
-        const f = facilities.data.slice(0, count);
-        req.reply({ data: f });
+        req.reply({ data });
       },
     ).as('v0:get:facilities');
   } else if (apiVersion === 1) {
+    let { data } = facilityData;
+
+    if (Array.isArray(facilityIds)) {
+      data = data.filter(facility => facilityIds.includes(facility.id));
+    }
+
     cy.intercept(
       {
         method: 'GET',
@@ -720,21 +750,6 @@ export function mockFacilitiesApi({ facilityIds, count, apiVersion = 0 }) {
         },
       },
       req => {
-        const tokens = req.query.ids.split(',');
-        let data = tokens.map(token => {
-          // NOTE: Convert test facility ids to real ids
-          return facilityData.data.find(f => {
-            return f.id === token.replace('983', '442').replace('984', '552');
-          });
-        });
-
-        // Remove 'falsey' values
-        data = data.filter(Boolean);
-        // TODO: remove the harded coded id.
-        // req.reply({
-        //   data: facilityData.data.filter(f => f.id === 'vha_442GC'),
-        // });
-        // const f = facilities.data.slice(0);
         req.reply({ data });
       },
     ).as(`v1:get:facilities`);
@@ -742,9 +757,7 @@ export function mockFacilitiesApi({ facilityIds, count, apiVersion = 0 }) {
     let { data } = facilitiesV2;
 
     if (Array.isArray(facilityIds)) {
-      data = facilitiesV2.data.filter(facility =>
-        facilityIds.includes(facility.id),
-      );
+      data = data.filter(facility => facilityIds.includes(facility.id));
     }
 
     cy.intercept(
@@ -757,7 +770,6 @@ export function mockFacilitiesApi({ facilityIds, count, apiVersion = 0 }) {
         },
       },
       req => {
-        // req.reply(facilitiesV2);
         req.reply({ data });
       },
     ).as('v2:get:facilities');
@@ -902,19 +914,23 @@ export function mockCCEligibilityApi({
 
 export function mockClinicApi({
   clinicId,
-  facilityId,
+  facilityId = '983',
   locations = ['983'],
   hasClinics = true,
   apiVersion = 2,
 } = {}) {
   if (apiVersion === 0) {
+    let { data } = clinicList983;
+    if (clinicId)
+      data = data.filter(clinic => clinic.attributes.clinicId === clinicId);
+
     cy.intercept(
       {
         method: 'GET',
         pathname: `/vaos/v0/facilities/${facilityId}/clinics`,
       },
       req => {
-        req.reply({ data: clinicList983.data });
+        req.reply({ data });
       },
     ).as('v0:get:clinics');
   } else if (apiVersion === 2) {

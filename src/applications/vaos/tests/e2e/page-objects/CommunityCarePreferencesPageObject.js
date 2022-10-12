@@ -8,6 +8,11 @@ class CommunityCarePreferencesPage extends PageObject {
     return this;
   }
 
+  assertNoAddress() {
+    cy.findByText(/To show providers near your home/);
+    return this;
+  }
+
   expandAccordian() {
     cy.findByText(/Choose a provider/).click();
     cy.axeCheckBestPractice();

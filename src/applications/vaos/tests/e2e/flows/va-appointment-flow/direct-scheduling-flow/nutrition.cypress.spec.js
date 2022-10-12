@@ -1,4 +1,4 @@
-describe(`VAOS MOVE direct scheudle flow`, () => {
+describe(`VAOS nutrition direct scheudle flow`, () => {
   describe('When more than one facility supports online scheduling', () => {
     describe('And one clinic supports direct scheduling', () => {
       it('should schedule appointment', () => {});
