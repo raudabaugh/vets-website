@@ -8,11 +8,14 @@ const apiBasePath = `${environment.API_URL}/my_health/v1`;
  * @returns
  */
 export const getFolderList = () => {
-  return apiRequest(`${apiBasePath}/messaging/folders`, {
-    headers: {
-      'Content-Type': 'application/json',
+  return apiRequest(
+    `${apiBasePath}/messaging/folders?page=1&per_page=999&useCache=false`,
+    {
+      headers: {
+        'Content-Type': 'application/json',
+      },
     },
-  });
+  );
 };
 
 /**
@@ -39,8 +42,26 @@ export const createFolder = folderName => {
     headers: {
       'Content-Type': 'application/json',
     },
-    body: { name: folderName },
+    body: JSON.stringify({ name: folderName }),
   });
+};
+
+/**
+ * Update a folder's name.
+ * @param {Long} folderId
+ * @param {String} folderName
+ * @returns
+ */
+export const updateFolderName = (folderId, folderName) => {
+  return apiRequest(
+    `${apiBasePath}/messaging/folders/${folderId}/rename/${folderName}`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    },
+  );
 };
 
 /**
@@ -50,7 +71,7 @@ export const createFolder = folderName => {
  */
 export const deleteFolder = folderId => {
   return apiRequest(`${apiBasePath}/messaging/folders/${folderId}`, {
-    method: 'DEL',
+    method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',
     },
@@ -65,6 +86,7 @@ export const getMessageCategoryList = () => {
   return apiRequest(`${apiBasePath}/messaging/messages/categories`, {
     headers: {
       'Content-Type': 'application/json',
+      Accept: 'application/json',
     },
   });
 };
@@ -122,8 +144,9 @@ export const createDraft = message => {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      Accept: 'application/json',
     },
-    body: message,
+    body: JSON.stringify(message),
   });
 };
 
@@ -141,7 +164,7 @@ export const updateDraft = (draftMessageId, message) => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: message,
+      body: JSON.stringify(message),
     },
   );
 };
@@ -160,7 +183,7 @@ export const createReplyDraft = (replyToId, message) => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: message,
+      body: JSON.stringify(message),
     },
   );
 };
@@ -180,7 +203,7 @@ export const updateReplyDraft = (replyToId, draftMessageId, message) => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: message,
+      body: JSON.stringify(message),
     },
   );
 };
@@ -196,7 +219,7 @@ export const createMessage = message => {
     headers: {
       'Content-Type': 'application/json',
     },
-    body: message,
+    body: JSON.stringify(message),
   });
 };
 
@@ -205,13 +228,13 @@ export const createMessage = message => {
  * @param {*} message
  * @returns
  */
-export const createReplyToMessage = message => {
-  return apiRequest(`${apiBasePath}/messaging/messages/reply`, {
+export const createReplyToMessage = (replyToId, message) => {
+  return apiRequest(`${apiBasePath}/messaging/messages/${replyToId}/reply`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: message,
+    body: JSON.stringify(message),
   });
 };
 
@@ -225,7 +248,7 @@ export const deleteMessage = messageId => {
     headers: {
       'Content-Type': 'application/json',
     },
-    method: 'DEL',
+    method: 'DELETE',
   });
 };
 
