@@ -44,7 +44,7 @@ describe('VAOS eye care community care flow using VAOS services', () => {
         mockCCEligibilityApi({ typeOfCare: 'Optometry' });
       });
 
-      it('should schedule appointment', () => {
+      it('C26021: should request appointment', () => {
         mockLoginApi();
 
         AppointmentListPage.visit()
@@ -114,7 +114,7 @@ describe('VAOS eye care community care flow using VAOS services', () => {
         mockCCEligibilityApi({ typeOfCare: 'Optometry' });
       });
 
-      it('should schedule appointment', () => {
+      it('C26022: should request appointment', () => {
         mockLoginApi({ withoutAddress: true });
 
         AppointmentListPage.visit()
@@ -182,7 +182,7 @@ describe('VAOS eye care community care flow using VAOS services', () => {
         mockCCEligibilityApi({ typeOfCare: 'Optometry' });
       });
 
-      it('should schedule appointment', () => {
+      it('C26023: should request appointment', () => {
         mockLoginApi();
 
         AppointmentListPage.visit()
@@ -256,7 +256,7 @@ describe('VAOS eye care community care flow using VAOS services', () => {
         mockCCEligibilityApi({ typeOfCare: 'Optometry' });
       });
 
-      it('should schedule appointment', () => {
+      it('C26024: should request appointment', () => {
         mockLoginApi({ withoutAddress: true });
 
         AppointmentListPage.visit()

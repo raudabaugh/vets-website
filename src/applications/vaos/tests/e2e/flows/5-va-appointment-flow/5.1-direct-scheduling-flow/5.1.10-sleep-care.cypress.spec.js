@@ -144,7 +144,7 @@ describe('VAOS direct scheudle flow using VAOS services', () => {
     });
 
     describe('And one clinic supports direct scheduling', () => {
-      it('C23481 - should submit form', () => {
+      it('C23481: should submit form', () => {
         mockSchedulingConfigurationApi({
           facilityIds: ['983'],
           typeOfCareId: 'cpap',
@@ -193,7 +193,7 @@ describe('VAOS direct scheudle flow using VAOS services', () => {
     });
 
     describe('And more than one clinic supports direct scheduling', () => {
-      it('C23482 - should submit form', () => {
+      it('C23482: should submit form', () => {
         mockSchedulingConfigurationApi({
           facilityIds: ['983', '983GB'],
           typeOfCareId: 'cpap',
@@ -244,7 +244,7 @@ describe('VAOS direct scheudle flow using VAOS services', () => {
     });
 
     describe('And no clinic supports direct scheduling, clinic supports request scheduling', () => {
-      it('C23483 - should submit form', () => {
+      it('C23483: should submit form', () => {
         mockSchedulingConfigurationApi({
           facilityIds: ['983'],
           typeOfCareId: 'cpap',
@@ -292,7 +292,7 @@ describe('VAOS direct scheudle flow using VAOS services', () => {
     });
 
     describe('And clinic does not support direct or request scheduling, veteran not eligible, or errors', () => {
-      it('C23484 - should not submit form', () => {
+      it('C23484: should not submit form', () => {
         mockSchedulingConfigurationApi({
           facilityIds: [],
           typeOfCareId: 'cpap',

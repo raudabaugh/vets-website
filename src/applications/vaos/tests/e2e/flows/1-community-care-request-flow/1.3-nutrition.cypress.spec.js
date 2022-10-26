@@ -22,6 +22,15 @@ import {
 } from '../../vaos-cypress-helpers';
 
 describe('VAOS nutrition community care flow using VAOS services', () => {
+  describe('When one facility where veteran is registered supports CC', () => {
+    describe('And veteran does have a home address', () => {
+      it('C26192: should schedule appointment', () => {});
+    });
+    describe('And veteran does not have a home address', () => {
+      it('C26193: should schedule appointment', () => {});
+    });
+  });
+
   describe('When more than one facility where veteran is registered supports CC', () => {
     beforeEach(() => {
       vaosSetup();
@@ -42,7 +51,7 @@ describe('VAOS nutrition community care flow using VAOS services', () => {
     });
 
     describe('And veteran does have a home address', () => {
-      it('should schedule appointment', () => {
+      it('C26194: should schedule appointment', () => {
         mockLoginApi();
 
         AppointmentListPage.visit()
@@ -90,7 +99,7 @@ describe('VAOS nutrition community care flow using VAOS services', () => {
     });
 
     describe('And veteran does not have a home address', () => {
-      it('should schedule appointment', () => {
+      it('C26195: should schedule appointment', () => {
         mockLoginApi({ withoutAddress: true });
 
         AppointmentListPage.visit()
@@ -132,15 +141,6 @@ describe('VAOS nutrition community care flow using VAOS services', () => {
 
         cy.axeCheckBestPractice();
       });
-    });
-  });
-
-  describe('When one facility where veteran is registered supports CC', () => {
-    describe('And veteran does have a home address', () => {
-      it('should schedule appointment', () => {});
-    });
-    describe('And veteran does not have a home address', () => {
-      it('should schedule appointment', () => {});
     });
   });
 });

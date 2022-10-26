@@ -38,7 +38,7 @@ describe('VAOS podiatry community care flow using VAOS services', () => {
 
   describe('When one facility where veteran is registered supports CC', () => {
     describe('And veteran does have a home address', () => {
-      it('should schedule appointment', () => {
+      it('C26200: should request appointment', () => {
         mockCCEligibilityApi({ typeOfCare: 'Podiatry' });
         mockLoginApi();
         mockSchedulingConfigurationApi({
@@ -87,16 +87,18 @@ describe('VAOS podiatry community care flow using VAOS services', () => {
       });
     });
 
-    describe('And veteran does not have a home address', () => {});
+    describe('And veteran does not have a home address', () => {
+      it('C26199: should request appointment', () => {});
+    });
   });
 
   describe('When more than one facility where veteran is registered supports CC', () => {
     describe('And veteran does have a home address', () => {
-      it('should schedule appointment', () => {});
+      it('C26198: should request appointment', () => {});
     });
 
     describe('And veteran does not have a home address', () => {
-      it('should schedule appointment', () => {
+      it('C26197: should request appointment', () => {
         mockCCEligibilityApi({ typeOfCare: 'Podiatry' });
         mockLoginApi({ withoutAddress: true });
         mockSchedulingConfigurationApi({
@@ -148,7 +150,7 @@ describe('VAOS podiatry community care flow using VAOS services', () => {
   });
 
   describe('When veteran is not communtity care eligible', () => {
-    it('should not submit form', () => {
+    it('C26196: should not request appointment', () => {
       mockCCEligibilityApi({ typeOfCare: 'Podiatry', isEligible: false });
       mockLoginApi();
       mockSchedulingConfigurationApi({

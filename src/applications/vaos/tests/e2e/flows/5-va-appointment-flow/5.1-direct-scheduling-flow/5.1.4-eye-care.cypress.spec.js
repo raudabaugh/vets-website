@@ -61,7 +61,7 @@ describe(`VAOS eye care direct scheudle flow`, () => {
     });
 
     describe('And one clinic supports direct scheduling', () => {
-      it(`C23816 - should schedule eye care appointment`, () => {
+      it(`C23816: should schedule eye care appointment`, () => {
         mockClinicApi({ clinicId: '308', apiVersion: 0 });
 
         AppointmentListPage.visit()
@@ -109,7 +109,7 @@ describe(`VAOS eye care direct scheudle flow`, () => {
     });
 
     describe('And more than one clinic supports direct scheduling', () => {
-      it(`C23817 - should schedule eye care appointment`, () => {
+      it(`C23817: should schedule eye care appointment`, () => {
         mockClinicApi({ apiVersion: 0 });
         AppointmentListPage.visit()
           .validate()
@@ -155,7 +155,7 @@ describe(`VAOS eye care direct scheudle flow`, () => {
     });
 
     describe('And no clinic supports direct, clinic supports request scheduling', () => {
-      it(`C23818 - should schedule eye care appointment`, () => {
+      it(`C23818: should schedule eye care appointment`, () => {
         AppointmentListPage.visit()
           .validate()
           .scheduleAppointment();
@@ -165,7 +165,7 @@ describe(`VAOS eye care direct scheudle flow`, () => {
     });
 
     describe('And clinic does not support direct or request scheduling, veteran not eligible, or errors', () => {
-      it(`C23819 - should not schedule eye care appointment`, () => {
+      it(`C23819: should not schedule eye care appointment`, () => {
         AppointmentListPage.visit()
           .validate()
           .scheduleAppointment();
@@ -175,7 +175,7 @@ describe(`VAOS eye care direct scheudle flow`, () => {
     });
 
     describe('And is Cerner', () => {
-      it('C23820 - should redirect to Cerner', () => {
+      it('C23820: should redirect to Cerner', () => {
         AppointmentListPage.visit()
           .validate()
           .scheduleAppointment();
@@ -264,7 +264,7 @@ describe(`VAOS eye care direct scheudle flow`, () => {
       });
     });
     describe('And is Cerner', () => {
-      it('C23820 - should redirect to Cerner', () => {
+      it('C23820: should redirect to Cerner', () => {
         AppointmentListPage.visit()
           .validate()
           .scheduleAppointment();
