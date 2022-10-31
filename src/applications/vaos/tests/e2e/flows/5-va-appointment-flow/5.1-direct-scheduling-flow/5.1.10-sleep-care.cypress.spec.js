@@ -16,7 +16,7 @@ import VAFacilityPageObject from '../../../page-objects/VAFacilityPageObject';
 import {
   mockAppointmentRequestsApi,
   mockAppointmentsApi,
-  mockClinicApi,
+  mockClinicsApi,
   mockDirectBookingEligibilityCriteriaApi,
   mockDirectScheduleSlotsApi,
   mockEligibilityApi,
@@ -46,7 +46,7 @@ describe('VAOS sleep care direct scheudle flow', () => {
 
     mockAppointmentRequestsApi();
     mockAppointmentsApi({ apiVersion: 0 });
-    mockClinicApi({ facilityId: '983', apiVersion: 0 });
+    mockClinicsApi({ facilityId: '983', apiVersion: 0 });
     mockDirectBookingEligibilityCriteriaApi({
       facilityIds: ['983'],
       typeOfCareId: '349',
@@ -124,7 +124,7 @@ describe('VAOS direct scheudle flow using VAOS services', () => {
       // mockFacilityApi({ id: '983', apiVersion: 2 });
       mockAppointmentsApi({ apiVersion: 0 });
       mockAppointmentsApi({ apiVersion: 2 });
-      mockClinicApi({ locations: ['983'], apiVersion: 2 });
+      mockClinicsApi({ locationIds: ['983'], apiVersion: 2 });
       mockDirectScheduleSlotsApi({
         start,
         end,
@@ -342,7 +342,7 @@ describe('VAOS direct scheudle flow using VAOS services', () => {
       // mockFacilityApi({ id: '983', apiVersion: 2 });
       mockAppointmentsApi({ apiVersion: 0 });
       mockAppointmentsApi({ apiVersion: 2 });
-      mockClinicApi({ locations: ['983'], apiVersion: 2 });
+      mockClinicsApi({ locationIds: ['983'], apiVersion: 2 });
       mockDirectScheduleSlotsApi({
         start,
         end,
@@ -429,7 +429,7 @@ describe('VAOS direct scheudle flow using VAOS services', () => {
       // mockFacilityApi({ id: '983', apiVersion: 2 });
       mockAppointmentsApi({ apiVersion: 0 });
       mockAppointmentsApi({ apiVersion: 2 });
-      mockClinicApi({ locations: ['983'], apiVersion: 2 });
+      mockClinicsApi({ locationIds: ['983'], apiVersion: 2 });
       mockDirectScheduleSlotsApi({
         start,
         end,
@@ -500,7 +500,7 @@ describe('VAOS direct scheudle flow using VAOS services', () => {
     });
   });
 
-  describe('When more than one facility supports online scheduling and is Cerner', () => {
+  describe('When more than one facility supports online scheduling And veteran is Cerner user', () => {
     beforeEach(() => {
       vaosSetup();
 
@@ -508,7 +508,7 @@ describe('VAOS direct scheudle flow using VAOS services', () => {
       // mockFacilityApi({ id: '983', apiVersion: 2 });
       mockAppointmentsApi({ apiVersion: 0 });
       mockAppointmentsApi({ apiVersion: 2 });
-      mockClinicApi({ locations: ['983'], apiVersion: 2 });
+      mockClinicsApi({ locationIds: ['983'], apiVersion: 2 });
       mockDirectScheduleSlotsApi({ clinicId: '455', apiVersion: 2 });
       mockEligibilityApi({ typeOfCare: 'cpap', isEligible: true });
       mockFacilitiesApi({ apiVersion: 2 });
@@ -572,7 +572,11 @@ describe('VAOS direct scheudle flow using VAOS services', () => {
 
     describe('And one facility configured, no available clinics, no requests', () => {
       it('should not submit form', () => {
-        mockClinicApi({ locations: ['983'], hasClinics: false, apiVersion: 2 });
+        mockClinicsApi({
+          locationIds: ['983'],
+          hasClinics: false,
+          apiVersion: 2,
+        });
         mockEligibilityApi({ typeOfCare: 'cpap', isEligible: true });
         mockSchedulingConfigurationApi({
           facilityIds: ['983'],

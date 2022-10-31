@@ -4,7 +4,7 @@ import ClosestCityPageObject from '../../page-objects/ClosestCityPageObject';
 import CommunityCarePreferencesPage from '../../page-objects/CommunityCarePreferencesPageObject';
 import ConfirmationPageObject from '../../page-objects/ConfirmationPageObject';
 import ContactInfoPageObject from '../../page-objects/ContactInfoPageObject';
-import FacilityTypePage from '../../page-objects/FacilityTypePage';
+import FacilityTypePageObject from '../../page-objects/FacilityTypePageObject';
 import PreferredLanguagePageObject from '../../page-objects/PreferredLanguagePageObject';
 import AppointmentReasonPageObject from '../../page-objects/AppointmentReasonPageObject';
 import RequestDatePageObject from '../../page-objects/RequestDatePageObject';
@@ -55,7 +55,7 @@ describe('VAOS audiology community care request flow', () => {
           .selectTypeOfCare(/Audiology/i)
           .clickNextButton();
 
-        FacilityTypePage.assertUrl()
+        FacilityTypePageObject.assertUrl()
           .selectFacility(/Community care facility/)
           .clickNextButton();
 
@@ -113,7 +113,7 @@ describe('VAOS audiology community care request flow', () => {
           .selectTypeOfCare(/Audiology/i)
           .clickNextButton();
 
-        FacilityTypePage.assertUrl()
+        FacilityTypePageObject.assertUrl()
           .selectFacility(/Community care facility/)
           .clickNextButton();
 
@@ -182,7 +182,7 @@ describe('VAOS audiology community care request flow', () => {
           .selectTypeOfCare(/Audiology/i)
           .clickNextButton();
 
-        FacilityTypePage.assertUrl()
+        FacilityTypePageObject.assertUrl()
           .selectFacility(/Community care facility/)
           .clickNextButton();
 
@@ -239,7 +239,7 @@ describe('VAOS audiology community care request flow', () => {
           .selectTypeOfCare(/Audiology/i)
           .clickNextButton();
 
-        FacilityTypePage.assertUrl()
+        FacilityTypePageObject.assertUrl()
           .selectFacility(/Community care facility/)
           .clickNextButton();
 

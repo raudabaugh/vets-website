@@ -174,7 +174,7 @@ describe(`VAOS eye care direct scheudle flow`, () => {
       });
     });
 
-    describe('And is Cerner', () => {
+    describe('And veteran is Cerner user', () => {
       it('C23820: should redirect to Cerner', () => {
         AppointmentListPage.visit()
           .validate()
@@ -263,7 +263,7 @@ describe(`VAOS eye care direct scheudle flow`, () => {
         cy.axeCheckBestPractice();
       });
     });
-    describe('And is Cerner', () => {
+    describe('And veteran is Cerner user', () => {
       it('C23820: should redirect to Cerner', () => {
         AppointmentListPage.visit()
           .validate()

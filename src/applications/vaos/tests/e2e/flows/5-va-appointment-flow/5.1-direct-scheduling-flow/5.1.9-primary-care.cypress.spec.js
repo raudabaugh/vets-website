@@ -76,7 +76,7 @@ describe('VAOS primary care direct schedule flow', () => {
           .clickNextButton();
 
         // Only when CC eligible
-        // FacilityTypePage.assertUrl()
+        // FacilityTypePageObject.assertUrl()
         //   .selectFacility(/VA medical center/)
         //   .clickNextButton();
 
@@ -114,7 +114,7 @@ describe('VAOS primary care direct schedule flow', () => {
     describe.skip('And more than one clinic supports direct scheduling', () => {});
     describe.skip('And no clinic supports direct, clinic supports request scheduling', () => {});
     describe.skip('And clinic does not support direct or request scheduling, veteran not eligible, or errors', () => {});
-    describe.skip('And is Cerner', () => {});
+    describe.skip('And veteran is Cerner user', () => {});
     describe.skip('And veteran has no home address', () => {});
   });
 });

@@ -3,7 +3,7 @@ import AppointmentReasonPageObject from '../../page-objects/AppointmentReasonPag
 import CommunityCarePreferencesPageObject from '../../page-objects/CommunityCarePreferencesPageObject';
 import ConfirmationPageObject from '../../page-objects/ConfirmationPageObject';
 import ContactInfoPageObject from '../../page-objects/ContactInfoPageObject';
-import FacilityTypePage from '../../page-objects/FacilityTypePage';
+import FacilityTypePageObject from '../../page-objects/FacilityTypePageObject';
 import PreferredLanguagePageObject from '../../page-objects/PreferredLanguagePageObject';
 import RequestDatePageObject from '../../page-objects/RequestDatePageObject';
 import ReviewPageObject from '../../page-objects/ReviewPageObject';
@@ -62,7 +62,7 @@ describe('VAOS nutrition community care flow using VAOS services', () => {
           .selectTypeOfCare('Nutrition and food')
           .clickNextButton();
 
-        FacilityTypePage.assertUrl()
+        FacilityTypePageObject.assertUrl()
           .selectFacility(/Community care facility/i)
           .clickNextButton();
 
@@ -110,7 +110,7 @@ describe('VAOS nutrition community care flow using VAOS services', () => {
           .selectTypeOfCare('Nutrition and food')
           .clickNextButton();
 
-        FacilityTypePage.assertUrl()
+        FacilityTypePageObject.assertUrl()
           .selectFacility(/Community care facility/i)
           .clickNextButton();
 

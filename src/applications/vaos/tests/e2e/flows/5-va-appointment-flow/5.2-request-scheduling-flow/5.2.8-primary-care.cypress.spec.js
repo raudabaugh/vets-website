@@ -1,7 +1,7 @@
 import AppointmentListPage from '../../../page-objects/AppointmentList/AppointmentListPage';
 import ConfirmationPage from '../../../page-objects/ConfirmationPageObject';
 import ContactInfoPageObject from '../../../page-objects/ContactInfoPageObject';
-import FacilityTypePage from '../../../page-objects/FacilityTypePage';
+import FacilityTypePageObject from '../../../page-objects/FacilityTypePageObject';
 import ReasonForAppointmentPage from '../../../page-objects/AppointmentReasonPageObject';
 import ReviewPage from '../../../page-objects/ReviewPageObject';
 import RequestDatePage from '../../../page-objects/RequestDatePageObject';
@@ -12,7 +12,7 @@ import {
   mockAppointmentsApi,
   mockCCEligibilityApi,
   mockCCProvidersApi,
-  mockClinicApi,
+  mockClinicsApi,
   mockDirectBookingEligibilityCriteriaApi,
   mockDirectScheduleSlotsApi,
   mockFacilitiesApi,
@@ -38,7 +38,7 @@ describe('VAOS primary care request schedule flow', () => {
       mockAppointmentRequestsApi();
       mockAppointmentsApi({ apiVersion: 0 });
       mockCCProvidersApi();
-      mockClinicApi({ facilityId: '983', apiVersion: 0 });
+      mockClinicsApi({ facilityId: '983', apiVersion: 0 });
       mockDirectBookingEligibilityCriteriaApi();
       mockDirectScheduleSlotsApi({ apiVersion: 0 });
       mockFacilitiesApi({ apiVersion: 0 });
@@ -62,7 +62,7 @@ describe('VAOS primary care request schedule flow', () => {
         .selectTypeOfCare('Primary care')
         .clickNextButton();
 
-      FacilityTypePage.assertUrl()
+      FacilityTypePageObject.assertUrl()
         .selectFacility(/Community care facility/)
         .clickNextButton();
 

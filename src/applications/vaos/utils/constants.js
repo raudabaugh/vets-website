@@ -102,6 +102,16 @@ export const COVID_VACCINE_ID = 'covid';
 
 export const PRIMARY_CARE = '323';
 export const MENTAL_HEALTH = '502';
+export const PHARMACY_TYPE_OF_CARE_ID = '160';
+export const SOCIAL_WORK_TYPE_OF_CARE_ID = '125';
+export const AMPUTATION_TYPE_OF_CARE_ID = '211';
+export const AUDIOLOGY_TYPE_OF_CARE_ID = '203';
+export const MOVE_TYPE_OF_CARE_ID = '372';
+export const NUTRITION_TYPE_OF_CARE_ID = '123';
+export const CPAP_TYPE_OF_CARE_ID = '349';
+export const HOME_SLEEP_TESTING_TYPE_OF_CARE_ID = '143';
+export const OPTOMETRY_TYPE_OF_CARE_ID = '408';
+export const OPHTHALMOLOGY_TYPE_OF_CARE_ID = '407';
 
 export const TYPES_OF_CARE = [
   {

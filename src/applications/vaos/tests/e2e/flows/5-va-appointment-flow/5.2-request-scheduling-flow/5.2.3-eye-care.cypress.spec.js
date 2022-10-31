@@ -4,7 +4,7 @@ import CommunityCarePreferencesPageObject from '../../../page-objects/CommunityC
 import ConfirmationPageObject from '../../../page-objects/ConfirmationPageObject';
 import ContactInfoPageObject from '../../../page-objects/ContactInfoPageObject';
 import EyeCarePageObject from '../../../page-objects/EyeCarePageObject';
-import FacilityTypePage from '../../../page-objects/FacilityTypePage';
+import FacilityTypePageObject from '../../../page-objects/FacilityTypePageObject';
 import PreferredLanguagePageObject from '../../../page-objects/PreferredLanguagePageObject';
 import AppointmentReasonPageObject from '../../../page-objects/AppointmentReasonPageObject';
 import RequestDatePageObject from '../../../page-objects/RequestDatePageObject';
@@ -59,7 +59,7 @@ describe('VAOS eye care request schedule flow using VAOS services', () => {
           .selectTypeOfCare(/Optometry/)
           .clickNextButton();
 
-        FacilityTypePage.assertUrl()
+        FacilityTypePageObject.assertUrl()
           .selectFacility(/Community care facility/i)
           .clickNextButton();
 

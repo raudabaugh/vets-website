@@ -892,7 +892,7 @@ export function mockEligibilityApi({
 }
 
 export function mockCCEligibilityApi({
-  typeOfCare = 'PrimaryCare',
+  typeOfCare = 'PrimaryCare', // TODO: remove default
   isEligible = true,
 } = {}) {
   cy.intercept(
@@ -912,10 +912,39 @@ export function mockCCEligibilityApi({
   ).as('v0:get:cc-eligibility');
 }
 
-export function mockClinicApi({
+export function mockClinicalServices({
+  clinicId,
+  locations = [],
+  apiVersion = 2,
+} = {}) {
+  if (apiVersion === 2) {
+    locations.forEach(locationId => {
+      let { data } = clinicsV2;
+      if (clinicId) data = data.filter(clinic => clinic.id === clinicId);
+
+      cy.intercept(
+        {
+          method: 'GET',
+          // path: `/vaos/v2/locations/${locationId}/clinics?clinical_service*`,
+          pathname: `/vaos/v2/locations/${locationId}/clinics`,
+          query: {
+            clinical_service: '*',
+          },
+        },
+        req => {
+          req.reply({
+            data,
+          });
+        },
+      ).as(`v2:get:clinics:clincial_service`);
+    });
+  }
+}
+
+export function mockClinicsApi({
   clinicId,
   facilityId = '983',
-  locations = ['983'],
+  locationIds = ['983'],
   hasClinics = true,
   apiVersion = 2,
 } = {}) {
@@ -934,25 +963,9 @@ export function mockClinicApi({
       },
     ).as('v0:get:clinics');
   } else if (apiVersion === 2) {
-    locations.forEach(locationId => {
+    locationIds.forEach(locationId => {
       let { data } = clinicsV2;
       if (clinicId) data = data.filter(clinic => clinic.id === clinicId);
-
-      cy.intercept(
-        {
-          method: 'GET',
-          // path: `/vaos/v2/locations/${locationId}/clinics?clinical_service*`,
-          pathname: `/vaos/v2/locations/${locationId}/clinics`,
-          query: {
-            clinical_service: '*',
-          },
-        },
-        req => {
-          req.reply({
-            data: [],
-          });
-        },
-      ).as(`v2:get:clinics:clincial_service`);
 
       cy.intercept(
         {
