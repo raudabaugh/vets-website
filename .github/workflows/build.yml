@@ -12,6 +12,10 @@ jobs:
     env:
       NODE_EXTRA_CA_CERTS: /etc/ssl/certs/VA-Internal-S2-RCA1-v1.cer.pem
     steps:
+    - name: Build
+      run: |
+        echo "Beginning free space:"
+        df -h
     - name: Maximize build space
       uses: easimon/maximize-build-space@master
       with:
@@ -23,7 +27,7 @@ jobs:
 
     - name: Build
       run: |
-        echo "Free space:"
+        echo "Ending free space:"
         df -h
 
     - name: Check out code
