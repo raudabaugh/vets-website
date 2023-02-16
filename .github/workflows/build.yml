@@ -2,7 +2,7 @@ name: Build and Push Docker Image to ECR
 
 on:
   push:
-    branches: [ "new-docker" ]
+    branches: [ "gha-runner-docker-build" ]
     
 jobs:
 
@@ -26,7 +26,7 @@ jobs:
       run: |
         echo "Free space:"
         df -h
-        
+
     - name: Check out code
       uses: actions/checkout@v2
     
