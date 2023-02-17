@@ -12,20 +12,20 @@ jobs:
     env:
       NODE_EXTRA_CA_CERTS: /etc/ssl/certs/VA-Internal-S2-RCA1-v1.cer.pem
     steps:
-    - name: Build
+    - name: Measure free space
       run: |
         echo "Beginning free space:"
         df -h
     - name: Maximize build space
       uses: easimon/maximize-build-space@master
       with:
-        root-reserve-mb: 33792
+        root-reserve-mb: 40000
         remove-dotnet: 'true'
         remove-android: 'true'
     - name: Checkout
       uses: actions/checkout@v2
 
-    - name: Build
+    - name: Measure free space
       run: |
         echo "Ending free space:"
         df -h
