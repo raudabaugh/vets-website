@@ -10,25 +10,16 @@ COPY . .
 RUN yarn config set "strict-ssl" false
 RUN npm config set strict-ssl false
 RUN yarn install
-RUN yarn build
+RUN yarn build --buildtype=vagovdev
 
 WORKDIR /website
 
 RUN git clone --depth 1 https://github.com/department-of-veterans-affairs/vagov-content
-RUN git clone --depth 1 https://github.com/department-of-veterans-affairs/content-build
 RUN git clone --depth 1 https://github.com/department-of-veterans-affairs/vets-json-schema
 RUN git clone --depth 1 https://github.com/department-of-veterans-affairs/veteran-facing-services-tools
-
-WORKDIR /website/content-build
-
-# setting up content-build
-RUN yarn install
-RUN cp .env.example .env
-RUN yarn fetch-drupal-cache
-RUN yarn build 
 
 EXPOSE 3002
 EXPOSE 3001
 EXPOSE 3000
 
-CMD ["/bin/bash", "-c", "cd /website/content-build && yarn watch; cd /website/vets-website && yarn watch"]
+CMD ["/bin/bash", "-c", "cd /website/vets-website && yarn watch"]
