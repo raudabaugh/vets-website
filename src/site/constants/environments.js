@@ -7,6 +7,9 @@ module.exports = {
   /** The local-dev environment. */
   LOCALHOST: 'localhost',
 
+  /** The local-dev environment. */
+  PREVIEW: 'preview',
+
   /** The VA.gov dev environment */
   VAGOVDEV: 'vagovdev',
 

@@ -29,6 +29,16 @@ module.exports = {
     API_URL: 'https://dev-api.va.gov',
   },
 
+  [ENVIRONMENTS.PREVIEW]: {
+    BUILDTYPE: ENVIRONMENTS.PREVIEW,
+    BASE_URL: isNode
+      ? 'https://127.0.0.1:3001'
+      : `http://${location.hostname || '127.0.0.1'}:${
+          location.port ? location.port : '3001'
+        }`,
+    API_URL: 'https://dev-api.va.gov',
+  },
+
   [ENVIRONMENTS.LOCALHOST]: {
     BUILDTYPE: ENVIRONMENTS.LOCALHOST,
     BASE_URL: isNode

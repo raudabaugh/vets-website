@@ -10,7 +10,7 @@ COPY . .
 RUN yarn config set "strict-ssl" false
 RUN npm config set strict-ssl false
 RUN yarn install
-RUN yarn build --buildtype=vagovdev
+RUN yarn build --buildtype=preview --asset-source=https://s3-us-gov-west-1.amazonaws.com/content.dev.va.gov/
 
 WORKDIR /website
 
