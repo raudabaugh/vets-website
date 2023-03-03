@@ -22,4 +22,4 @@ EXPOSE 3002
 EXPOSE 3001
 EXPOSE 3000
 
-CMD ["/bin/bash", "-c", "cd /website/vets-website && yarn watch"]
+CMD ["/bin/bash", "-c", "cd /website/vets-website && yarn watch --env host=0.0.0.0"]
