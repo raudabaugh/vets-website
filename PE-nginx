@@ -1,0 +1,3 @@
+FROM nginx
+
+COPY PE-nginx.config /etc/nginx/conf.d/

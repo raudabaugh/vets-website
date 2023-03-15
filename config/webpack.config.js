@@ -23,7 +23,7 @@ const ENVIRONMENTS = require('../src/site/constants/environments');
 const scaffoldRegistry = require('../src/applications/registry.scaffold.json');
 const facilitySidebar = require('../src/platform/landing-pages/facility-sidebar.json');
 
-const { VAGOVSTAGING, VAGOVPROD, LOCALHOST } = ENVIRONMENTS;
+const { VAGOVSTAGING, VAGOVPROD, LOCALHOST, PREVIEW } = ENVIRONMENTS;
 
 const {
   getAppManifests,
@@ -263,7 +263,9 @@ module.exports = async (env = {}) => {
 
   const apps = getEntryPoints(buildOptions.entry);
   const entryFiles = { ...apps, ...globalEntryFiles };
-  const isOptimizedBuild = [VAGOVSTAGING, VAGOVPROD].includes(buildtype);
+  const isOptimizedBuild = [VAGOVSTAGING, VAGOVPROD, PREVIEW].includes(
+    buildtype,
+  );
   const scaffoldAssets = await getScaffoldAssets();
   const appRegistry = JSON.parse(scaffoldAssets['registry.json']);
   const envBucketUrl = BUCKETS[buildtype];
