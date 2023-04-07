@@ -198,19 +198,34 @@ function generateHtmlFiles(buildPath, scaffoldAssets) {
     widgetType,
     widgetTemplate,
     useLocalStylesAndComponents,
-  }) =>
-    new HtmlPlugin({
+  }) => {
+    const { file: templateFile, includeVendor } = template;
+    // TODO: Fix path to application dir
+    const templatePath = templateFile
+      ? path.join('src/applications', 'mhv/landing-page', templateFile)
+      : 'src/platform/landing-pages/dev-template.ejs';
+
+    if (entryName === 'mhv-landing-page') {
+      console.log(`templateFile: ${templateFile}`);
+      console.log(`includeVendor: ${includeVendor}`);
+      console.log(`buildPath: ${buildPath}`);
+      console.log(`rootUrl: ${rootUrl}`);
+      console.log(`templatePath: ${templatePath}`);
+      // throw new Error('ABORT, ABORT!!!');
+    }
+
+    return new HtmlPlugin({
       chunks: [
         'polyfills',
         useLocalStylesAndComponents ? null : 'web-components',
-        'vendor',
+        includeVendor ? 'vendor' : null,
         useLocalStylesAndComponents ? null : 'style',
         entryName,
       ],
       filename: path.join(buildPath, rootUrl, 'index.html'),
       inject: false,
       scriptLoading: 'defer',
-      template: 'src/platform/landing-pages/dev-template.ejs',
+      template: templatePath,
       templateParameters: {
         // Menu and navigation content
         headerFooterData,
@@ -241,7 +256,11 @@ function generateHtmlFiles(buildPath, scaffoldAssets) {
               : null
             : 'VA.gov Home | Veterans Affairs',
     });
+  };
   /* eslint-enable no-nested-ternary */
+
+  // console.dir(appRegistry);
+  // throw new Error('App registry ack');
 
   return [...appRegistry, ...scaffoldRegistry]
     .filter(({ rootUrl }) => rootUrl)

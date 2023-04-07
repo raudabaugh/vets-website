@@ -10,14 +10,21 @@ function getAppManifests() {
     .map(file => {
       // eslint-disable-next-line import/no-dynamic-require
       const manifest = require(file);
+      const resolvedRoot = path.resolve(root, path.dirname(file));
 
-      return Object.assign({}, manifest, {
+      const templateFile = manifest?.template?.file;
+
+      return {
+        ...manifest,
+        template: {
+          file: templateFile ? path.join(resolvedRoot, templateFile) : null,
+        },
         filePath: file,
         entryFile: path.resolve(
           root,
           path.join(path.dirname(file), manifest.entryFile),
         ),
-      });
+      };
     });
 }
 
