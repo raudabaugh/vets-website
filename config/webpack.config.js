@@ -199,7 +199,7 @@ function generateHtmlFiles(buildPath, scaffoldAssets) {
     widgetTemplate,
     useLocalStylesAndComponents,
   }) => {
-    const { file: templateFile, includeVendor } = template;
+    const { file: templateFile, vanillaJs } = template;
     // TODO: Fix path to application dir
     const templatePath = templateFile
       ? path.join('src/applications', 'mhv/landing-page', templateFile)
@@ -207,21 +207,26 @@ function generateHtmlFiles(buildPath, scaffoldAssets) {
 
     if (entryName === 'mhv-landing-page') {
       console.log(`templateFile: ${templateFile}`);
-      console.log(`includeVendor: ${includeVendor}`);
-      console.log(`buildPath: ${buildPath}`);
-      console.log(`rootUrl: ${rootUrl}`);
+      console.log(`vanillaJs: ${vanillaJs}`);
+      console.log(`entryName: ${entryName}`);
       console.log(`templatePath: ${templatePath}`);
       // throw new Error('ABORT, ABORT!!!');
     }
 
+    const baseChunks = [
+      'polyfills',
+      useLocalStylesAndComponents ? null : 'web-components',
+      useLocalStylesAndComponents ? null : 'style',
+    ];
+
+    const reactChunks = ['vendor', entryName];
+
+    const pageChunks = vanillaJs
+      ? [...baseChunks]
+      : [...baseChunks, reactChunks];
+
     return new HtmlPlugin({
-      chunks: [
-        'polyfills',
-        useLocalStylesAndComponents ? null : 'web-components',
-        includeVendor ? 'vendor' : null,
-        useLocalStylesAndComponents ? null : 'style',
-        entryName,
-      ],
+      chunks: pageChunks,
       filename: path.join(buildPath, rootUrl, 'index.html'),
       inject: false,
       scriptLoading: 'defer',
