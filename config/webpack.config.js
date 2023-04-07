@@ -215,15 +215,16 @@ function generateHtmlFiles(buildPath, scaffoldAssets) {
 
     const baseChunks = [
       'polyfills',
-      useLocalStylesAndComponents ? null : 'web-components',
       useLocalStylesAndComponents ? null : 'style',
     ];
 
-    const reactChunks = ['vendor', entryName];
+    const spaChunks = [
+      'vendor',
+      useLocalStylesAndComponents ? null : 'web-components',
+      entryName,
+    ];
 
-    const pageChunks = vanillaJs
-      ? [...baseChunks]
-      : [...baseChunks, reactChunks];
+    const pageChunks = vanillaJs ? [...baseChunks] : [...baseChunks, spaChunks];
 
     return new HtmlPlugin({
       chunks: pageChunks,
