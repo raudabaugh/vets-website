@@ -206,6 +206,8 @@ function generateHtmlFiles(buildPath, scaffoldAssets) {
       : 'src/platform/landing-pages/dev-template.ejs';
 
     if (entryName === 'mhv-landing-page') {
+      console.log(`rootUrl: ${rootUrl}`);
+      console.log(`buildPath: ${buildPath}`);
       console.log(`templateFile: ${templateFile}`);
       console.log(`vanillaJs: ${vanillaJs}`);
       console.log(`entryName: ${entryName}`);
@@ -216,12 +218,12 @@ function generateHtmlFiles(buildPath, scaffoldAssets) {
     const baseChunks = [
       'polyfills',
       useLocalStylesAndComponents ? null : 'style',
+      entryName,
     ];
 
     const spaChunks = [
       'vendor',
       useLocalStylesAndComponents ? null : 'web-components',
-      entryName,
     ];
 
     const pageChunks = vanillaJs ? [...baseChunks] : [...baseChunks, spaChunks];

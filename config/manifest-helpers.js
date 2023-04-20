@@ -20,10 +20,7 @@ function getAppManifests() {
           file: templateFile ? path.join(resolvedRoot, templateFile) : null,
         },
         filePath: file,
-        entryFile: path.resolve(
-          root,
-          path.join(path.dirname(file), manifest.entryFile),
-        ),
+        entryFile: path.resolve(resolvedRoot, manifest.entryFile),
       };
     });
 }
