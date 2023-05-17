@@ -15,79 +15,71 @@ import ThrottledError from './submit-states/ThrottledError';
 import ValidationError from './submit-states/ValidationError';
 
 export default function SubmitButtons(props) {
-  const { onBack, onSubmit, submission, formConfig, formErrors = {} } = props;
+  const { onSubmit, submission, formConfig, formErrors = {} } = props;
 
   const appType = formConfig?.customText?.appType || APP_TYPE_DEFAULT;
   const buttonText =
     formConfig.customText?.submitButtonText || `Submit ${appType}`;
 
-  if (submission.status === false) {
-    return (
-      <Default
-        buttonText={buttonText}
-        onBack={onBack}
-        onSubmit={onSubmit}
-        formConfig={formConfig}
-      />
-    );
-  } else if (submission.status === 'submitPending') {
-    return (
-      <Pending onBack={onBack} onSubmit={onSubmit} formConfig={formConfig} />
-    );
-  } else if (submission.status === 'applicationSubmitted') {
-    return (
-      <Submitted onBack={onBack} onSubmit={onSubmit} formConfig={formConfig} />
-    );
-  } else if (submission.status === 'clientError') {
-    return (
-      <ClientError
-        buttonText={buttonText}
-        formConfig={formConfig}
-        onBack={onBack}
-        onSubmit={onSubmit}
-      />
-    );
-  } else if (submission.status === 'throttledError') {
-    return (
-      <ThrottledError
-        buttonText={buttonText}
-        formConfig={formConfig}
-        when={submission.extra}
-        onBack={onBack}
-        onSubmit={onSubmit}
-      />
-    );
-  } else if (submission.status === 'validationError') {
-    return (
-      <ValidationError
-        appType={appType}
-        buttonText={buttonText}
-        formConfig={formConfig}
-        formErrors={formErrors}
-        onBack={onBack}
-        onSubmit={onSubmit}
-      />
-    );
-  } else {
-    return (
-      <GenericError
-        appType={appType}
-        formConfig={formConfig}
-        onBack={onBack}
-        onSubmit={onSubmit}
-      />
-    );
+  switch (submission.status) {
+    case false:
+      return (
+        <Default
+          buttonText={buttonText}
+          onSubmit={onSubmit}
+          formConfig={formConfig}
+        />
+      );
+    case submission.status === 'submitPending':
+      return <Pending onSubmit={onSubmit} formConfig={formConfig} />;
+    case submission.status === 'applicationSubmitted':
+      return <Submitted onSubmit={onSubmit} formConfig={formConfig} />;
+    case submission.status === 'clientError':
+      return (
+        <ClientError
+          buttonText={buttonText}
+          formConfig={formConfig}
+          onSubmit={onSubmit}
+        />
+      );
+    case submission.status === 'throttledError':
+      return (
+        <ThrottledError
+          buttonText={buttonText}
+          formConfig={formConfig}
+          when={submission.extra}
+          onSubmit={onSubmit}
+        />
+      );
+    case submission.status === 'validationError':
+      return (
+        <ValidationError
+          appType={appType}
+          buttonText={buttonText}
+          formConfig={formConfig}
+          formErrors={formErrors}
+          onSubmit={onSubmit}
+        />
+      );
+    default:
+      return (
+        <GenericError
+          appType={appType}
+          formConfig={formConfig}
+          onSubmit={onSubmit}
+        />
+      );
   }
 }
 
 SubmitButtons.propTypes = {
-  onBack: PropTypes.func,
-  onSubmit: PropTypes.func,
-  submission: PropTypes.object,
   formConfig: PropTypes.shape({
     customText: PropTypes.shape({
       appType: PropTypes.string,
       submitButtonText: PropTypes.string,
     }),
   }),
+  submission: PropTypes.object,
+  onBack: PropTypes.func,
+  onSubmit: PropTypes.func,
 };

@@ -13,7 +13,7 @@ import {
 import get from '../../../../utilities/data/get';
 import set from '../../../../utilities/data/set';
 
-import FormNavButtons from '../components/FormNavButtons';
+import FormContinueButton from '../components/FormContinueButton';
 import SchemaForm from '../components/SchemaForm';
 import { setData, uploadFile } from '../actions';
 import {
@@ -160,10 +160,6 @@ class FormPage extends React.Component {
       // Similarly, the items uiSchema and the data for just that particular item are passed
       uiSchema = uiSchema[route.pageConfig.arrayPath].items;
     }
-    // It should be "safe" to check that this is the first page because it is
-    // always eligible and enabled, no need to call getPreviousPagePath.
-    const isFirstRoutePage =
-      route.pageList[0].path === this.props.location.pathname;
 
     function callOnContinue() {
       if (typeof route.pageConfig.onContinue === 'function') {
@@ -217,11 +213,7 @@ class FormPage extends React.Component {
           onSubmit={this.onSubmit}
         >
           {contentBeforeButtons}
-          <FormNavButtons
-            goBack={!isFirstRoutePage && this.goBack}
-            goForward={callOnContinue}
-            submitToContinue
-          />
+          <FormContinueButton goForward={callOnContinue} submitToContinue />
           {contentAfterButtons}
         </SchemaForm>
       </div>

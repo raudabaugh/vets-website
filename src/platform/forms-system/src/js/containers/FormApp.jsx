@@ -1,15 +1,19 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import Scroll from 'react-scroll';
+import { Link } from 'react-router';
+import PropTypes from 'prop-types';
 
 import { isLoggedIn } from 'platform/user/selectors';
 
 import FormNav from '../components/FormNav';
 import FormTitle from '../components/FormTitle';
-import { isInProgress } from '../helpers';
+import { isInProgress, createPageList, createFormPageList } from '../helpers';
 import { setGlobalScroll } from '../utilities/ui';
 
-const Element = Scroll.Element;
+import { getPreviousPagePath } from '../routing';
+
+const { Element } = Scroll;
 
 /*
  * Primary component for a schema generated form app.
@@ -42,6 +46,7 @@ class FormApp extends React.Component {
         ? formConfig.title(this.props)
         : formConfig.title;
 
+    let formBackButton = null;
     let formTitle;
     let formNav;
     let renderedChildren = children;
@@ -57,6 +62,26 @@ class FormApp extends React.Component {
     // page or one of the additionalRoutes specified in the form config
     // Also add form classes only if on an actual form page
     if (!isNonFormPage && isInProgress(trimmedPathname)) {
+      const formPages = createFormPageList(formConfig);
+      const pageList = createPageList(formConfig, formPages);
+      const goBackPath = getPreviousPagePath(
+        pageList,
+        formData,
+        currentLocation.pathname,
+      );
+
+      formBackButton = (
+        <Link to={goBackPath} className="form-back-arrow">
+          <img
+            className="icon-back-arrow"
+            src="/img/arrow-right-blue.svg"
+            alt="go back"
+            aria-hidden="true"
+          />
+          Back
+        </Link>
+      );
+
       formNav = (
         <FormNav
           formData={formData}
@@ -84,6 +109,7 @@ class FormApp extends React.Component {
         <div className="row">
           <div className="usa-width-two-thirds medium-8 columns">
             <Element name="topScrollElement" />
+            {formBackButton}
             {formTitle}
             {formNav}
             {renderedChildren}
@@ -105,6 +131,33 @@ const mapStateToProps = state => ({
   isLoggedIn: isLoggedIn(state),
   inProgressFormId: state.form.loadedData?.metadata?.inProgressFormId,
 });
+
+FormApp.propTypes = {
+  children: PropTypes.element,
+  currentLocation: PropTypes.shape({
+    pathname: PropTypes.string,
+  }),
+  formConfig: PropTypes.shape({
+    additionalRoutes: PropTypes.arrayOf([
+      PropTypes.shape({
+        path: PropTypes.string,
+      }),
+    ]),
+    footerContent: PropTypes.oneOfType([PropTypes.element, PropTypes.func]),
+    subTitle: PropTypes.string,
+    title: PropTypes.string,
+  }),
+  formData: PropTypes.shape({}),
+  inProgressFormId: PropTypes.string,
+  isLoggedIn: PropTypes.bool,
+  route: PropTypes.shape({
+    pageList: PropTypes.arrayOf(
+      PropTypes.shape({
+        path: PropTypes.string.isRequired,
+      }),
+    ),
+  }),
+};
 
 export default connect(mapStateToProps)(FormApp);
 

@@ -6,12 +6,13 @@ import { Column, Row } from 'platform/forms/components/common/grid';
 import ErrorMessage from 'platform/forms/components/common/alerts/ErrorMessage';
 import PreSubmitSection from 'platform/forms/components/review/PreSubmitSection';
 import scrollTo from 'platform/utilities/ui/scrollTo';
+
 import ProgressButton from '../../components/ProgressButton';
-import Back from './Back';
 
 export default function ClientError(props) {
-  const { buttonText, formConfig, onBack, onSubmit, testId } = props;
+  const { buttonText, formConfig, onSubmit, testId } = props;
   const { Element } = Scroll;
+
   const scrollToError = () => {
     scrollTo('errorScrollElement', getScrollOptions());
   };
@@ -44,9 +45,6 @@ export default function ClientError(props) {
       <PreSubmitSection formConfig={formConfig} />
       <Row classNames="form-progress-buttons vads-u-margin-y--2">
         <Column classNames="small-6 medium-5">
-          <Back onButtonClick={onBack} />
-        </Column>
-        <Column classNames="small-6 medium-5">
           <ProgressButton
             ariaDescribedBy={ariaDescribedBy}
             onButtonClick={onSubmit}
@@ -54,6 +52,7 @@ export default function ClientError(props) {
             buttonClass="usa-button-primary"
           />
         </Column>
+        <Column classNames="small-6 medium-5" />
         <Column classNames="small-1 medium-1 end">
           <div className="hidden">&nbsp;</div>
         </Column>
@@ -65,6 +64,6 @@ export default function ClientError(props) {
 ClientError.propTypes = {
   buttonText: PropTypes.string,
   formConfig: PropTypes.object,
-  onBack: PropTypes.func,
+  testId: PropTypes.string,
   onSubmit: PropTypes.func,
 };

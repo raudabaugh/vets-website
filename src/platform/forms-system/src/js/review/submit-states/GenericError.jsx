@@ -52,13 +52,9 @@ export default function GenericError(props) {
         </Column>
       </Row>
       <PreSubmitSection formConfig={formConfig} />
-      <Row classNames="form-progress-buttons schemaform-back-buttons vads-u-margin-y--2">
-        <Column classNames="small-6 usa-width-one-half medium-6">
-          <a href="/" className="usa-button-primary">
-            Go Back to VA.gov
-          </a>
-        </Column>
+      <Row classNames="form-progress-buttons schemaform-back-buttons">
         {submitButton}
+        <Column classNames="small-6 usa-width-one-half medium-6" />
       </Row>
     </>
   );

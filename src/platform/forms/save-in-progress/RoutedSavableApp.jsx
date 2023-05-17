@@ -10,6 +10,7 @@ import scrollToTop from 'platform/utilities/ui/scrollToTop';
 import environment from 'platform/utilities/environment';
 import { getScrollOptions } from 'platform/utilities/ui';
 import { restartShouldRedirect } from 'platform/site-wide/wizard';
+
 import {
   LOAD_STATUSES,
   PREFILL_STATUSES,
@@ -17,7 +18,6 @@ import {
   setFetchFormStatus,
   fetchInProgressForm,
 } from './actions';
-
 import { isInProgressPath } from '../helpers';
 import { getSaveInProgressState } from './selectors';
 import { APP_TYPE_DEFAULT } from '../../forms-system/src/js/constants';
@@ -185,6 +185,10 @@ class RoutedSavableApp extends React.Component {
     );
   }
 
+  removeOnbeforeunload = () => {
+    window.removeEventListener('beforeunload', this.onbeforeunload);
+  };
+
   redirectOrLoad(props) {
     // Stop a user that's been redirected from being redirected again after
     // logging in
@@ -229,10 +233,6 @@ class RoutedSavableApp extends React.Component {
       props.router.replace(firstPagePath);
     }
   }
-
-  removeOnbeforeunload = () => {
-    window.removeEventListener('beforeunload', this.onbeforeunload);
-  };
 
   render() {
     const { currentLocation, formConfig, children, loadedStatus } = this.props;

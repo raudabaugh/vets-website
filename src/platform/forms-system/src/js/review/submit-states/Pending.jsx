@@ -2,11 +2,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Column, Row } from 'platform/forms/components/common/grid';
 import PreSubmitSection from 'platform/forms/components/review/PreSubmitSection';
+
 import ProgressButton from '../../components/ProgressButton';
-import Back from './Back';
 
 export default function Pending(props) {
-  const { formConfig, onBack, onSubmit } = props;
+  const { formConfig, onSubmit } = props;
   let ariaDescribedBy = null;
   // If no ariaDescribedBy is passed down from form.js,
   // a null value will properly not render the aria label.
@@ -21,9 +21,6 @@ export default function Pending(props) {
       <PreSubmitSection formConfig={formConfig} />
       <Row classNames="form-progress-buttons vads-u-margin-y--2">
         <Column classNames="small-6 medium-5">
-          <Back onButtonClick={onBack} />
-        </Column>
-        <Column classNames="small-6 medium-5">
           <ProgressButton
             ariaDescribedBy={ariaDescribedBy}
             onButtonClick={onSubmit}
@@ -32,6 +29,7 @@ export default function Pending(props) {
             buttonClass="usa-button-disabled"
           />
         </Column>
+        <Column classNames="small-6 medium-5" />
         <Column classNames="small-1 medium-1 end">
           <div className="hidden">&nbsp;</div>
         </Column>
@@ -42,6 +40,5 @@ export default function Pending(props) {
 
 Pending.propTypes = {
   formConfig: PropTypes.object,
-  onBack: PropTypes.func,
   onSubmit: PropTypes.func,
 };

@@ -602,6 +602,18 @@ $medium-phone-screen: 375px;
   }
 }
 
+.form-back-arrow {
+  display: block;
+  margin-bottom: 1rem;
+
+  .icon-back-arrow {
+    height: 13px;
+    width: 13px;
+    margin-right: 1rem;
+    transform: rotate(180deg);
+  }
+}
+
 @media print {
   #mdFormButton{
       &[aria-label="give feedback"]{
