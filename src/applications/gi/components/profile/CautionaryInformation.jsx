@@ -172,7 +172,7 @@ export function CautionaryInformation({ institution, showModal }) {
             <thead>
               <tr>
                 <td />
-                <th>This campus</th>
+                <th tabIndex="0">This campus</th>
                 <th>{allCampusesLink}</th>
               </tr>
             </thead>
