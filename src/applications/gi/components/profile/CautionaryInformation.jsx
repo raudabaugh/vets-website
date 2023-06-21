@@ -1,5 +1,6 @@
+/* eslint-disable jsx-a11y/no-noninteractive-tabindex */
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { useEffect } from 'react';
 import CautionFlagDetails from './CautionFlagDetails';
 import SchoolClosingDetails from './SchoolClosingDetails';
 import LearnMoreLabel from '../LearnMoreLabel';
@@ -26,12 +27,16 @@ export function CautionaryInformation({ institution, showModal }) {
     const bold = description === 'Total Complaints';
     return (
       <tr key={key}>
-        <th>
+        <th className="complaintHeader" tabIndex="0">
           <strong>{description}</strong> <br />
           {definition}
         </th>
-        <td>{bold ? <strong>{thisCampus}</strong> : thisCampus}</td>
-        <td>{bold ? <strong>{allCampuses}</strong> : allCampuses}</td>
+        <td tabIndex="0" className="complaintCell">
+          {bold ? <strong>{thisCampus}</strong> : thisCampus}
+        </td>
+        <td tabIndex="0" className="complaintCell">
+          {bold ? <strong>{allCampuses}</strong> : allCampuses}
+        </td>
       </tr>
     );
   };
@@ -142,6 +147,59 @@ export function CautionaryInformation({ institution, showModal }) {
 
   const allComplaints = complaintRows.pop();
 
+  /*
+* Builtin user accessibilty to navigate the complaints
+* table with the use of arrow keys on the keyboard
+*
+* tableCells - collects all cells within the complaint table and stores
+* them as an array
+*
+* handleCellNavigation() - takes the arrow key that was pressed as the event
+* and navigates the tableCell as defined below. This creates the illusion of
+* a user going up, down, left, or right when navigating inside the table
+*
+* useEffect() - adds addEventListener() to listen for an arrow key being pressed
+* then passes the pressed arrow as an event into handleCellNavigation()
+*/
+
+  const tableCells = Array.from(
+    document.querySelectorAll('td.complaintCell, th.complaintHeader'),
+  );
+
+  const handleCellNavigation = event => {
+    const currentCell = event.target;
+
+    let index = tableCells.indexOf(currentCell);
+
+    const columns = currentCell.parentElement.children.length; // Number of columns in the row
+
+    if (event.key === 'ArrowUp') {
+      index -= columns; // Move up one row
+    } else if (event.key === 'ArrowDown') {
+      index += columns; // Move down one row
+    } else if (event.key === 'ArrowLeft') {
+      index -= 1; // Move left one cell
+    } else if (event.key === 'ArrowRight') {
+      index += 1; // Move right one cell
+    }
+
+    if (index >= 0 && index < tableCells.length) {
+      tableCells[index].focus(); // Set focus to the new cell
+    }
+  };
+
+  useEffect(
+    () => {
+      const addCellNav = () => {
+        tableCells.forEach(cell => {
+          cell.addEventListener('keydown', handleCellNavigation);
+        });
+      };
+      addCellNav();
+    },
+    [tableCells],
+  );
+
   return (
     <div className="cautionary-information small-screen-font">
       {renderCautionFlags()}
@@ -171,9 +229,13 @@ export function CautionaryInformation({ institution, showModal }) {
           <table className="all-complaints">
             <thead>
               <tr>
-                <td />
-                <th tabIndex="0">This campus</th>
-                <th>{allCampusesLink}</th>
+                <th className="complaintHeader" tabIndex="0" />
+                <th className="complaintHeader" tabIndex="0">
+                  This campus
+                </th>
+                <th className="complaintHeader" tabIndex="0">
+                  {allCampusesLink}
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -190,12 +252,16 @@ export function CautionaryInformation({ institution, showModal }) {
             <table className="complaints-by-type">
               <thead>
                 <tr>
-                  <th>
+                  <th className="complaintHeader" tabIndex="0">
                     Complaints by type{' '}
                     <span>(Each complaint can have multiple types)</span>
                   </th>
-                  <th>This campus</th>
-                  <th>{allCampusesLink}</th>
+                  <th className="complaintHeader" tabIndex="0">
+                    This campus
+                  </th>
+                  <th className="complaintHeader" tabIndex="0">
+                    {allCampusesLink}
+                  </th>
                 </tr>
               </thead>
               <tbody>
