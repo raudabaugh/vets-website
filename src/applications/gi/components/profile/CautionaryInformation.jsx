@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/no-noninteractive-tabindex */
 import PropTypes from 'prop-types';
-import React, { useEffect } from 'react';
+import React from 'react';
 import CautionFlagDetails from './CautionFlagDetails';
 import SchoolClosingDetails from './SchoolClosingDetails';
 import LearnMoreLabel from '../LearnMoreLabel';
@@ -47,7 +47,7 @@ export function CautionaryInformation({ institution, showModal }) {
     return (
       <div className="row " key={key}>
         <div className="small-11 columns">
-          <p className="vads-u-margin--0">
+          <div className="vads-u-margin--0">
             {description !== 'Other' ? (
               <va-additional-info
                 trigger={
@@ -59,7 +59,7 @@ export function CautionaryInformation({ institution, showModal }) {
             ) : (
               description
             )}
-          </p>
+          </div>
         </div>
         <div className="small-1 columns">
           <p className="number vads-u-margin--0">
@@ -146,59 +146,6 @@ export function CautionaryInformation({ institution, showModal }) {
   );
 
   const allComplaints = complaintRows.pop();
-
-  /*
-* Builtin user accessibilty to navigate the complaints
-* table with the use of arrow keys on the keyboard
-*
-* tableCells - collects all cells within the complaint table and stores
-* them as an array
-*
-* handleCellNavigation() - takes the arrow key that was pressed as the event
-* and navigates the tableCell as defined below. This creates the illusion of
-* a user going up, down, left, or right when navigating inside the table
-*
-* useEffect() - adds addEventListener() to listen for an arrow key being pressed
-* then passes the pressed arrow as an event into handleCellNavigation()
-*/
-
-  const tableCells = Array.from(
-    document.querySelectorAll('td.complaintCell, th.complaintHeader'),
-  );
-
-  const handleCellNavigation = event => {
-    const currentCell = event.target;
-
-    let index = tableCells.indexOf(currentCell);
-
-    const columns = currentCell.parentElement.children.length; // Number of columns in the row
-
-    if (event.key === 'ArrowUp') {
-      index -= columns; // Move up one row
-    } else if (event.key === 'ArrowDown') {
-      index += columns; // Move down one row
-    } else if (event.key === 'ArrowLeft') {
-      index -= 1; // Move left one cell
-    } else if (event.key === 'ArrowRight') {
-      index += 1; // Move right one cell
-    }
-
-    if (index >= 0 && index < tableCells.length) {
-      tableCells[index].focus(); // Set focus to the new cell
-    }
-  };
-
-  useEffect(
-    () => {
-      const addCellNav = () => {
-        tableCells.forEach(cell => {
-          cell.addEventListener('keydown', handleCellNavigation);
-        });
-      };
-      addCellNav();
-    },
-    [tableCells],
-  );
 
   return (
     <div className="cautionary-information small-screen-font">
