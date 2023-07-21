@@ -12,6 +12,8 @@ import {
 import { renderWithProfileReducers as render } from '../unit-test-helpers';
 import { useProfileTransaction } from '../../hooks';
 
+// these tests and relatated functionality are what was created to use the VAFSC library
+
 const initialState = {
   vapService: {
     hasUnsavedEdits: true,
