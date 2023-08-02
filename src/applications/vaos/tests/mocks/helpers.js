@@ -351,25 +351,6 @@ export function mockParentSites(ids, data) {
 }
 
 /**
- * Mocks the api call to check if the given sites allow community care requests
- *
- * @export
- * @param {Array<string>} ids List of VistA parent site ids to check for CC support
- * @param {Array<VARSupportedSite>} data List of community care enabled VA parent site data to return
- *   from mock call
- */
-export function mockSupportedCCSites(ids, data) {
-  setFetchJSONResponse(
-    global.fetch.withArgs(
-      `${environment.API_URL}/vaos/v0/community_care/supported_sites?${ids
-        .map(id => `site_codes[]=${id}`)
-        .join('&')}`,
-    ),
-    { data },
-  );
-}
-
-/**
  * Mock the api call to get supported facilities for a parent site through var-resources.
  * Used on old two step facility page.
  *
@@ -790,30 +771,6 @@ export function mockFacilitiesPageFetches(
   mockFacilitiesFetchByVersion({ facilities, version: 0 });
 
   return { requestFacilities, directFacilities, facilities };
-}
-
-/**
- * Mocks the api call that sets or retrieves preferences in var-resources
- *
- * @export
- * @param {string} emailAddress The email address to return in the mock
- */
-export function mockPreferences(emailAddress) {
-  setFetchJSONResponse(
-    global.fetch.withArgs(`${environment.API_URL}/vaos/v0/preferences`),
-    {
-      data: {
-        id: '3071ca1783954ec19170f3c4bdfd0c95',
-        type: 'preferences',
-        attributes: {
-          notificationFrequency: 'Each new message',
-          emailAllowed: true,
-          emailAddress,
-          textMsgAllowed: false,
-        },
-      },
-    },
-  );
 }
 
 /**

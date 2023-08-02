@@ -6,8 +6,8 @@ import PaymentsCardV2 from './PaymentsCardV2';
 import DashboardWidgetWrapper from '../DashboardWidgetWrapper';
 import IconCTALink from '../IconCTALink';
 import recordEvent from '~/platform/monitoring/record-event';
-import { canAccess } from '../../selectors';
-import API_NAMES from '../../utils/apiNames';
+import { canAccess } from '../../../common/selectors';
+import { API_NAMES } from '../../../common/constants';
 
 const NoRecentPaymentText = () => {
   return (
@@ -44,12 +44,12 @@ const PopularActionsForPayments = ({ showPaymentHistoryLink = false }) => {
         <IconCTALink
           href="/va-payment-history/payments/"
           icon="user-check"
-          text="View your payment history"
+          text="Review your payment history"
           /* eslint-disable react/jsx-no-bind */
           onClick={() => {
             recordEvent({
               event: 'nav-linkslist',
-              'links-list-header': 'View your payment history',
+              'links-list-header': 'Review your payment history',
               'links-list-section-header': 'Benefit payments',
             });
           }}

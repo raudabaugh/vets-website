@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import moment from 'moment';
 import { intersection, matches, merge, uniq } from 'lodash';
 import shouldUpdate from 'recompose/shouldUpdate';
@@ -12,6 +13,39 @@ export const minYear = 1900;
 export const maxYear = moment()
   .add(100, 'year')
   .year();
+
+// For the DISPLAYED step-count on pages [in progress-bar and step-header], we need to subtract the number of progress-hidden chapters from the total number of chapters
+// Progress-hidden chapters are those that have a hideFormNavProgress prop set to true
+export const getChaptersLengthDisplay = ({ uniqueChapters, formConfig }) => {
+  // Do NOT manipulate or re-assign formConfig param!
+  // It's used elsewhere [in functional logic]
+  const { chapters } = formConfig;
+
+  // some chapters have hideFormNavProgress true, so we need to substract them from the total length
+  let progressHiddenChaptersLength = 0;
+  Object.keys(chapters).forEach(chapter => {
+    if (chapters[chapter].hideFormNavProgress) {
+      progressHiddenChaptersLength += 1;
+    }
+  });
+  return uniqueChapters.length - progressHiddenChaptersLength;
+};
+
+// For the DISPLAYED chapter NUMBER on pages [in step-header], we need to account for any progress-hidden chapters.
+// Progress-hidden chapters are those that have a hideFormNavProgress prop set to true.
+export const getCurrentChapterDisplay = (formConfig, currentChapterIndex) => {
+  // Do NOT manipulate or re-assign params passed in!
+  // formConfig & currentChapterIndex are likely used in elsewhere [in functional logic]
+  const { chapters } = formConfig;
+  let upstreamProgressHiddenChaptersLength = 0;
+  Object.keys(chapters).forEach((chapter, index) => {
+    if (index < currentChapterIndex && chapters[chapter].hideFormNavProgress) {
+      upstreamProgressHiddenChaptersLength += 1;
+    }
+  });
+
+  return currentChapterIndex - upstreamProgressHiddenChaptersLength;
+};
 
 // An active page is one that will be shown to the user.
 // Pages become inactive if they are conditionally shown based
@@ -688,4 +722,18 @@ export function showReviewField(
     !hiddenOnSchema &&
     !collapsedOnSchema
   );
+}
+
+/**
+ * Custom hook to track previous values inside a useEffect
+ * See https://blog.logrocket.com/accessing-previous-props-state-react-hooks/
+ * @param {*} value - previous value to track
+ * @returns previous value
+ */
+export function usePreviousValue(value) {
+  const ref = useRef();
+  useEffect(() => {
+    ref.current = value;
+  });
+  return ref.current;
 }

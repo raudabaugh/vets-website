@@ -3,7 +3,7 @@ import PrefillMessage from 'platform/forms/save-in-progress/PrefillMessage';
 
 import { SIGIGenderDescription } from '../../../components/FormDescriptions';
 import { ShortFormAlert } from '../../../components/FormAlerts';
-import { NotHighDisability } from '../../../utils/helpers';
+import { isShortFormEligible } from '../../../utils/helpers';
 import { emptyObjectSchema } from '../../../definitions';
 
 const { sigiGenders } = fullSchemaHca.properties;
@@ -13,11 +13,14 @@ export default {
     'view:genderShortFormMessage': {
       'ui:description': ShortFormAlert,
       'ui:options': {
-        hideIf: NotHighDisability,
+        hideIf: formData => !isShortFormEligible(formData),
       },
     },
     'view:prefillMessage': {
       'ui:description': PrefillMessage,
+      'ui:options': {
+        hideIf: formData => !formData['view:isLoggedIn'],
+      },
     },
     'view:genderIdentity': {
       'ui:title': 'Gender identity',

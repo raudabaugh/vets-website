@@ -1,13 +1,17 @@
 import { pick } from 'lodash';
 import applicantDescription from 'platform/forms/components/ApplicantDescription';
-
 import currentOrPastDateUI from 'platform/forms-system/src/js/definitions/currentOrPastDate';
+import { validateCurrentOrFutureDate } from 'platform/forms-system/src/js/validation';
 import fullNameUI from 'platform/forms/definitions/fullName';
 import * as personId from 'platform/forms/definitions/personId';
 
-import { relationshipLabels, genderLabels } from 'platform/static-data/labels';
+import { genderLabels } from 'platform/static-data/labels';
 
-import { ageWarning, eighteenOrOver } from '../helpers';
+import {
+  ageWarning,
+  eighteenOrOver,
+  relationshipAndChildTypeLabels,
+} from '../helpers';
 
 const defaults = prefix => ({
   fields: [
@@ -15,11 +19,15 @@ const defaults = prefix => ({
     'view:noSSN',
     `${prefix}SocialSecurityNumber`,
     `${prefix}DateOfBirth`,
-    'view:ageWarningNotification',
+    'minorHighSchoolQuestions',
     'gender',
-    'relationship',
+    'relationshipAndChildType',
   ],
-  required: [`${prefix}FullName`, `${prefix}DateOfBirth`, 'relationship'],
+  required: [
+    `${prefix}FullName`,
+    `${prefix}DateOfBirth`,
+    'relationshipAndChildType',
+  ],
   labels: {},
   isVeteran: false,
 });
@@ -33,72 +41,118 @@ const defaults = prefix => ({
 export default function applicantInformationUpdate(schema, options) {
   // Use the defaults as necessary, but override with the options given
   const prefix = options && options.isVeteran ? 'veteran' : 'relative';
-  const { fields, required, labels } = Object.assign(
-    {},
-    defaults(prefix),
-    options,
-  );
+  const { fields, required, labels } = {
+    ...defaults(prefix),
+    ...options,
+  };
 
-  const possibleProperties = Object.assign({}, schema.properties, {
+  const possibleProperties = {
+    ...schema.properties,
     'view:noSSN': {
       type: 'boolean',
     },
-    'view:ageWarningNotification': {
+    minorHighSchoolQuestions: {
       type: 'object',
-      properties: {},
+      properties: {
+        minorHighSchoolQuestion: {
+          type: 'boolean',
+        },
+        highSchoolGedGradDate: {
+          type: 'object',
+          $ref: '#/definitions/date',
+        },
+        highSchoolGedExpectedGradDate: {
+          type: 'object',
+          $ref: '#/definitions/date',
+        },
+      },
     },
-  });
+  };
 
   return {
     path: 'applicant/information',
     title: 'Applicant information',
     initialData: {},
-    uiSchema: Object.assign(
-      {},
-      {
-        'ui:order': fields,
-        'ui:description': applicantDescription,
-        [`${prefix}FullName`]: fullNameUI,
-        [`${prefix}DateOfBirth`]: Object.assign(
-          {},
-          currentOrPastDateUI('Your date of birth'),
-          {
-            'ui:errorMessages': {
-              pattern: 'Please provide a valid date',
-              required: 'Please enter a date',
-              futureDate: 'Please provide a valid date',
-            },
-          },
-        ),
-        'view:ageWarningNotification': {
-          'ui:description': ageWarning,
+    uiSchema: {
+      'ui:order': fields,
+      'ui:description': applicantDescription,
+      [`${prefix}FullName`]: fullNameUI,
+      [`${prefix}DateOfBirth`]: {
+        ...currentOrPastDateUI('Your date of birth'),
+        'ui:errorMessages': {
+          pattern: 'Please provide a valid date',
+          required: 'Please enter a date',
+          futureDate: 'Please provide a valid date',
+        },
+      },
+      minorHighSchoolQuestions: {
+        'ui:description': ageWarning,
+        'ui:options': {
+          expandUnder: [`${prefix}DateOfBirth`],
+          hideIf: formData => eighteenOrOver(formData.relativeDateOfBirth),
+        },
+        minorHighSchoolQuestion: {
+          'ui:title': 'Applicant has graduated high school or received GED?',
+          'ui:widget': 'yesNo',
+          'ui:required': formData =>
+            !eighteenOrOver(formData.relativeDateOfBirth),
+        },
+        highSchoolGedGradDate: {
+          ...currentOrPastDateUI('Date graduated'),
           'ui:options': {
-            hideIf: formData => eighteenOrOver(formData.relativeDateOfBirth),
+            expandUnder: 'minorHighSchoolQuestion',
+          },
+          'ui:required': formData => {
+            let isRequired = false;
+            if (!eighteenOrOver(formData.relativeDateOfBirth)) {
+              const yesNoResults =
+                formData.minorHighSchoolQuestions.minorHighSchoolQuestion;
+              if (yesNoResults) {
+                isRequired = true;
+              }
+              if (!yesNoResults) {
+                isRequired = false;
+              }
+            }
+            return isRequired;
           },
         },
-        gender: {
-          'ui:widget': 'radio',
-          'ui:title': 'Gender',
+        highSchoolGedExpectedGradDate: {
+          'ui:title': 'Date expected to graduate',
+          'ui:widget': 'date',
           'ui:options': {
-            labels: labels.gender || genderLabels,
+            expandUnder: 'minorHighSchoolQuestion',
+            expandUnderCondition: false,
           },
-        },
-        relationship: {
-          'ui:widget': 'radio',
-          'ui:title':
-            'What’s your relationship to the service member whose benefit is being transferred to you?',
-          'ui:options': {
-            labels: labels.relationship || relationshipLabels,
+          'ui:validations': [validateCurrentOrFutureDate],
+          'ui:errorMessages': {
+            pattern: 'Please enter a valid current or future date',
+            required: 'Please enter a date',
           },
         },
       },
-      personId.uiSchema(prefix, 'view:noSSN'),
-    ),
+      gender: {
+        'ui:widget': 'radio',
+        'ui:title': 'Your Gender',
+        'ui:options': {
+          labels: labels.gender || genderLabels,
+        },
+      },
+      relationshipAndChildType: {
+        'ui:widget': 'radio',
+        'ui:title':
+          'What’s your relationship to the service member whose benefit is being transferred to you?',
+        'ui:options': {
+          labels: relationshipAndChildTypeLabels,
+        },
+      },
+      ...personId.uiSchema(prefix, 'view:noSSN'),
+    },
     schema: {
       type: 'object',
       definitions: pick(schema.definitions, [
         'fullName',
-        'relationship',
+        'relationshipAndChildType',
         'ssn',
         'gender',
         'date',

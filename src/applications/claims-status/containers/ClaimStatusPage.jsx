@@ -6,17 +6,152 @@ import scrollToTop from 'platform/utilities/ui/scrollToTop';
 
 import { clearNotification } from '../actions';
 import ClaimComplete from '../components/ClaimComplete';
-import ClaimDetailLayout from '../components/ClaimDetailLayout';
+// START lighthouse_migration
+import ClaimDetailLayoutEVSS from '../components/evss/ClaimDetailLayout';
+import ClaimDetailLayoutLighthouse from '../components/ClaimDetailLayout';
+import ClaimStatusPageContent from '../components/evss/ClaimStatusPageContent';
+// END lighthouse_migration
 import ClaimsDecision from '../components/ClaimsDecision';
-import ClaimsTimeline from '../components/ClaimsTimeline';
+import ClaimTimeline from '../components/ClaimTimeline';
 import NeedFilesFromYou from '../components/NeedFilesFromYou';
-import { showClaimLettersFeature } from '../selectors';
+import { cstUseLighthouse, showClaimLettersFeature } from '../selectors';
 import {
-  itemsNeedingAttentionFromVet,
   getClaimType,
-  getCompletedDate,
+  getItemDate,
+  getTrackedItemDate,
+  getUserPhase,
+  itemsNeedingAttentionFromVet,
 } from '../utils/helpers';
 import { setUpPage, isTab, setFocus } from '../utils/page';
+
+// Using a Map instead of the typical Object because
+// we want to guarantee that the key insertion order
+// is maintained when converting to an array of keys
+const getStatusMap = () => {
+  const map = new Map();
+  map.set('CLAIM_RECEIVED', 'CLAIM_RECEIVED');
+  map.set('UNDER_REVIEW', 'UNDER_REVIEW');
+  map.set('GATHERING_OF_EVIDENCE', 'GATHERING_OF_EVIDENCE');
+  map.set('REVIEW_OF_EVIDENCE', 'REVIEW_OF_EVIDENCE');
+  map.set('PREPARATION_FOR_DECISION', 'PREPARATION_FOR_DECISION');
+  map.set('PENDING_DECISION_APPROVAL', 'PENDING_DECISION_APPROVAL');
+  map.set('PREPARATION_FOR_NOTIFICATION', 'PREPARATION_FOR_NOTIFICATION');
+  map.set('COMPLETE', 'COMPLETE');
+  return map;
+};
+
+const STATUSES = getStatusMap();
+
+const getPhaseFromStatus = latestStatus =>
+  [...STATUSES.keys()].indexOf(latestStatus) + 1;
+
+function isEventOrPrimaryPhase(event) {
+  if (event.type === 'phase_entered') {
+    return event.phase <= 3 || event.phase >= 7;
+  }
+
+  return !!getItemDate(event);
+}
+
+const generatePhases = claim => {
+  const { previousPhases } = claim.attributes.claimPhaseDates;
+  const phases = [];
+
+  phases.push({
+    type: 'filed',
+    date: claim.attributes.claimDate,
+  });
+
+  const regex = /\d+/;
+
+  // Add other phase events
+  const phaseKeys = Object.keys(previousPhases);
+  phaseKeys.forEach(phaseKey => {
+    phases.push({
+      type: 'phase_entered',
+      // We are assuming here that each phaseKey is of the format:
+      // phaseXCompleteDate, where X is some integer between 1 and 7
+      phase: Number(phaseKey.match(regex)[0]) + 1,
+      date: previousPhases[phaseKey],
+    });
+  });
+
+  if (claim.attributes.closeDate !== null) {
+    phases.push({
+      type: 'complete',
+      phase: 8,
+      date: claim.closeDate,
+    });
+  }
+
+  return phases.filter(isEventOrPrimaryPhase);
+};
+
+const generateSupportingDocuments = claim => {
+  const { supportingDocuments } = claim.attributes;
+
+  return supportingDocuments
+    .map(doc => ({
+      ...doc,
+      date: doc.uploadDate,
+      type: 'supporting_document',
+    }))
+    .filter(isEventOrPrimaryPhase);
+};
+
+const generateTrackedItems = claim => {
+  const { trackedItems } = claim.attributes;
+
+  return trackedItems.map(item => ({
+    ...item,
+    date: getTrackedItemDate(item),
+    type: 'tracked_item',
+  }));
+};
+
+const generateEventTimeline = claim => {
+  const phases = generatePhases(claim);
+  const supportingDocuments = generateSupportingDocuments(claim);
+  const trackedItems = generateTrackedItems(claim);
+
+  const events = [...trackedItems, ...supportingDocuments, ...phases];
+
+  // Sort events from least to most recent
+  events.sort((a, b) => {
+    if (a.date === b.date) {
+      // Phases should be flipped
+      if (a.phase && b.phase) {
+        return b.phase - a.phase;
+      }
+      // Tracked items should be flipped as well
+      if (a.type === 'tracked_item' && b.type === 'tracked_item') {
+        return b.id - a.id;
+      }
+      return 0;
+    }
+
+    return b.date > a.date ? 1 : -1;
+  });
+
+  let activity = [];
+  const eventPhases = {};
+
+  events.forEach(event => {
+    if (event.type.startsWith('phase')) {
+      activity.push(event);
+      eventPhases[getUserPhase(event.phase)] = activity;
+      activity = [];
+    } else {
+      activity.push(event);
+    }
+  });
+
+  if (activity.length > 0) {
+    eventPhases[1] = activity;
+  }
+
+  return eventPhases;
+};
 
 class ClaimStatusPage extends React.Component {
   componentDidMount() {
@@ -50,6 +185,60 @@ class ClaimStatusPage extends React.Component {
     this.props.clearNotification();
   }
 
+  getPageContent() {
+    const { claim, showClaimLettersLink, useLighthouse } = this.props;
+
+    if (!useLighthouse) {
+      return (
+        <ClaimStatusPageContent
+          claim={claim}
+          showClaimLettersLink={showClaimLettersLink}
+        />
+      );
+    }
+
+    // claim can be null
+    const attributes = (claim && claim.attributes) || {};
+
+    const {
+      claimPhaseDates,
+      closeDate,
+      decisionLetterSent,
+      documentsNeeded,
+      status,
+    } = attributes;
+
+    const isOpen = status !== STATUSES.COMPLETE && closeDate === null;
+    const filesNeeded = itemsNeedingAttentionFromVet(attributes.trackedItems);
+    const showDocsNeeded =
+      !decisionLetterSent && isOpen && documentsNeeded && filesNeeded > 0;
+
+    return (
+      <div>
+        {showDocsNeeded ? (
+          <NeedFilesFromYou claimId={claim.id} files={filesNeeded} />
+        ) : null}
+        {decisionLetterSent && !isOpen ? (
+          <ClaimsDecision
+            completedDate={closeDate}
+            showClaimLettersLink={showClaimLettersLink}
+          />
+        ) : null}
+        {!decisionLetterSent && !isOpen ? (
+          <ClaimComplete completedDate={closeDate} />
+        ) : null}
+        {status && isOpen ? (
+          <ClaimTimeline
+            id={claim.id}
+            phase={getPhaseFromStatus(claimPhaseDates.latestPhaseType)}
+            currentPhaseBack={claimPhaseDates.currentPhaseBack}
+            events={generateEventTimeline(claim)}
+          />
+        ) : null}
+      </div>
+    );
+  }
+
   setTitle() {
     document.title = this.props.loading
       ? 'Status - Your Claim'
@@ -57,55 +246,18 @@ class ClaimStatusPage extends React.Component {
   }
 
   render() {
-    const {
-      claim,
-      loading,
-      message,
-      showClaimLettersLink,
-      synced,
-    } = this.props;
+    const { claim, loading, message, synced, useLighthouse } = this.props;
 
     let content = null;
-    // claim can be null
-    const attributes = (claim && claim.attributes) || {};
     if (!loading) {
-      const { phase } = attributes;
-      const filesNeeded = itemsNeedingAttentionFromVet(
-        attributes.eventsTimeline,
-      );
-      const showDocsNeeded =
-        !attributes.decisionLetterSent &&
-        attributes.open &&
-        attributes.documentsNeeded &&
-        filesNeeded > 0;
-
-      content = (
-        <div>
-          {showDocsNeeded ? (
-            <NeedFilesFromYou claimId={claim.id} files={filesNeeded} />
-          ) : null}
-          {attributes.decisionLetterSent && !attributes.open ? (
-            <ClaimsDecision
-              completedDate={getCompletedDate(claim)}
-              showClaimLettersLink={showClaimLettersLink}
-            />
-          ) : null}
-          {!attributes.decisionLetterSent && !attributes.open ? (
-            <ClaimComplete completedDate={getCompletedDate(claim)} />
-          ) : null}
-          {phase !== null && attributes.open ? (
-            <ClaimsTimeline
-              id={claim.id}
-              estimatedDate={attributes.maxEstDate}
-              phase={phase}
-              currentPhaseBack={attributes.currentPhaseBack}
-              everPhaseBack={attributes.everPhaseBack}
-              events={attributes.eventsTimeline}
-            />
-          ) : null}
-        </div>
-      );
+      content = this.getPageContent();
     }
+
+    // START lighthouse_migration
+    const ClaimDetailLayout = useLighthouse
+      ? ClaimDetailLayoutLighthouse
+      : ClaimDetailLayoutEVSS;
+    // END lighthouse_migration
 
     return (
       <ClaimDetailLayout
@@ -125,6 +277,7 @@ class ClaimStatusPage extends React.Component {
 
 function mapStateToProps(state) {
   const claimsState = state.disability.status;
+
   return {
     loading: claimsState.claimDetail.loading,
     claim: claimsState.claimDetail.detail,
@@ -132,6 +285,7 @@ function mapStateToProps(state) {
     lastPage: claimsState.routing.lastPage,
     showClaimLettersLink: showClaimLettersFeature(state),
     synced: claimsState.claimSync.synced,
+    useLighthouse: cstUseLighthouse(state),
   };
 }
 
@@ -148,6 +302,7 @@ ClaimStatusPage.propTypes = {
   params: PropTypes.object,
   showClaimLettersLink: PropTypes.bool,
   synced: PropTypes.bool,
+  useLighthouse: PropTypes.bool,
 };
 
 export default connect(

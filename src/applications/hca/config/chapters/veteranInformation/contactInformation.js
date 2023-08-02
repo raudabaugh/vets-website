@@ -5,7 +5,7 @@ import PrefillMessage from 'platform/forms/save-in-progress/PrefillMessage';
 
 import { ShortFormAlert } from '../../../components/FormAlerts';
 import { ContactInfoDescription } from '../../../components/FormDescriptions';
-import { NotHighDisability } from '../../../utils/helpers';
+import { isShortFormEligible } from '../../../utils/helpers';
 import { emptyObjectSchema } from '../../../definitions';
 
 const { email } = fullSchemaHca.properties;
@@ -16,11 +16,14 @@ export default {
     'view:contactShortFormMessage': {
       'ui:description': ShortFormAlert,
       'ui:options': {
-        hideIf: NotHighDisability,
+        hideIf: formData => !isShortFormEligible(formData),
       },
     },
     'view:prefillMessage': {
       'ui:description': PrefillMessage,
+      'ui:options': {
+        hideIf: formData => !formData['view:isLoggedIn'],
+      },
     },
     'view:contactInfoDescription': {
       'ui:description': ContactInfoDescription,

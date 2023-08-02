@@ -20,9 +20,15 @@ describe('makeBotStartConvoAndTrackUtterances actions', () => {
     payload: { activity: 'some activity' },
   };
 
+  const sandbox = sinon.createSandbox();
+
   beforeEach(() => {
     fakeNext = sinon.stub();
     store = mockStore({});
+  });
+
+  afterEach(() => {
+    sandbox.restore();
   });
 
   it('should correctly handle "DIRECT_LINE/CONNECT_FULFILLED" startConversationActivity dispatch', async () => {
@@ -69,13 +75,11 @@ describe('makeBotStartConvoAndTrackUtterances actions', () => {
     const IS_TRACKING_UTTERANCES = 'va-bot.isTrackingUtterances';
     const IN_AUTH_EXP = 'va-bot.inAuthExperience';
     const RECENT_UTTERANCES = 'va-bot.recentUtterances';
-    const sandbox = sinon.createSandbox();
     beforeEach(() => {
       sessionStorage.clear();
     });
     afterEach(() => {
       sessionStorage.clear();
-      sandbox.restore();
     });
     it("should correctly begin tracking utterances if it hasn't yet", async () => {
       // setup
@@ -217,6 +221,91 @@ describe('makeBotStartConvoAndTrackUtterances actions', () => {
 
     expect(fakeNext.firstCall.args[0].payload).to.own.include({
       text: '****',
+    });
+  });
+
+  it('should dispatch an event "WEB_CHAT/SEND_MESSAGE"', async () => {
+    const stubDispatchEvent = sandbox.stub(window, 'dispatchEvent');
+
+    await StartConvoAndTrackUtterances.makeBotStartConvoAndTrackUtterances(
+      'csrfToken',
+      'apiSession',
+      'apiURL',
+      'baseURL',
+      'userFirstName',
+      'userUuid',
+    )(store)(fakeNext)(connectSendMessage);
+
+    expect(stubDispatchEvent.firstCall.args[0].type).to.equal(
+      'bot-outgoing-activity',
+    );
+  });
+  describe('Checking the bot entered and exited the Rx skill', () => {
+    const IS_RX_SKILL = 'va-bot.isRxSkill';
+    beforeEach(() => {
+      sessionStorage.clear();
+    });
+    afterEach(() => {
+      sessionStorage.clear();
+    });
+    it('should update the session storage RX key to true upon entering the RX skill and dispatch an RxSkill event', async () => {
+      // setup
+      // fire/execute
+      const spyDispatchEvent = sandbox.spy(window, 'dispatchEvent');
+      const activity = {
+        type: 'message',
+        text: 'You are now in the Prescriptions Bot.',
+        from: { role: 'bot' },
+      };
+      const rxActivity = {
+        type: 'DIRECT_LINE/INCOMING_ACTIVITY',
+        payload: { activity },
+      };
+      await StartConvoAndTrackUtterances.makeBotStartConvoAndTrackUtterances(
+        'csrfToken',
+        'apiSession',
+        'apiURL',
+        'baseURL',
+        'userFirstName',
+        'userUuid',
+      )(store)(fakeNext)(rxActivity);
+      // tests
+      const isRxSkillSessionStorageSet = await sessionStorage.getItem(
+        IS_RX_SKILL,
+      );
+      // second call is for skill entry
+      const entrySkillEvent = spyDispatchEvent.secondCall.args[0];
+      expect(isRxSkillSessionStorageSet).to.equal('true');
+      expect(entrySkillEvent.type).to.equal('rxSkill');
+    });
+
+    it('should update the session storage RX key to false upon exiting the RX skill and dispatch an RxSkill event ', async () => {
+      const spyDispatchEvent = sandbox.spy(window, 'dispatchEvent');
+      const activity = {
+        type: 'message',
+        text: 'Returning to the main chatbot...',
+        from: { role: 'bot' },
+      };
+      const rxActivity = {
+        type: 'DIRECT_LINE/INCOMING_ACTIVITY',
+        payload: { activity },
+      };
+      await StartConvoAndTrackUtterances.makeBotStartConvoAndTrackUtterances(
+        'csrfToken',
+        'apiSession',
+        'apiURL',
+        'baseURL',
+        'userFirstName',
+        'userUuid',
+      )(store)(fakeNext)(rxActivity);
+      // tests
+      const isRxSkillSessionStorageSet = await sessionStorage.getItem(
+        IS_RX_SKILL,
+      );
+      // second call is for skill entry
+      const entrySkillEvent = spyDispatchEvent.secondCall.args[0];
+      expect(isRxSkillSessionStorageSet).to.equal('false');
+      expect(entrySkillEvent.type).to.equal('rxSkill');
     });
   });
 });

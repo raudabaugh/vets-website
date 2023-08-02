@@ -762,7 +762,7 @@
         "requestedPeriods": null,
         "serviceType": "outpatientMentalHealth",
         "slot": null,
-        "start": "2022-01-23T20:00:00Z",
+        "start": "2023-06-23T20:00:00Z",
         "status": "booked",
         "telehealth": {
           "url": "https://care2.evn.va.gov/vvc-app/?join=1&media=1&escalate=1&conference=VAC00064b6f@care2.evn.va.gov&pin=4569928835#",
@@ -1015,7 +1015,7 @@
           ]
         },
         "description": "Upcoming phone appointment",
-        "end": "2022-12-27T18:19:34",
+        "end": "2023-07-27T18:19:34",
         "id": "06aa456va",
         "kind": "phone",
         "locationId": "983",
@@ -1030,7 +1030,7 @@
         "requestedPeriods": null,
         "serviceType": "primaryCare",
         "slot": null,
-        "start": "2022-12-27T18:19:34",
+        "start": "2023-07-27T18:19:34",
         "status": "booked",
         "telehealth": null
       }
@@ -1252,6 +1252,176 @@
       }
     },
     {
+      "id": "167311",
+      "type": "appointments",
+      "attributes": {
+        "id": "167311",
+        "identifier": [
+          {
+            "system": "Appointment/",
+            "value": "4139383339353233"
+          }
+        ],
+        "kind": "clinic",
+        "status": "booked",
+        "serviceType": "audiology",
+        "serviceTypes": [
+          {
+            "coding": [
+              {
+                "system": "http://veteran.apps.va.gov/terminologies/fhir/CodeSystem/vats-service-type",
+                "code": "audiology"
+              }
+            ]
+          }
+        ],
+        "serviceCategory": [
+          {
+            "coding": [
+              {
+                "system": "http://www.va.gov/Terminology/VistADefinedTerms/409_1",
+                "code": "COMPENSATION & PENSION",
+                "display": "COMPENSATION & PENSION"
+              }
+            ],
+            "text": "COMPENSATION & PENSION"
+          }
+        ],
+        "patientIcn": "1013120826V646496",
+        "locationId": "983GC",
+        "clinic": "945",
+        "start": "2023-06-22T13:00:00Z",
+        "end": "2023-06-22T14:00:00Z",
+        "created": "2023-03-17T00:00:00Z",
+        "cancellable": false,
+        "extension": {
+          "ccLocation": {
+            "address": {}
+          },
+          "vistaStatus": [
+            "NO ACTION TAKEN"
+          ]
+        },
+        "serviceName": "FTC C&P AUDIO BEV",
+        "physicalLocation": "FORT COLLINS AUDIO",
+        "friendlyName": "C&P BEV AUDIO FTC",
+        "location": {
+          "id": "983GC",
+          "type": "appointments",
+          "attributes": {
+            "id": "983GC",
+            "vistaSite": "983",
+            "vastParent": "983",
+            "type": "va_facilities",
+            "name": "Fort Collins VA Clinic",
+            "classification": "Multi-Specialty CBOC",
+            "timezone": {
+              "timeZoneId": "America/Denver"
+            },
+            "lat": 40.553875,
+            "long": -105.08795,
+            "website": "https://www.cheyenne.va.gov/locations/Fort_Collins_VA_CBOC.asp",
+            "phone": {
+              "main": "970-224-1550"
+            },
+            "physicalAddress": {
+              "line": [
+                "2509 Research Boulevard"
+              ],
+              "city": "Fort Collins",
+              "state": "CO",
+              "postalCode": "80526-8108"
+            },
+            "healthService": [
+              "Audiology",
+              "EmergencyCare",
+              "MentalHealthCare",
+              "PrimaryCare",
+              "SpecialtyCare"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "147685",
+      "type": "appointments",
+      "attributes": {
+        "id": "147685",
+        "identifier": [
+          {
+            "system": "http://med.va.gov/fhir/urn/vaos/vista/983/appointment/id",
+            "value": "1081;20221214.080000"
+          }
+        ],
+        "kind": "clinic",
+        "status": "booked",
+        "serviceType": "amputation",
+        "reasonCode": {
+          "text": "test"
+        },
+        "patientIcn": "1012845943V900681",
+        "locationId": "983GC",
+        "clinic": "1081",
+        "start": "2022-12-14T15:00:00Z",
+        "end": "2022-12-14T15:30:00Z",
+        "minutesDuration": 30,
+        "slot": {
+          "id": "3230323231323134313530303A323032323132313431353330",
+          "start": "2022-12-14T15:00:00Z",
+          "end": "2022-12-14T15:30:00Z"
+        },
+        "comment": "test",
+        "cancellable": true,
+        "extension": {
+          "ccLocation": {
+            "address": {}
+          },
+          "vistaStatus": [
+            "FUTURE"
+          ]
+        },
+        "serviceName": "FTC AMPUTATION",
+        "friendlyName": "Friendly Name FTC Amputation",
+        "location": {
+          "id": "983GC",
+          "type": "appointments",
+          "attributes": {
+            "id": "983GC",
+            "vistaSite": "983",
+            "vastParent": "983",
+            "type": "va_facilities",
+            "name": "Fort Collins VA Clinic",
+            "classification": "Multi-Specialty CBOC",
+            "timezone": {
+              "timeZoneId": "America/Denver"
+            },
+            "lat": 40.553875,
+            "long": -105.08795,
+            "website": "https://www.cheyenne.va.gov/locations/Fort_Collins_VA_CBOC.asp",
+            "phone": {
+              "main": "970-224-1550"
+            },
+            "physicalAddress": {
+              "line": [
+                "2509 Research Boulevard"
+              ],
+              "city": "Fort Collins",
+              "state": "CO",
+              "postalCode": "80526-8108"
+            },
+            "healthService": [
+              "Audiology",
+              "EmergencyCare",
+              "MentalHealthCare",
+              "PrimaryCare",
+              "SpecialtyCare"
+            ]
+          }
+        }
+      }
+    },
+    {
       "id": "50096",
       "type": "appointments",
       "attributes": {
@@ -1278,6 +1448,7 @@
         "cancellationReason": {
           "code": "other"
         },
+        "friendlyName": "Friendly Name CHY PC KILPATRICK",
         "serviceName": "CHY PC KILPATRICK",
         "location": {
           "id": "983",

@@ -1,24 +1,9 @@
 import React from 'react';
-
-import AlertBox, {
-  ALERT_TYPE,
-} from '@department-of-veterans-affairs/component-library/AlertBox';
-
-import MissingContactInfoAlertLink from './MissingContactInfoAlertLink';
+import PropTypes from 'prop-types';
 
 import { MISSING_CONTACT_INFO } from '@@vap-svc/constants';
+import MissingContactInfoAlertLink from './MissingContactInfoAlertLink';
 
-const missingEmailAddressContent = (
-  <>
-    <p>
-      To manage settings for email notifications, first add an email address to
-      your profile.
-    </p>
-    <p>
-      <MissingContactInfoAlertLink missingInfo={MISSING_CONTACT_INFO.EMAIL} />
-    </p>
-  </>
-);
 const missingMobilePhoneContent = (
   <>
     <p>
@@ -30,68 +15,77 @@ const missingMobilePhoneContent = (
     </p>
   </>
 );
-// TODO: uncomment when email is a supported communication channel
-// const missingAllContactInfoContent = (
-//   <>
-//     <p>
-//       We don’t have your contact email address or mobile phone number. To manage
-//       your notification settings, first update your contact information.{' '}
-//     </p>
-//     <p>
-//       <AddContactInfoLink missingInfo={MISSING_CONTACT_INFO.ALL} />
-//     </p>
-//   </>
-// );
+
+const missingAllContactInfoContent = (
+  <>
+    <p>
+      We don’t have your contact email address or mobile phone number. To manage
+      your notification settings, first update your contact information.{' '}
+    </p>
+
+    <p>
+      <MissingContactInfoAlertLink missingInfo={MISSING_CONTACT_INFO.EMAIL} />
+    </p>
+
+    <p>
+      <MissingContactInfoAlertLink missingInfo={MISSING_CONTACT_INFO.MOBILE} />
+    </p>
+  </>
+);
+
+export const getAlertData = ({
+  missingEmailAddress,
+  missingMobilePhone,
+  showEmailNotificationSettings,
+}) => {
+  if (
+    missingEmailAddress &&
+    missingMobilePhone &&
+    showEmailNotificationSettings
+  ) {
+    return {
+      content: missingAllContactInfoContent,
+      title: 'We don’t have your contact information',
+    };
+  }
+  if (missingMobilePhone && !showEmailNotificationSettings) {
+    return {
+      content: missingMobilePhoneContent,
+      title: 'We don’t have your mobile phone number',
+    };
+  }
+  return { content: null, title: null };
+};
 
 const MissingContactInfoAlert = ({
   missingMobilePhone,
   missingEmailAddress,
+  showEmailNotificationSettings,
 }) => {
-  const alertContents = React.useMemo(
-    () => {
-      if (missingEmailAddress && missingMobilePhone) {
-        return missingMobilePhoneContent;
-        // TODO: uncomment when email is a supported communication channel
-        // return missingAllContactInfoContent;
-      } else if (missingEmailAddress) {
-        return missingEmailAddressContent;
-      } else if (missingMobilePhone) {
-        return missingMobilePhoneContent;
-      } else {
-        return null;
-      }
-    },
-    [missingEmailAddress, missingMobilePhone],
-  );
+  const { content, title } = getAlertData({
+    missingEmailAddress,
+    missingMobilePhone,
+    showEmailNotificationSettings,
+  });
 
-  const alertTitle = React.useMemo(
-    () => {
-      if (missingEmailAddress && missingMobilePhone) {
-        return 'We don’t have your mobile phone number';
-        // TODO: uncomment when email is a supported communication channel
-        // return 'We don’t have your contact information';
-      } else if (missingEmailAddress) {
-        return 'We don’t have your email address';
-      } else if (missingMobilePhone) {
-        return 'We don’t have your mobile phone number';
-      } else {
-        return null;
-      }
-    },
-    [missingEmailAddress, missingMobilePhone],
-  );
-
-  if (alertContents) {
+  if (content) {
     return (
       <div data-testid="missing-contact-info-alert">
-        <AlertBox status={ALERT_TYPE.WARNING} headline={alertTitle} level={2}>
-          {alertContents}
-        </AlertBox>
+        <va-alert status="warning">
+          <h2 slot="headline">{title}</h2>
+          {content}
+        </va-alert>
       </div>
     );
   }
 
   return null;
+};
+
+MissingContactInfoAlert.propTypes = {
+  missingEmailAddress: PropTypes.bool,
+  missingMobilePhone: PropTypes.bool,
+  showEmailNotificationSettings: PropTypes.bool,
 };
 
 export default MissingContactInfoAlert;

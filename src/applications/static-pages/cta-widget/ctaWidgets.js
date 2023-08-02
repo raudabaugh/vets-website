@@ -38,6 +38,8 @@ export const CTA_WIDGET_TYPES = {
   VIEW_DEPENDENTS: 'view-dependents',
   VIEW_PAYMENT_HISTORY: 'view-payment-history',
   VRRAP: 'vrrap',
+  EDUCATION_LETTERS: 'education-letters',
+  ENROLLMENT_VERIFICATION: 'enrollment-verification',
 };
 
 export const ctaWidgetsLookup = {
@@ -75,7 +77,7 @@ export const ctaWidgetsLookup = {
       backendServices.EVSS_CLAIMS,
       backendServices.APPEALS_STATUS,
     ],
-    serviceDescription: 'see your claim or appeal status',
+    serviceDescription: 'check your claim, decision review, or appeal status',
   },
   [CTA_WIDGET_TYPES.COMBINED_DEBT_PORTAL]: {
     id: CTA_WIDGET_TYPES.COMBINED_DEBT_PORTAL,
@@ -93,7 +95,7 @@ export const ctaWidgetsLookup = {
     id: CTA_WIDGET_TYPES.DIRECT_DEPOSIT,
     deriveToolUrlDetails: () => ({
       url: '/profile/direct-deposit',
-      redirect: false,
+      redirect: true,
     }),
     hasRequiredMhvAccount: () => false,
     isHealthTool: false,
@@ -324,6 +326,8 @@ export const ctaWidgetsLookup = {
     serviceDescription: 'view your VA payment history',
   },
   [CTA_WIDGET_TYPES.VRRAP]: {
+    // Note: VRRAP stopped accepting new enrollments after 12/10/2022
+    // This should probably be removed
     id: CTA_WIDGET_TYPES.VRRAP,
     deriveToolUrlDetails: () => ({
       url:
@@ -335,5 +339,29 @@ export const ctaWidgetsLookup = {
     mhvToolName: null,
     requiredServices: backendServices.EDUCATION_BENEFITS,
     serviceDescription: 'apply for VRRAP',
+  },
+  [CTA_WIDGET_TYPES.EDUCATION_LETTERS]: {
+    id: CTA_WIDGET_TYPES.EDUCATION_LETTERS,
+    deriveToolUrlDetails: () => ({
+      url: 'education/download-letters',
+      redirect: false,
+    }),
+    hasRequiredMhvAccount: () => false,
+    isHealthTool: false,
+    mhvToolName: null,
+    requiredServices: null,
+    serviceDescription: 'check your VA education letter',
+  },
+  [CTA_WIDGET_TYPES.ENROLLMENT_VERIFICATION]: {
+    id: CTA_WIDGET_TYPES.ENROLLMENT_VERIFICATION,
+    deriveToolUrlDetails: () => ({
+      url: 'education/verify-school-enrollment',
+      redirect: false,
+    }),
+    hasRequiredMhvAccount: () => false,
+    isHealthTool: false,
+    mhvToolName: null,
+    requiredServices: null,
+    serviceDescription: 'verify your school enrollment',
   },
 };

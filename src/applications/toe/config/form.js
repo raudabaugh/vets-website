@@ -1,5 +1,6 @@
 import React from 'react';
 import { createSelector } from 'reselect';
+import { Link } from 'react-router';
 
 import fullSchema1990e from 'vets-json-schema/dist/22-1990E-schema.json';
 import commonDefinitions from 'vets-json-schema/dist/definitions.json';
@@ -14,16 +15,19 @@ import get from 'platform/utilities/data/get';
 import { isValidCurrentOrPastDate } from 'platform/forms-system/src/js/utilities/validations';
 import ReviewCardField from 'platform/forms-system/src/js/components/ReviewCardField';
 import { VA_FORM_IDS } from 'platform/forms/constants';
+import FormFooter from 'platform/forms/components/FormFooter';
 
 import constants from 'vets-json-schema/dist/constants.json';
-
-import { vagovprod, VAGOVSTAGING } from 'site/constants/buckets';
+import * as BUCKETS from 'site/constants/buckets';
+import * as ENVIRONMENTS from 'site/constants/environments';
 
 import manifest from '../manifest.json';
 
 import ConfirmationPage from '../containers/ConfirmationPage';
 import IntroductionPage from '../containers/IntroductionPage';
 
+import ApplicantIdentityView from '../components/ApplicantIdentityView';
+import ApplicantInformationReviewPage from '../components/ApplicantInformationReviewPage.jsx';
 import DirectDepositViewField from '../components/DirectDepositViewField';
 import EmailReviewField from '../components/EmailReviewField';
 import EmailViewField from '../components/EmailViewField';
@@ -41,11 +45,10 @@ import YesNoReviewField from '../components/YesNoReviewField';
 import preSubmitInfo from '../components/preSubmitInfo';
 
 import {
-  isOnlyWhitespace,
-  hideUnder18Field,
   addWhitespaceOnlyError,
-  isAlphaNumeric,
   applicantIsChildOfSponsor,
+  hideUnder18Field,
+  isOnlyWhitespace,
   prefillTransformer,
 } from '../helpers';
 
@@ -57,19 +60,26 @@ import {
   isValidLastName,
   isValidPhoneField,
   nameErrorMessage,
+  validateAccountNumber,
   validateEmail,
+  validateRoutingNumber,
 } from '../utils/validation';
 import {
   formFields,
   SPONSOR_RELATIONSHIP,
   YOUR_PROFILE_URL,
 } from '../constants';
+import ObfuscateReviewField from '../ObfuscateReviewField';
 
 const { fullName, date, email } = commonDefinitions;
 const contactMethods = ['Email', 'Home Phone', 'Mobile Phone', 'Mail'];
-const checkImageSrc = environment.isStaging()
-  ? `${VAGOVSTAGING}/img/check-sample.png`
-  : `${vagovprod}/img/check-sample.png`;
+const checkImageSrc = (() => {
+  const bucket = environment.isProduction()
+    ? BUCKETS[ENVIRONMENTS.VAGOVPROD]
+    : BUCKETS[ENVIRONMENTS.VAGOVSTAGING];
+
+  return `${bucket}/img/check-sample.png`;
+})();
 
 const formConfig = {
   rootUrl: manifest.rootUrl,
@@ -101,6 +111,7 @@ const formConfig = {
       'Please sign in again to continue your application for survivor dependent benefits.',
   },
   defaultDefinitions: {},
+  footerContent: FormFooter,
   getHelp: GetHelp,
   preSubmitInfo,
   chapters: {
@@ -111,6 +122,7 @@ const formConfig = {
           title: 'Your information',
           path: 'applicant-information',
           subTitle: 'Your information',
+          CustomPageReview: ApplicantInformationReviewPage,
           instructions:
             'This is the personal information we have on file for you.',
           uiSchema: {
@@ -134,12 +146,39 @@ const formConfig = {
                   </p>
                 </>
               ),
+              'ui:options': {
+                hideIf: formData =>
+                  formData.showMebEnhancements06 && formData.isLOA3,
+              },
+            },
+            'view:applicantInformation': {
+              'ui:options': {
+                hideIf: formData =>
+                  !formData.showMebEnhancements06 || !formData.isLOA3,
+              },
+              'ui:description': (
+                <>
+                  <ApplicantIdentityView />
+                </>
+              ),
             },
             [formFields.viewUserFullName]: {
+              'ui:options': {
+                hideIf: formData =>
+                  formData.showMebEnhancements06 && formData.isLOA3,
+              },
               [formFields.userFullName]: {
+                'ui:options': {
+                  hideIf: formData => formData.showMebEnhancements06,
+                },
+                'ui:required': formData => !formData?.showMebEnhancements06,
                 ...fullNameUI,
                 first: {
                   ...fullNameUI.first,
+                  'ui:options': {
+                    hideIf: formData => formData.showMebEnhancements06,
+                  },
+                  'ui:required': formData => !formData?.showMebEnhancements06,
                   'ui:title': 'Your first name',
                   'ui:validations': [
                     (errors, field) => {
@@ -151,6 +190,10 @@ const formConfig = {
                 },
                 middle: {
                   ...fullNameUI.middle,
+                  'ui:options': {
+                    hideIf: formData => formData.showMebEnhancements06,
+                  },
+                  'ui:required': formData => !formData?.showMebEnhancements06,
                   'ui:title': 'Your middle name',
                   'ui:validations': [
                     (errors, field) => {
@@ -162,6 +205,10 @@ const formConfig = {
                 },
                 last: {
                   ...fullNameUI.last,
+                  'ui:options': {
+                    hideIf: formData => formData.showMebEnhancements06,
+                  },
+                  'ui:required': formData => !formData?.showMebEnhancements06,
                   'ui:title': 'Your last name',
                   'ui:validations': [
                     (errors, field) => {
@@ -174,6 +221,11 @@ const formConfig = {
               },
             },
             [formFields.dateOfBirth]: {
+              'ui:options': {
+                hideIf: formData =>
+                  formData.showMebEnhancements06 && formData.isLOA3,
+              },
+              'ui:required': formData => !formData?.showMebEnhancements06,
               ...currentOrPastDateUI('Your date of birth'),
             },
             'view:dateOfBirthUnder18Alert': {
@@ -273,6 +325,10 @@ const formConfig = {
                 type: 'object',
                 properties: {},
               },
+              'view:applicantInformation': {
+                type: 'object',
+                properties: {},
+              },
               [formFields.parentGuardianSponsor]: {
                 type: 'string',
               },
@@ -353,16 +409,11 @@ const formConfig = {
           title: 'Enter your sponsor’s information',
           path: 'sponsor-information',
           depends: formData =>
-            !formData.sponsors?.sponsors?.length ||
-            formData.sponsors?.someoneNotListed,
+            formData.showMebEnhancements08
+              ? false
+              : !formData.sponsors?.sponsors?.length ||
+                formData.sponsors?.someoneNotListed,
           uiSchema: {
-            'view:enterYourSponsorsInformationHeading': {
-              'ui:description': (
-                <h3 className="vads-u-margin-bottom--3">
-                  Enter your sponsor’s information
-                </h3>
-              ),
-            },
             'view:noSponsorWarning': {
               'ui:description': (
                 <va-alert
@@ -377,7 +428,7 @@ const formConfig = {
                   <p>
                     If you think this is incorrect, reach out to your sponsor so
                     they can{' '}
-                    <a href="https://myaccess.dmdc.osd.mil/identitymanagement/authenticate.do?execution=e3s1">
+                    <a href="https://milconnect.dmdc.osd.mil/milconnect/">
                       update this information on the DoD milConnect website
                     </a>
                     .
@@ -404,7 +455,7 @@ const formConfig = {
                   <p>
                     If you think this is incorrect, reach out to your sponsor so
                     they can{' '}
-                    <a href="https://myaccess.dmdc.osd.mil/identitymanagement/authenticate.do?execution=e3s1">
+                    <a href="https://milconnect.dmdc.osd.mil/milconnect/">
                       update this information on the DoD milConnect website
                     </a>
                     .
@@ -418,6 +469,13 @@ const formConfig = {
               'ui:options': {
                 hideIf: formData => !formData.sponsors?.sponsors?.length,
               },
+            },
+            'view:enterYourSponsorsInformationHeading': {
+              'ui:description': (
+                <h3 className="vads-u-margin-bottom--3">
+                  Enter your sponsor’s information
+                </h3>
+              ),
             },
             [formFields.relationshipToServiceMember]: {
               'ui:title':
@@ -463,15 +521,15 @@ const formConfig = {
               formFields.sponsorDateOfBirth,
             ],
             properties: {
-              'view:enterYourSponsorsInformationHeading': {
-                type: 'object',
-                properties: {},
-              },
               'view:noSponsorWarning': {
                 type: 'object',
                 properties: {},
               },
               'view:sponsorNotOnFileWarning': {
+                type: 'object',
+                properties: {},
+              },
+              'view:enterYourSponsorsInformationHeading': {
                 type: 'object',
                 properties: {},
               },
@@ -571,7 +629,6 @@ const formConfig = {
             'view:subHeadings': {
               'ui:description': (
                 <>
-                  <h3>Verify your high school education</h3>
                   <va-alert
                     close-btn-aria-label="Close notification"
                     status="info"
@@ -584,6 +641,7 @@ const formConfig = {
                       education.
                     </div>
                   </va-alert>
+                  <h3>Verify your high school education</h3>
                 </>
               ),
             },
@@ -618,7 +676,6 @@ const formConfig = {
             'view:subHeadings': {
               'ui:description': (
                 <>
-                  <h3>Verify your high school education</h3>
                   <va-alert
                     close-btn-aria-label="Close notification"
                     status="info"
@@ -631,6 +688,7 @@ const formConfig = {
                       education.
                     </div>
                   </va-alert>
+                  <h3>Verify your high school education</h3>
                 </>
               ),
             },
@@ -1056,68 +1114,70 @@ const formConfig = {
                   </div>
                 </>
               ),
-              [formFields.receiveTextMessages]: {
-                'ui:title':
-                  'Would you like to receive text message notifications about your education benefits?',
-                'ui:widget': 'radio',
-                'ui:validations': [
-                  (errors, field, formData) => {
-                    const isYes = field?.slice(0, 4).includes('Yes');
-                    if (!isYes) {
-                      return;
-                    }
+              'view:noMobilePhoneAlert': {
+                'ui:description': (
+                  <va-alert
+                    background-only
+                    close-btn-aria-label="Close notification"
+                    show-icon
+                    status="warning"
+                    visible
+                  >
+                    <div>
+                      <p className="vads-u-margin-y--0">
+                        We can’t send you text message notifications because we
+                        don’t have a mobile phone number on file for you
+                      </p>
 
-                    const { phone, isInternational } = formData[
-                      formFields.viewPhoneNumbers
-                    ][formFields.mobilePhoneNumber];
-
-                    if (!phone) {
-                      errors.addError(
-                        'You can’t select that response because we don’t have a mobile phone number on file for you.',
-                      );
-                    } else if (isInternational) {
-                      errors.addError(
-                        'You can’t select that response because you have an international mobile phone number',
-                      );
-                    }
-                  },
-                ],
+                      <Link
+                        aria-label="Go back and add a mobile phone number"
+                        to={{
+                          pathname: 'phone-email',
+                          search: '?redirect',
+                        }}
+                      >
+                        <va-button
+                          onClick={() => {}}
+                          secondary
+                          text="Go back and add a mobile phone number"
+                        />
+                      </Link>
+                    </div>
+                  </va-alert>
+                ),
                 'ui:options': {
-                  widgetProps: {
-                    Yes: { 'data-info': 'yes' },
-                    No: { 'data-info': 'no' },
-                  },
-                  selectedProps: {
-                    Yes: { 'aria-describedby': 'yes' },
-                    No: { 'aria-describedby': 'no' },
+                  hideIf: formData => {
+                    return !!formData['view:phoneNumbers']?.mobilePhoneNumber
+                      ?.phone;
                   },
                 },
               },
-            },
-            'view:noMobilePhoneAlert': {
-              'ui:description': (
-                <va-alert status="warning">
-                  <>
-                    You can’t choose to get text message notifications because
-                    we don’t have a mobile phone number on file for you.
-                  </>
-                </va-alert>
-              ),
-              'ui:options': {
-                hideIf: formData =>
-                  (formData[formFields.viewReceiveTextMessages][
-                    formFields.receiveTextMessages
-                  ] &&
-                    !formData[formFields.viewReceiveTextMessages][
-                      formFields.receiveTextMessages
-                    ]
-                      .slice(0, 4)
-                      .includes('Yes')) ||
-                  isValidPhoneField(
-                    formData[formFields.viewPhoneNumbers][
-                      formFields.mobilePhoneNumber
-                    ],
-                  ),
+              [formFields.receiveTextMessages]: {
+                'ui:title':
+                  'Would you like to receive text message notifications on your education benefits?',
+                'ui:widget': 'radio',
+                'ui:validations': [
+                  (errors, field, formData) => {
+                    const isYes = field.slice(0, 4).includes('Yes');
+                    const phoneExist = !!formData[formFields.viewPhoneNumbers]
+                      .mobilePhoneNumber.phone;
+                    const { isInternational } = formData[
+                      formFields.viewPhoneNumbers
+                    ].mobilePhoneNumber;
+
+                    if (isYes) {
+                      if (!phoneExist) {
+                        errors.addError(
+                          "You can't select that response because we don't have a mobile phone number on file for you.",
+                        );
+                      } else if (isInternational) {
+                        errors.addError(
+                          "You can't select that response because you have an international mobile phone number",
+                        );
+                      }
+                    }
+                  },
+                ],
               },
             },
             'view:internationalTextMessageAlert': {
@@ -1167,6 +1227,10 @@ const formConfig = {
                 type: 'object',
                 required: [formFields.receiveTextMessages],
                 properties: {
+                  'view:noMobilePhoneAlert': {
+                    type: 'object',
+                    properties: {},
+                  },
                   [formFields.receiveTextMessages]: {
                     type: 'string',
                     enum: [
@@ -1175,10 +1239,6 @@ const formConfig = {
                     ],
                   },
                 },
-              },
-              'view:noMobilePhoneAlert': {
-                type: 'object',
-                properties: {},
               },
               'view:internationalTextMessageAlert': {
                 type: 'object',
@@ -1214,52 +1274,61 @@ const formConfig = {
               viewComponent: DirectDepositViewField,
               volatileData: true,
             },
+            'ui:description': (
+              <p>
+                We make payments only through direct deposit, also called
+                electronic funds transfer (EFT).
+              </p>
+            ),
             [formFields.bankAccount]: {
               ...bankAccountUI,
-              'ui:order': [
-                formFields.accountType,
-                formFields.accountNumber,
-                formFields.routingNumber,
-              ],
-              [formFields.accountType]: {
-                ...bankAccountUI.accountType,
-                'ui:errorMessages': {
-                  required: 'Please select an account type',
-                },
-              },
-              [formFields.accountNumber]: {
+              'ui:order': ['accountType', 'accountNumber', 'routingNumber'],
+              accountNumber: {
                 ...bankAccountUI.accountNumber,
-                'ui:validations': [
-                  (errors, field) => {
-                    if (!isAlphaNumeric(field)) {
-                      errors.addError('Please enter a valid account number');
-                    }
-                  },
-                ],
+                'ui:errorMessages': {
+                  ...bankAccountUI.accountNumber['ui:errorMessages'],
+                  pattern: 'Please enter only numbers',
+                },
+                'ui:reviewField': ObfuscateReviewField,
+                'ui:title': 'Bank account number',
+                'ui:validations': [validateAccountNumber],
+              },
+              routingNumber: {
+                ...bankAccountUI.routingNumber,
+                'ui:reviewField': ObfuscateReviewField,
+                'ui:validations': [validateRoutingNumber],
               },
             },
-            'view:directDepositLearnMore': {
+            'view:learnMore': {
               'ui:description': (
-                <va-additional-info trigger="Where can I find these numbers?">
+                <>
                   <img
                     key="check-image-src"
+                    style={{ marginTop: '1rem' }}
                     src={checkImageSrc}
                     alt="Example of a check showing where the account and routing numbers are"
                   />
-                  <p>
+                  <p key="learn-more-title">Where can I find these numbers?</p>
+                  <p key="learn-more-description">
                     The bank routing number is the first 9 digits on the bottom
                     left corner of a printed check. Your account number is the
                     second set of numbers on the bottom of a printed check, just
                     to the right of the bank routing number.
                   </p>
-                </va-additional-info>
+                  <va-additional-info key="learn-more-btn" trigger="Learn More">
+                    <p key="btn-copy">
+                      If you don’t have a printed check, you can sign in to your
+                      online banking institution for this information
+                    </p>
+                  </va-additional-info>
+                </>
               ),
             },
           },
           schema: {
             type: 'object',
             properties: {
-              [formFields.bankAccount]: {
+              bankAccount: {
                 type: 'object',
                 required: [
                   formFields.accountType,
@@ -1267,20 +1336,21 @@ const formConfig = {
                   formFields.routingNumber,
                 ],
                 properties: {
-                  [formFields.accountType]: {
+                  accountNumber: {
+                    type: 'string',
+                    pattern: '^\\**[a-z0-9]+$',
+                  },
+                  accountType: {
                     type: 'string',
                     enum: ['checking', 'savings'],
                   },
-                  [formFields.routingNumber]: {
+                  routingNumber: {
                     type: 'string',
-                    pattern: '^\\d{9}$',
-                  },
-                  [formFields.accountNumber]: {
-                    type: 'string',
+                    pattern: '^[\\d*]{5}\\d{4}$',
                   },
                 },
               },
-              'view:directDepositLearnMore': {
+              'view:learnMore': {
                 type: 'object',
                 properties: {},
               },

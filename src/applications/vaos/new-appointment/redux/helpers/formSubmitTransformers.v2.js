@@ -1,7 +1,7 @@
 import titleCase from 'platform/utilities/data/titleCase';
 import { selectVAPResidentialAddress } from 'platform/user/selectors';
 import moment from '../../../lib/moment-tz';
-import { LANGUAGES, PURPOSE_TEXT_V2 } from '../../../utils/constants';
+import { LANGUAGES } from '../../../utils/constants';
 import {
   getTypeOfCare,
   getFormData,
@@ -11,54 +11,8 @@ import {
 } from '../selectors';
 import { getClinicId } from '../../../services/healthcare-service';
 import { getTimezoneByFacilityId } from '../../../utils/timezone';
-
-function getReasonCode({ data, isCC, isAcheron }) {
-  const code = PURPOSE_TEXT_V2.filter(purpose => purpose.id !== 'other').find(
-    purpose => purpose.id === data.reasonForAppointment,
-  )?.serviceName;
-
-  let reasonText = null;
-  let appointmentInfo = null;
-
-  if (isCC && data.reasonAdditionalInfo) {
-    reasonText = data.reasonAdditionalInfo.slice(0, 250);
-  }
-  if (!isCC) {
-    reasonText = data.reasonAdditionalInfo.slice(0, 100);
-  }
-  if (!isCC && isAcheron) {
-    const formattedDates = data.selectedDates.map(
-      date =>
-        `${moment(date).format('MM/DD/YYYY')}${
-          moment(date).hour() >= 12 ? ' PM' : ' AM'
-        }`,
-    );
-    // TODO: Replace hard coded values.
-    const phoneNumber = `Phone Number: 123-456-7890|`;
-    const email = `Email: s@test.com|`;
-    const preferredDates = `Preferred Dates:${formattedDates.toString()}|`;
-    const reasonCode = `Reason Code: code_1|`;
-    reasonText = `comments:${data.reasonAdditionalInfo.slice(0, 250)}`;
-    // Add phone number, email, preferred Date, reason Code to
-    // appointmentInfo string in this order (phone number, email,
-    // preferred Date, reason Code)
-    appointmentInfo = `${phoneNumber}${email}${preferredDates}${reasonCode}`;
-  }
-
-  return {
-    // If the user selects one of the three preset radio selections
-    // ("Routine Follow-up", "New Problem", or "Medication Concern"), then that values goes
-    // in reasonCode.coding[0].code.
-    coding: code ? [{ code }] : undefined,
-    // Per Brad - All comments should be sent in the reasonCode.text field and should should be
-    // truncated to 100 char for both VA appointment types only. CC appointments will continue
-    // to be truncated to 250 char
-    text:
-      data.reasonAdditionalInfo && isAcheron
-        ? `${appointmentInfo}${reasonText}`
-        : reasonText,
-  };
-}
+import { selectFeatureAcheronService } from '../../../redux/selectors';
+import { getReasonCode } from './getReasonCode';
 
 export function transformFormToVAOSCCRequest(state) {
   const data = getFormData(state);
@@ -113,7 +67,12 @@ export function transformFormToVAOSCCRequest(state) {
     locationId: data.communityCareSystemId,
     serviceType: typeOfCare.idV2 || typeOfCare.ccId,
     // comment: data.reasonAdditionalInfo,
-    reasonCode: getReasonCode({ data, isCC: true }),
+    reasonCode: getReasonCode({
+      data,
+      isCC: true,
+      isAcheron: false,
+      isDS: false,
+    }),
     contact: {
       telecom: [
         {
@@ -150,14 +109,12 @@ export function transformFormToVAOSCCRequest(state) {
   };
 }
 
-export function transformFormToVAOSVARequest(
-  state,
-  featureAcheronVAOSServiceRequests,
-) {
+export function transformFormToVAOSVARequest(state) {
+  const featureAcheronVAOSServiceRequests = selectFeatureAcheronService(state);
   const data = getFormData(state);
   const typeOfCare = getTypeOfCare(data);
 
-  return {
+  const postBody = {
     kind: data.visitType,
     status: 'proposed',
     locationId: data.vaFacility,
@@ -167,20 +124,9 @@ export function transformFormToVAOSVARequest(
       data,
       isCC: false,
       isAcheron: featureAcheronVAOSServiceRequests,
+      isDS: false,
     }),
     // comment: data.reasonAdditionalInfo,
-    contact: {
-      telecom: [
-        {
-          type: 'phone',
-          value: data.phoneNumber,
-        },
-        {
-          type: 'email',
-          value: data.email,
-        },
-      ],
-    },
     requestedPeriods: featureAcheronVAOSServiceRequests
       ? [
           {
@@ -205,9 +151,29 @@ export function transformFormToVAOSVARequest(
       .filter(item => item[1])
       .map(item => titleCase(item[0])),
   };
+
+  if (featureAcheronVAOSServiceRequests) return postBody;
+
+  // add contact field and modality (visitType) for non acheron service
+  return {
+    ...postBody,
+    contact: {
+      telecom: [
+        {
+          type: 'phone',
+          value: data.phoneNumber,
+        },
+        {
+          type: 'email',
+          value: data.email,
+        },
+      ],
+    },
+  };
 }
 
 export function transformFormToVAOSAppointment(state) {
+  const featureAcheronVAOSServiceRequests = selectFeatureAcheronService(state);
   const data = getFormData(state);
   const clinic = getChosenClinicInfo(state);
   const slot = getChosenSlot(state);
@@ -225,8 +191,11 @@ export function transformFormToVAOSAppointment(state) {
       desiredDate: `${data.preferredDate}T00:00:00+00:00`,
     },
     locationId: data.vaFacility,
-    // removing this for now, it's preventing QA from testing, will re-introduce when the team figures out how we're handling the comment field
-    // comment: getUserMessage(data),
-    reasonCode: getReasonCode({ data, isCC: false }),
+    reasonCode: getReasonCode({
+      data,
+      isCC: false,
+      isAcheron: featureAcheronVAOSServiceRequests,
+      isDS: true,
+    }),
   };
 }

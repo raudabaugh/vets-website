@@ -5,7 +5,9 @@ import { expect } from 'chai';
 import { mount } from 'enzyme';
 import { Provider } from 'react-redux';
 // Relative imports.
-import { CTA_WIDGET_TYPES } from '../ctaWidgets';
+
+import sessionStorage from 'platform/utilities/storage/sessionStorage';
+import { CTA_WIDGET_TYPES, ctaWidgetsLookup } from '../ctaWidgets';
 import { CallToActionWidget } from '../index';
 
 const defaultOptions = {
@@ -86,7 +88,7 @@ describe('<CallToActionWidget>', () => {
       />,
     );
 
-    expect(tree.find('LoadingIndicator').exists()).to.be.true;
+    expect(tree.find('va-loading-indicator').exists()).to.be.true;
     tree.unmount();
   });
   it('should show loading state when loading feature toggles', () => {
@@ -107,7 +109,7 @@ describe('<CallToActionWidget>', () => {
       />,
     );
 
-    expect(tree.find('LoadingIndicator').exists()).to.be.true;
+    expect(tree.find('va-loading-indicator').exists()).to.be.true;
     tree.unmount();
   });
   it('should show sign in state', () => {
@@ -147,6 +149,13 @@ describe('<CallToActionWidget>', () => {
       </Provider>,
     );
     expect(tree.find('Unauthed').exists()).to.be.true;
+
+    const authReturnUrl = sessionStorage.getItem('authReturnUrl');
+    const derivedUrl = ctaWidgetsLookup[
+      CTA_WIDGET_TYPES.DIRECT_DEPOSIT
+    ].deriveToolUrlDetails()?.url;
+    expect(authReturnUrl.includes(derivedUrl)).to.be.true;
+    sessionStorage.clear();
 
     tree.unmount();
   });
@@ -199,7 +208,9 @@ describe('<CallToActionWidget>', () => {
     expect(tree.find('Verify').exists()).to.be.false;
     expect(tree.find('a').props().href).to.contain('track-claims');
     expect(tree.find('a').props().target).to.equal('_self');
-    expect(tree.find('a').text()).to.contain('claim or appeal status');
+    expect(tree.find('a').text()).to.contain(
+      'claim, decision review, or appeal status',
+    );
     tree.unmount();
   });
   describe('health tools', () => {
@@ -227,110 +238,6 @@ describe('<CallToActionWidget>', () => {
 
       expect(fetchMHVAccount.called).to.be.true;
       tree.unmount();
-    });
-
-    it('should fetch MHV account on update', () => {
-      const { props, mockStore } = getData({ profile: { verified: true } });
-      const tree = mount(
-        <Provider store={mockStore}>
-          <CallToActionWidget
-            appId={CTA_WIDGET_TYPES.RX}
-            isLoggedIn={false}
-            {...props}
-            featureToggles={{ loading: false }}
-          />
-        </Provider>,
-      );
-      expect(props.fetchMHVAccount.called).to.be.false;
-
-      tree.setProps({
-        children: (
-          <Provider store={mockStore}>
-            <CallToActionWidget
-              appId={CTA_WIDGET_TYPES.RX}
-              isLoggedIn
-              {...props}
-              featureToggles={{ loading: false }}
-            />
-          </Provider>
-        ),
-      });
-
-      expect(props.fetchMHVAccount.called).to.be.true;
-      tree.unmount();
-    });
-
-    it('should create and upgrade MHV account when necessary', () => {
-      const createAndUpgradeMHVAccount = sinon.spy();
-      const tree = mount(
-        <CallToActionWidget
-          createAndUpgradeMHVAccount={createAndUpgradeMHVAccount}
-          appId={CTA_WIDGET_TYPES.RX}
-          profile={{
-            loading: false,
-            verified: true,
-            multifactor: false,
-          }}
-          mhvAccount={{
-            loading: true,
-          }}
-          mviStatus={{}}
-          featureToggles={{
-            loading: false,
-          }}
-        />,
-      );
-      expect(createAndUpgradeMHVAccount.called).to.be.false;
-
-      global.dom.reconfigure({ url: 'http://localhost?tc_accepted=true' });
-      tree.setProps({
-        isLoggedIn: true,
-        mhvAccount: {
-          loading: false,
-          accountState: 'something',
-        },
-      });
-
-      expect(createAndUpgradeMHVAccount.called).to.be.true;
-      tree.unmount();
-      global.dom.reconfigure({ url: 'http://localhost' });
-    });
-
-    it('should upgrade MHV account when necessary', () => {
-      const upgradeMHVAccount = sinon.spy();
-      const tree = mount(
-        <CallToActionWidget
-          upgradeMHVAccount={upgradeMHVAccount}
-          appId={CTA_WIDGET_TYPES.RX}
-          profile={{
-            loading: false,
-            verified: true,
-            multifactor: false,
-          }}
-          mhvAccount={{
-            loading: true,
-          }}
-          mviStatus={{}}
-          featureToggles={{
-            loading: false,
-          }}
-        />,
-      );
-      expect(upgradeMHVAccount.called).to.be.false;
-
-      global.dom.reconfigure({ url: 'http://localhost?tc_accepted=true' });
-      tree.setProps({
-        isLoggedIn: true,
-        mhvAccount: {
-          loading: false,
-          accountState: 'something',
-          accountLevel: 'Basic',
-        },
-      });
-
-      expect(upgradeMHVAccount.called).to.be.true;
-      tree.unmount();
-      global.dom.reconfigure({ url: 'http://localhost' });
     });
 
     it('should open myhealthevet popup', () => {

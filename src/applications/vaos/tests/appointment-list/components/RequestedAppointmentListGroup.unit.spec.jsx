@@ -7,10 +7,7 @@ import RequestedAppointmentsListGroup from '../../../appointment-list/components
 import { getVAOSRequestMock } from '../../mocks/v2';
 import reducers from '../../../redux/reducer';
 import { mockVAOSAppointmentsFetch } from '../../mocks/helpers.v2';
-import {
-  getTimezoneTestDate,
-  renderWithStoreAndRouter,
-} from '../../mocks/setup';
+import { getTestDate, renderWithStoreAndRouter } from '../../mocks/setup';
 
 const initialStateVAOSService = {
   featureToggles: {
@@ -23,7 +20,7 @@ describe('VAOS <RequestedAppointmentsList>', () => {
   describe('Given vaOnlineSchedulingStatusImprovement feature is on', () => {
     beforeEach(() => {
       mockFetch();
-      MockDate.set(getTimezoneTestDate());
+      MockDate.set(getTestDate());
     });
 
     afterEach(() => {
@@ -129,7 +126,7 @@ describe('VAOS <RequestedAppointmentsList>', () => {
       expect(
         screen.getByRole('heading', { level: 2, name: 'Canceled requests' }),
       ).to.be.ok;
-      expect(screen.getByText('Your appointment requests that where canceled'))
+      expect(screen.getByText('These appointment requests have been canceled.'))
         .to.be.ok;
     });
 
@@ -225,7 +222,7 @@ describe('VAOS <RequestedAppointmentsList>', () => {
         screen.queryByRole('heading', { level: 2, name: 'Canceled requests' }),
       ).not.to.be.ok;
       expect(
-        screen.queryByText('Your appointment requests that where canceled'),
+        screen.queryByText('These appointment requests have been canceled.'),
       ).not.to.be.ok;
 
       // And the no appointments alert message should not be displayed
@@ -366,7 +363,7 @@ describe('VAOS <RequestedAppointmentsList>', () => {
           name: 'Canceled requests',
         }),
       ).to.be.ok;
-      expect(screen.getByText('Your appointment requests that where canceled'))
+      expect(screen.getByText('These appointment requests have been canceled.'))
         .to.be.ok;
 
       // And it should display the no appointments alert message

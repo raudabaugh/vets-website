@@ -1,44 +1,56 @@
 import React from 'react';
 import { createSelector } from 'reselect';
 
-// Example of an imported schema:
-// import fullSchema from '../22-1990-schema.json';
-// eslint-disable-next-line no-unused-vars
 import commonDefinitions from 'vets-json-schema/dist/definitions.json';
-import preSubmitInfo from 'platform/forms/preSubmitInfo';
-import FormFooter from 'platform/forms/components/FormFooter';
-import fullNameUI from 'platform/forms-system/src/js/definitions/fullName';
-import emailUI from 'platform/forms-system/src/js/definitions/email';
-import phoneUI from 'platform/forms-system/src/js/definitions/phone';
+
+import * as address from 'platform/forms-system/src/js/definitions/address';
+import bankAccountUI from 'platform/forms/definitions/bankAccount';
 import currentOrPastDateUI from 'platform/forms-system/src/js/definitions/currentOrPastDate';
 import dateUI from 'platform/forms-system/src/js/definitions/date';
-import * as address from 'platform/forms-system/src/js/definitions/address';
-import { VA_FORM_IDS } from 'platform/forms/constants';
+import emailUI from 'platform/forms-system/src/js/definitions/email';
+// import ReviewCardField from 'platform/forms-system/src/js/components/ReviewCardField';
 import environment from 'platform/utilities/environment';
-import bankAccountUI from 'platform/forms/definitions/bankAccount';
+import FormFooter from 'platform/forms/components/FormFooter';
+import fullNameUI from 'platform/forms-system/src/js/definitions/fullName';
+import get from 'platform/utilities/data/get';
+import phoneUI from 'platform/forms-system/src/js/definitions/phone';
+import { VA_FORM_IDS } from 'platform/forms/constants';
+
+import constants from 'vets-json-schema/dist/constants.json';
 import * as ENVIRONMENTS from 'site/constants/environments';
 import * as BUCKETS from 'site/constants/buckets';
+
 import fullSchema from '../22-1990-schema.json';
 
-// In a real app this would not be imported directly; instead the schema you
-// imported above would import and use these common definitions:
-import GetFormHelp from '../components/GetFormHelp';
-
 import manifest from '../manifest.json';
-
-import IntroductionPage from '../containers/IntroductionPage';
-import ConfirmationPage from '../containers/ConfirmationPage';
 import toursOfDutyUI from '../definitions/toursOfDuty';
-import CustomReviewDOBField from '../components/CustomReviewDOBField';
-import ServicePeriodAccordionView from '../components/ServicePeriodAccordionView';
-import EmailViewField from '../components/EmailViewField';
-import PhoneViewField from '../components/PhoneViewField';
+
 import AccordionField from '../components/AccordionField';
+import ApplicantIdentityView from '../components/ApplicantIdentityView';
+import ApplicantInformationReviewPage from '../components/ApplicantInformationReviewPage.jsx';
 import BenefitGivenUpReviewField from '../components/BenefitGivenUpReviewField';
-import YesNoReviewField from '../components/YesNoReviewField';
-import PhoneReviewField from '../components/PhoneReviewField';
+import BenefitRelinquishedLabel from '../components/BenefitRelinquishedLabel';
+import ConfirmationPage from '../containers/ConfirmationPage';
+import CustomReviewDOBField from '../components/CustomReviewDOBField';
+import CustomEmailField from '../components/CustomEmailField';
+import CustomPhoneNumberField from '../components/CustomPhoneNumberField';
 import DateReviewField from '../components/DateReviewField';
-import EmailReviewField from '../components/EmailReviewField';
+// import DirectDepositViewField from '../components/DirectDepositViewField';
+import EmailViewField from '../components/EmailViewField';
+import GetFormHelp from '../components/GetFormHelp';
+import IntroductionPage from '../containers/IntroductionPage';
+import LearnMoreAboutMilitaryBaseTooltip from '../components/LearnMoreAboutMilitaryBaseTooltip';
+import MailingAddressViewField from '../components/MailingAddressViewField';
+import PhoneReviewField from '../components/PhoneReviewField';
+import PhoneViewField from '../components/PhoneViewField';
+import CustomPreSubmitInfo from '../components/PreSubmitInfo';
+import ServicePeriodAccordionView from '../components/ServicePeriodAccordionView';
+import TextNotificationsDisclaimer from '../components/TextNotificationsDisclaimer';
+import YesNoReviewField from '../components/YesNoReviewField';
+import DuplicateContactInfoModal from '../components/DuplicateContactInfoModal';
+
+import { ELIGIBILITY } from '../actions';
+import { formFields } from '../constants';
 
 import {
   unsureDescription,
@@ -46,10 +58,6 @@ import {
   prefillTransformer,
   customDirectDepositDescription,
 } from '../helpers';
-
-import BenefitRelinquishedLabel from '../components/BenefitRelinquishedLabel';
-import LearnMoreAboutMilitaryBaseTooltip from '../components/LearnMoreAboutMilitaryBaseTooltip';
-import MailingAddressViewField from '../components/MailingAddressViewField';
 
 import {
   isValidPhone,
@@ -61,8 +69,6 @@ import {
 
 import { createSubmissionForm } from '../utils/form-submit-transform';
 
-import { ELIGIBILITY } from '../actions';
-
 const {
   fullName,
   // ssn,
@@ -73,46 +79,13 @@ const {
   toursOfDuty,
 } = commonDefinitions;
 
-// Define all the fields in the form to aid reuse
-const formFields = {
-  fullName: 'fullName',
-  userFullName: 'userFullName',
-  dateOfBirth: 'dateOfBirth',
-  ssn: 'ssn',
-  toursOfDuty: 'toursOfDuty',
-  serviceHistoryIncorrect: 'serviceHistoryIncorrect',
-  viewNoDirectDeposit: 'view:noDirectDeposit',
-  viewStopWarning: 'view:stopWarning',
-  bankAccount: 'bankAccount',
-  accountType: 'accountType',
-  accountNumber: 'accountNumber',
-  routingNumber: 'routingNumber',
-  address: 'address',
-  email: 'email',
-  viewPhoneNumbers: 'view:phoneNumbers',
-  phoneNumber: 'phoneNumber',
-  mobilePhoneNumber: 'mobilePhoneNumber',
-  viewBenefitSelection: 'view:benefitSelection',
-  benefitRelinquished: 'benefitRelinquished',
-  benefitEffectiveDate: 'benefitEffectiveDate',
-  incorrectServiceHistoryExplanation: 'incorrectServiceHistoryExplanation',
-  contactMethod: 'contactMethod',
-  receiveTextMessages: 'receiveTextMessages',
-  hasDoDLoanPaymentPeriod: 'hasDoDLoanPaymentPeriod',
-  activeDutyKicker: 'activeDutyKicker',
-  selectedReserveKicker: 'selectedReserveKicker',
-  federallySponsoredAcademy: 'federallySponsoredAcademy',
-  seniorRotcCommission: 'seniorRotcCommission',
-  loanPayment: 'loanPayment',
-  additionalConsiderationsNote: 'additionalConsiderationsNote',
-};
-
 // Define all the form pages to help ensure uniqueness across all form chapters
 const formPages = {
   applicantInformation: 'applicantInformation',
   contactInformation: {
     contactInformation: 'contactInformation',
     mailingAddress: 'mailingAddress',
+    mailingAddressMilitaryBaseUpdates: 'mailingAddressMilitaryBaseUpdates',
     preferredContactMethod: 'preferredContactMethod',
   },
   serviceHistory: 'serviceHistory',
@@ -195,7 +168,7 @@ function titleCase(str) {
 }
 
 function phoneUISchema(category) {
-  return {
+  const schema = {
     'ui:options': {
       hideLabelText: true,
       showFieldLabel: false,
@@ -214,10 +187,12 @@ function phoneUISchema(category) {
       'ui:options': {
         hideIf: formData => {
           if (category === 'mobile') {
-            if (!formData['view:phoneNumbers'].mobilePhoneNumber.phone) {
+            if (
+              !formData[formFields.viewPhoneNumbers].mobilePhoneNumber.phone
+            ) {
               return true;
             }
-          } else if (!formData['view:phoneNumbers'].phoneNumber.phone) {
+          } else if (!formData[formFields.viewPhoneNumbers].phoneNumber.phone) {
             return true;
           }
           return false;
@@ -225,6 +200,13 @@ function phoneUISchema(category) {
       },
     },
   };
+
+  // use custom component if mobile phone
+  if (category === 'mobile') {
+    schema.phone['ui:widget'] = CustomPhoneNumberField;
+  }
+
+  return schema;
 }
 
 function phoneSchema() {
@@ -405,14 +387,17 @@ const formConfig = {
   subTitle: 'Equal to VA Form 22-1990 (Application for VA Education Benefits)',
   defaultDefinitions: {
     fullName,
-    // ssn,
     date,
     dateRange,
     usaPhone,
   },
   footerContent: FormFooter,
-  getHelp: GetFormHelp,
-  preSubmitInfo,
+  getHelp: () => <GetFormHelp />, // Wrapping in a function to skirt failing platform unit test
+  preSubmitInfo: {
+    CustomComponent: CustomPreSubmitInfo,
+    required: false,
+    field: 'privacyAgreementAccepted',
+  },
   chapters: {
     applicantInformationChapter: {
       title: 'Your information',
@@ -421,6 +406,7 @@ const formConfig = {
           title: 'Your information',
           path: 'applicant-information/personal-information',
           subTitle: 'Your information',
+          CustomPageReview: ApplicantInformationReviewPage,
           instructions:
             'This is the personal information we have on file for you.',
           uiSchema: {
@@ -446,33 +432,59 @@ const formConfig = {
                   </p>
                 </>
               ),
+              'ui:options': {
+                hideIf: formData => formData.showMebEnhancements06,
+              },
             },
-            formId: {
+            [formFields.formId]: {
               'ui:title': 'Form ID',
               'ui:disabled': true,
               'ui:options': {
                 hideOnReview: true,
               },
             },
-            claimantId: {
+            [formFields.claimantId]: {
               'ui:title': 'Claimant ID',
               'ui:disabled': true,
               'ui:options': {
                 hideOnReview: true,
               },
             },
-            'view:userFullName': {
+            'view:applicantInformation': {
+              'ui:options': {
+                hideIf: formData => !formData.showMebEnhancements06,
+              },
               'ui:description': (
-                <p className="meb-review-page-only">
-                  If you’d like to update your personal information, please edit
-                  the form fields below.
-                </p>
+                <>
+                  <ApplicantIdentityView />
+                </>
+              ),
+            },
+            [formFields.viewUserFullName]: {
+              'ui:options': {
+                hideIf: formData => formData.showMebEnhancements06,
+              },
+              'ui:description': (
+                <>
+                  <p className="meb-review-page-only">
+                    If you’d like to update your personal information, please
+                    edit the form fields below.
+                  </p>
+                </>
               ),
               [formFields.userFullName]: {
+                'ui:options': {
+                  hideIf: formData => formData.showMebEnhancements06,
+                },
+                'ui:required': formData => !formData?.showMebEnhancements06,
                 ...fullNameUI,
                 first: {
                   ...fullNameUI.first,
+                  'ui:options': {
+                    hideIf: formData => formData.showMebEnhancements06,
+                  },
                   'ui:title': 'Your first name',
+                  'ui:required': formData => !formData?.showMebEnhancements06,
                   'ui:validations': [
                     (errors, field) => {
                       if (!isValidName(field)) {
@@ -494,6 +506,10 @@ const formConfig = {
                 last: {
                   ...fullNameUI.last,
                   'ui:title': 'Your last name',
+                  'ui:options': {
+                    hideIf: formData => formData.showMebEnhancements06,
+                  },
+                  'ui:required': formData => !formData?.showMebEnhancements06,
                   'ui:validations': [
                     (errors, field) => {
                       if (!isValidLastName(field)) {
@@ -519,6 +535,10 @@ const formConfig = {
                 middle: {
                   ...fullNameUI.middle,
                   'ui:title': 'Your middle name',
+                  'ui:options': {
+                    hideIf: formData => formData.showMebEnhancements06,
+                  },
+                  'ui:required': formData => !formData?.showMebEnhancements06,
                   'ui:validations': [
                     (errors, field) => {
                       if (!isValidName(field)) {
@@ -540,6 +560,10 @@ const formConfig = {
               },
             },
             [formFields.dateOfBirth]: {
+              'ui:options': {
+                hideIf: formData => formData.showMebEnhancements06,
+              },
+              'ui:required': formData => !formData?.showMebEnhancements06,
               ...currentOrPastDateUI('Your date of birth'),
               'ui:reviewField': CustomReviewDOBField,
             },
@@ -548,18 +572,18 @@ const formConfig = {
             type: 'object',
             required: [formFields.dateOfBirth],
             properties: {
-              formId: {
+              [formFields.formId]: {
                 type: 'string',
               },
-              claimantId: {
+              [formFields.claimantId]: {
                 type: 'integer',
               },
               'view:subHeadings': {
                 type: 'object',
                 properties: {},
               },
-              'view:userFullName': {
-                required: [formFields.userFullName],
+              [formFields.viewUserFullName]: {
+                // required: [formFields.userFullName],
                 type: 'object',
                 properties: {
                   [formFields.userFullName]: {
@@ -583,6 +607,10 @@ const formConfig = {
                 },
               },
               [formFields.dateOfBirth]: date,
+              'view:applicantInformation': {
+                type: 'object',
+                properties: {},
+              },
             },
           },
         },
@@ -651,7 +679,7 @@ const formConfig = {
               email: {
                 ...emailUI('Email address'),
                 'ui:validations': [validateEmail],
-                'ui:reviewField': EmailReviewField,
+                'ui:widget': CustomEmailField,
               },
               confirmEmail: {
                 ...emailUI('Confirm email address'),
@@ -669,6 +697,9 @@ const formConfig = {
                   }
                 },
               ],
+            },
+            'view:confirmDuplicateData': {
+              'ui:description': DuplicateContactInfoModal,
             },
           },
           schema: {
@@ -692,6 +723,10 @@ const formConfig = {
                   email,
                   confirmEmail: email,
                 },
+              },
+              'view:confirmDuplicateData': {
+                type: 'object',
+                properties: {},
               },
             },
           },
@@ -727,7 +762,7 @@ const formConfig = {
                 </>
               ),
             },
-            'view:mailingAddress': {
+            [formFields.viewMailingAddress]: {
               'ui:description': (
                 <>
                   <h4 className="form-review-panel-page-header vads-u-font-size--h5 meb-review-page-only">
@@ -739,7 +774,7 @@ const formConfig = {
                   </p>
                 </>
               ),
-              livesOnMilitaryBase: {
+              [formFields.livesOnMilitaryBase]: {
                 'ui:title': (
                   <span id="LiveOnMilitaryBaseTooltip">
                     I live on a United States military base outside of the
@@ -752,7 +787,56 @@ const formConfig = {
                 'ui:description': LearnMoreAboutMilitaryBaseTooltip(),
               },
               [formFields.address]: {
-                ...address.uiSchema(''),
+                ...address.uiSchema('', false, null, true),
+                country: {
+                  'ui:title': 'Country',
+                  'ui:required': formData =>
+                    !formData.showMebDgi40Features ||
+                    (formData.showMebDgi40Features &&
+                      !formData['view:mailingAddress'].livesOnMilitaryBase),
+                  'ui:disabled': formData =>
+                    formData.showMebDgi40Features &&
+                    formData['view:mailingAddress'].livesOnMilitaryBase,
+                  'ui:options': {
+                    updateSchema: (formData, schema, uiSchema) => {
+                      const countryUI = uiSchema;
+                      const addressFormData = get(
+                        ['view:mailingAddress', 'address'],
+                        formData,
+                      );
+                      const livesOnMilitaryBase = get(
+                        ['view:mailingAddress', 'livesOnMilitaryBase'],
+                        formData,
+                      );
+                      if (
+                        formData.showMebDgi40Features &&
+                        livesOnMilitaryBase
+                      ) {
+                        countryUI['ui:disabled'] = true;
+                        const USA = {
+                          value: 'USA',
+                          label: 'United States',
+                        };
+                        addressFormData.country = USA.value;
+                        return {
+                          enum: [USA.value],
+                          enumNames: [USA.label],
+                          default: USA.value,
+                        };
+                      }
+
+                      countryUI['ui:disabled'] = false;
+
+                      return {
+                        type: 'string',
+                        enum: constants.countries.map(country => country.value),
+                        enumNames: constants.countries.map(
+                          country => country.label,
+                        ),
+                      };
+                    },
+                  },
+                },
                 street: {
                   'ui:title': 'Street address',
                   'ui:errorMessages': {
@@ -769,7 +853,6 @@ const formConfig = {
                   ],
                 },
                 city: {
-                  'ui:title': 'City',
                   'ui:errorMessages': {
                     required: 'Please enter a valid city',
                   },
@@ -780,17 +863,55 @@ const formConfig = {
                       }
                     },
                   ],
-                },
-                state: {
-                  'ui:title': 'State/Province/Region',
-                  'ui:errorMessages': {
-                    required: 'State is required',
+                  'ui:options': {
+                    replaceSchema: formData => {
+                      if (
+                        formData.showMebDgi40Features &&
+                        formData['view:mailingAddress']?.livesOnMilitaryBase
+                      ) {
+                        return {
+                          type: 'string',
+                          title: 'APO/FPO',
+                          enum: ['APO', 'FPO'],
+                        };
+                      }
+
+                      return {
+                        type: 'string',
+                        title: 'City',
+                      };
+                    },
                   },
                 },
+                state: {
+                  'ui:required': formData =>
+                    !formData.showMebDgi40Features ||
+                    (formData.showMebDgi40Features &&
+                      (formData['view:mailingAddress']?.livesOnMilitaryBase ||
+                        formData['view:mailingAddress']?.address?.country ===
+                          'USA')),
+                },
                 postalCode: {
-                  'ui:title': 'Postal Code (5-digit)',
                   'ui:errorMessages': {
                     required: 'Zip code must be 5 digits',
+                  },
+                  'ui:options': {
+                    replaceSchema: formData => {
+                      if (
+                        formData['view:mailingAddress']?.address?.country !==
+                        'USA'
+                      ) {
+                        return {
+                          title: 'Postal Code',
+                          type: 'string',
+                        };
+                      }
+
+                      return {
+                        title: 'Zip code',
+                        type: 'string',
+                      };
+                    },
                   },
                 },
               },
@@ -808,10 +929,10 @@ const formConfig = {
                 type: 'object',
                 properties: {},
               },
-              'view:mailingAddress': {
+              [formFields.viewMailingAddress]: {
                 type: 'object',
                 properties: {
-                  livesOnMilitaryBase: {
+                  [formFields.livesOnMilitaryBase]: {
                     type: 'boolean',
                   },
                   livesOnMilitaryBaseInfo: {
@@ -849,15 +970,35 @@ const formConfig = {
               'ui:options': {
                 updateSchema: (() => {
                   const filterContactMethods = createSelector(
-                    form => form['view:phoneNumbers'].mobilePhoneNumber.phone,
-                    form => form['view:phoneNumbers'].phoneNumber.phone,
-                    (mobilePhoneNumber, homePhoneNumber) => {
+                    form =>
+                      form[formFields.viewPhoneNumbers].mobilePhoneNumber.phone,
+                    form => form[formFields.viewPhoneNumbers].phoneNumber.phone,
+                    form => form?.duplicateEmail,
+                    form => form?.duplicatePhone,
+                    (
+                      mobilePhoneNumber,
+                      homePhoneNumber,
+                      duplicateEmail,
+                      duplicatePhone,
+                    ) => {
                       const invalidContactMethods = [];
-                      if (!mobilePhoneNumber) {
+
+                      const dupePhonePresent = duplicatePhone?.filter(
+                        entry => entry.dupe === true,
+                      );
+
+                      if (!mobilePhoneNumber || dupePhonePresent?.length > 0) {
                         invalidContactMethods.push('Mobile Phone');
                       }
                       if (!homePhoneNumber) {
                         invalidContactMethods.push('Home Phone');
+                      }
+                      const dupeEmailPresent = duplicateEmail?.filter(
+                        entry => entry.dupe === true,
+                      );
+
+                      if (dupeEmailPresent?.length > 0) {
+                        invalidContactMethods.push('Email');
                       }
 
                       return {
@@ -867,11 +1008,12 @@ const formConfig = {
                       };
                     },
                   );
+
                   return form => filterContactMethods(form);
                 })(),
               },
             },
-            'view:receiveTextMessages': {
+            [formFields.viewReceiveTextMessages]: {
               'ui:description': (
                 <>
                   <div className="meb-form-page-only">
@@ -883,6 +1025,8 @@ const formConfig = {
                       your education payments. This is an easy way to verify
                       your monthly enrollment.
                     </p>
+
+                    <TextNotificationsDisclaimer />
                   </div>
                 </>
               ),
@@ -890,14 +1034,27 @@ const formConfig = {
                 'ui:title':
                   'Would you like to receive text message notifications on your education benefits?',
                 'ui:widget': 'radio',
+                'ui:required': formData =>
+                  formData?.duplicatePhone?.some(
+                    entry => entry?.dupe === false && entry?.dupe !== '',
+                  ) ||
+                  formData?.duplicateEmail?.some(
+                    entry => entry?.dupe === false && entry?.dupe !== '',
+                  ),
                 'ui:validations': [
                   (errors, field, formData) => {
                     const isYes = field.slice(0, 4).includes('Yes');
-                    const phoneExist = !!formData['view:phoneNumbers']
+                    const phoneExist = !!formData[formFields.viewPhoneNumbers]
                       .mobilePhoneNumber.phone;
                     const { isInternational } = formData[
-                      'view:phoneNumbers'
+                      formFields.viewPhoneNumbers
                     ].mobilePhoneNumber;
+                    const hasDupePhone = formData?.duplicatePhone?.filter(
+                      entry => entry?.dupe === true,
+                    );
+                    const hasDupeEmail = formData?.duplicateEmail?.filter(
+                      entry => entry?.dupe === true,
+                    );
 
                     if (isYes) {
                       if (!phoneExist) {
@@ -908,11 +1065,26 @@ const formConfig = {
                         errors.addError(
                           "You can't select that response because you have an international mobile phone number",
                         );
+                      } else if (hasDupePhone?.length > 0) {
+                        errors.addError(
+                          "You can't select that response because your mobile phone number is on file for another person",
+                        );
                       }
+                    } else if (hasDupeEmail?.length > 0 && !isYes) {
+                      errors.addError(
+                        "You can't select that response because your email is on file for another person",
+                      );
                     }
                   },
                 ],
                 'ui:options': {
+                  hideIf: formData =>
+                    formData?.duplicateEmail?.some(
+                      entry => entry?.dupe === true,
+                    ) &&
+                    formData?.duplicatePhone?.some(
+                      entry => entry?.dupe === true,
+                    ),
                   widgetProps: {
                     Yes: { 'data-info': 'yes' },
                     No: { 'data-info': 'no' },
@@ -952,7 +1124,8 @@ const formConfig = {
                   ) ||
                   formData[formFields.viewPhoneNumbers][
                     formFields.mobilePhoneNumber
-                  ].isInternational,
+                  ].isInternational ||
+                  formData?.duplicatePhone?.some(entry => entry?.dupe === true),
               },
             },
             'view:noMobilePhoneAlert': {
@@ -994,6 +1167,104 @@ const formConfig = {
                   ].isInternational,
               },
             },
+            'view:emailOnFileWithSomeoneElse': {
+              'ui:description': (
+                <va-alert status="warning">
+                  <>
+                    You can’t choose to get email notifications because your
+                    email is on file for another person with education benefits.
+                    <a
+                      target="_blank"
+                      href="https://www.va.gov/education/verify-school-enrollment"
+                      rel="noreferrer"
+                    >
+                      Learn more about the Enrollment Verifications
+                    </a>
+                  </>
+                </va-alert>
+              ),
+              'ui:options': {
+                hideIf: formData =>
+                  formData?.duplicateEmail?.some(
+                    entry => entry?.dupe === false && entry?.dupe !== '',
+                  ) ||
+                  (formData?.duplicateEmail?.some(
+                    entry => entry?.dupe === true,
+                  ) &&
+                    formData?.duplicatePhone?.some(
+                      entry => entry?.dupe === true,
+                    )) ||
+                  (!formData?.duplicateEmail && !formData?.duplicatePhone),
+              },
+            },
+            'view:mobilePhoneOnFileWithSomeoneElse': {
+              'ui:description': (
+                <va-alert status="warning">
+                  <>
+                    You can’t choose to get text notifications because your
+                    mobile phone number is on file for another person with
+                    education benefits. You will not be able to take full
+                    advantage of VA’s electronic notifications and enrollment
+                    verifications available. If you cannot, certain electronic
+                    services will be limited or unavailable.
+                    <a
+                      target="_blank"
+                      href="https://www.va.gov/education/verify-school-enrollment"
+                      rel="noreferrer"
+                    >
+                      Learn more about the Enrollment Verifications
+                    </a>
+                  </>
+                </va-alert>
+              ),
+              'ui:options': {
+                hideIf: formData =>
+                  (formData?.duplicatePhone &&
+                    formData?.duplicatePhone?.some(
+                      entry => entry?.dupe === false && entry?.dupe !== '',
+                    )) ||
+                  (formData?.duplicateEmail &&
+                    formData?.duplicateEmail?.some(
+                      entry => entry?.dupe === true,
+                    ) &&
+                    formData?.duplicatePhone &&
+                    formData?.duplicatePhone?.some(
+                      entry => entry?.dupe === true,
+                    )) ||
+                  (!formData?.duplicateEmail && !formData?.duplicatePhone),
+              },
+            },
+            'view:duplicateEmailAndPhoneAndNoHomePhone': {
+              'ui:description': (
+                <va-alert status="warning">
+                  <>
+                    You can’t choose to get text notifications because your
+                    mobile phone number is on file for another person with
+                    education benefits. You will not be able to take full
+                    advantage of VA’s electronic notifications and enrollment
+                    verifications available. If you cannot, certain electronic
+                    services will be limited or unavailable.{' '}
+                    <a
+                      target="_blank"
+                      href="https://www.va.gov/education/verify-school-enrollment/"
+                      rel="noreferrer"
+                    >
+                      Learn more about the Enrollment Verifications
+                    </a>
+                  </>
+                </va-alert>
+              ),
+              'ui:options': {
+                hideIf: formData =>
+                  formData?.duplicatePhone?.some(
+                    entry => entry?.dupe === false && entry?.dupe !== '',
+                  ) ||
+                  formData?.duplicateEmail?.some(
+                    entry => entry?.dupe === false && entry?.dupe !== '',
+                  ) ||
+                  (!formData?.duplicateEmail && !formData?.duplicatePhone),
+              },
+            },
           },
           schema: {
             type: 'object',
@@ -1006,9 +1277,9 @@ const formConfig = {
                 type: 'string',
                 enum: contactMethods,
               },
-              'view:receiveTextMessages': {
+              [formFields.viewReceiveTextMessages]: {
                 type: 'object',
-                required: [formFields.receiveTextMessages],
+                // required: [formFields.receiveTextMessages],
                 properties: {
                   [formFields.receiveTextMessages]: {
                     type: 'string',
@@ -1031,6 +1302,18 @@ const formConfig = {
                 type: 'object',
                 properties: {},
               },
+              'view:emailOnFileWithSomeoneElse': {
+                type: 'object',
+                properties: {},
+              },
+              'view:mobilePhoneOnFileWithSomeoneElse': {
+                type: 'object',
+                properties: {},
+              },
+              'view:duplicateEmailAndPhoneAndNoHomePhone': {
+                type: 'object',
+                properties: {},
+              },
             },
             required: [formFields.contactMethod],
           },
@@ -1046,6 +1329,35 @@ const formConfig = {
           uiSchema: {
             'view:subHeading': {
               'ui:description': <h3>Review your service history</h3>,
+              'ui:options': {
+                hideIf: formData => formData?.showMebDgi40Features,
+              },
+            },
+            'view:newSubHeading': {
+              'ui:description': (
+                <>
+                  <p>
+                    The displayed service history is reported to VA by DOD and
+                    may include service which is not creditable for the
+                    Post-9/11 GI Bill.
+                  </p>
+                  <p>
+                    VA will only consider active duty service (
+                    <a
+                      target="_blank"
+                      href="https://uscode.house.gov/view.xhtml?req=(title:38%20section:3301%20edition:prelim)%20OR%20(granuleid:USC-prelim-title38-section3301)&f=treesort&edition=prelim&num=0&jumpTo=true"
+                      rel="noreferrer"
+                    >
+                      Authority 38 U.S.C. 3301(1)
+                    </a>
+                    ) when determining your eligibility. Please review your
+                    service history and indicate if anything is incorrect.
+                  </p>
+                </>
+              ),
+              'ui:options': {
+                hideIf: formData => !formData?.showMebDgi40Features,
+              },
             },
             [formFields.toursOfDuty]: {
               ...toursOfDutyUI,
@@ -1099,6 +1411,10 @@ const formConfig = {
             type: 'object',
             properties: {
               'view:subHeading': {
+                type: 'object',
+                properties: {},
+              },
+              'view:newSubHeading': {
                 type: 'object',
                 properties: {},
               },
@@ -1369,6 +1685,7 @@ const formConfig = {
     bankAccountInfoChapter: {
       title: 'Direct deposit',
       pages: {
+        // IF NOT showMebDgi40Features
         [formPages.directDeposit]: {
           path: 'direct-deposit',
           uiSchema: {
@@ -1442,6 +1759,98 @@ const formConfig = {
             },
           },
         },
+        // IF showMebDgi40Features
+        // [formPages.directDeposit]: {
+        //   path: 'direct-deposit',
+        //   title: 'Direct deposit',
+        //   uiSchema: {
+        //     title: 'direct-deposit',
+        //     'ui:title': (
+        //       <h4 className="vads-u-font-size--h5 vads-u-margin-top--0">
+        //         Direct deposit information
+        //       </h4>
+        //     ),
+        //     'ui:field': ReviewCardField,
+        //     'ui:options': {
+        //       editTitle: 'Direct deposit information',
+        //       hideLabelText: true,
+        //       itemName: 'account informaiton',
+        //       itemNameAction: 'Update',
+        //       reviewTitle: 'Direct deposit information',
+        //       showFieldLabel: false,
+        //       viewComponent: DirectDepositViewField,
+        //       volatileData: true,
+        //     },
+        //     'ui:description': customDirectDepositDescription,
+        //     bankAccount: {
+        //       ...bankAccountUI,
+        //       'ui:order': ['accountType', 'accountNumber', 'routingNumber'],
+        //       accountNumber: {
+        //         'ui:title': 'Bank account number',
+        //         'ui:validations': [validateAccountNumber],
+        //         'ui:errorMessages': {
+        //           pattern: 'Please enter only numbers',
+        //         },
+        //       },
+        //     },
+        //     'view:learnMore': {
+        //       'ui:description': (
+        //         <>
+        //           <img
+        //             key="check-image-src"
+        //             style={{ marginTop: '1rem' }}
+        //             src={checkImageSrc}
+        //             alt="Example of a check showing where the account and routing numbers are"
+        //           />
+        //           <p key="learn-more-title">Where can I find these numbers?</p>
+        //           <p key="learn-more-description">
+        //             The bank routing number is the first 9 digits on the bottom
+        //             left corner of a printed check. Your account number is the
+        //             second set of numbers on the bottom of a printed check, just
+        //             to the right of the bank routing number.
+        //           </p>
+        //           <va-additional-info key="learn-more-btn" trigger="Learn More">
+        //             <p key="btn-copy">
+        //               If you don’t have a printed check, you can sign in to your
+        //               online banking institution for this information
+        //             </p>
+        //           </va-additional-info>
+        //         </>
+        //       ),
+        //     },
+        //   },
+        //   schema: {
+        //     type: 'object',
+        //     properties: {
+        //       bankAccount: {
+        //         type: 'object',
+        //         required: [
+        //           formFields.accountType,
+        //           formFields.accountNumber,
+        //           formFields.routingNumber,
+        //         ],
+        //         properties: {
+        //           accountType: {
+        //             type: 'string',
+        //             enum: ['checking', 'savings'],
+        //           },
+        //           routingNumber: {
+        //             type: 'string',
+        //             pattern: '^\\d{9}$',
+        //           },
+        //           accountNumber: {
+        //             type: 'string',
+        //             required: [],
+        //           },
+        //         },
+        //       },
+        //       'view:learnMore': {
+        //         type: 'object',
+        //         properties: {},
+        //       },
+        //     },
+        //   },
+        // },
       },
     },
   },

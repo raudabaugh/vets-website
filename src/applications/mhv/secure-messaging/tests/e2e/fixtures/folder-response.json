@@ -6,8 +6,8 @@
       "attributes": {
         "folderId": 0,
         "name": "Inbox",
-        "count": 49,
-        "unreadCount": 36,
+        "count": 0,
+        "unreadCount": 0,
         "systemFolder": true
       },
       "links": {
@@ -21,7 +21,7 @@
         "folderId": -2,
         "name": "Drafts",
         "count": 32,
-        "unreadCount": 29,
+        "unreadCount": 18,
         "systemFolder": true
       },
       "links": {

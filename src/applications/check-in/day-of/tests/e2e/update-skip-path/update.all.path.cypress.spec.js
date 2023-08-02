@@ -22,9 +22,7 @@ describe('Check In Experience', () => {
       initializeSessionGet.withSuccessfulNewSession();
       initializeSessionPost.withSuccess();
       initializeDemographicsPatch.withSuccess();
-      initializeCheckInDataGet.withSuccess({
-        numberOfCheckInAbledAppointments: 1,
-      });
+      initializeCheckInDataGet.withSuccess();
       initializeCheckInDataPost.withSuccess();
       cy.visitWithUUID();
       ValidateVeteran.validatePage.dayOf();
@@ -42,7 +40,7 @@ describe('Check In Experience', () => {
       EmergencyContact.validatePageLoaded();
       EmergencyContact.attemptToGoToNextPage();
       NextOfKin.validatePageLoaded(
-        'Is this your current next of kin information?',
+        'Check-In Is this your current next of kin information?',
       );
       NextOfKin.attemptToGoToNextPage();
       Appointments.validatePageLoaded();

@@ -40,7 +40,7 @@ describe('VAOS <ReasonForAppointmentPage>', () => {
     expect(textBox).to.exist;
     expect(textBox)
       .to.have.attribute('maxlength')
-      .to.equal('100');
+      .to.equal('250');
 
     expect((await screen.findAllByRole('radio')).length).to.equal(4);
 
@@ -127,7 +127,7 @@ describe('VAOS <ReasonForAppointmentPage>', () => {
     fireEvent.click(screen.getByText(/Continue/));
 
     expect(await screen.findByRole('alert')).to.contain.text(
-      'following special character is not allowed: ^',
+      'following special characters are not allowed: ^ |',
     );
   });
 
@@ -147,7 +147,7 @@ describe('VAOS <ReasonForAppointmentPage>', () => {
     expect(textBox).to.exist;
     expect(textBox)
       .to.have.attribute('maxlength')
-      .to.equal('131');
+      .to.equal('250');
 
     expect(
       screen.getByRole('heading', {

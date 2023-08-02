@@ -3,7 +3,6 @@
 @import "~@department-of-veterans-affairs/formation/sass/modules/m-form-process";
 @import "~@department-of-veterans-affairs/formation/sass/modules/m-modal";
 @import "~@department-of-veterans-affairs/formation/sass/modules/m-omb-info";
-@import "~@department-of-veterans-affairs/formation/sass/shared-variables";
 @import "../../../platform/forms/sass/m-form-confirmation";
 @import "../../../platform/forms/sass/m-schemaform";
 
@@ -12,17 +11,11 @@
   min-height: 40px;
 }
 
-.schemaform-title > h1 {
-  @include media($small-desktop-screen) {
-    white-space: nowrap;
-  }
-}
-
 .form-review-panel-page tr td:last-child {
   font-weight: inherit;
 }
 
-.schemaform-review-page-warning {
+.schemaform-review-page-error {
   margin: 0;
 }
 
@@ -147,10 +140,16 @@
   }
 }
 
+// schemaform title override to match DS
+.schemaform-block-title {
+  font-size: $h3-font-size;
+  color: $color-base;
+}
+
 // form field subtitle
 .formfield-subtitle {
-  margin: 4px 0 8px;
-  font-size: 15px;
+  margin: 4px 0 0;
+  font-size: $base-font-size;
   max-width: 400px;
   color: $color-gray-medium;
 }
@@ -166,9 +165,6 @@
 }
 
 // resolution options
-.resolution-options-available .schemaform-block-title {
-  font-size: 20px;
-}
 .resolution-options-debt-title {
   font-size: 18px;
 }
@@ -219,12 +215,6 @@
   }
   .additional-info-button {
     margin: 10px 0 20px;
-  }
-}
-
-.repayments {
-  #root__title {
-    height: auto;
   }
 }
 
@@ -332,6 +322,34 @@
 
 .error-line {
   border-left: 4px solid var(--color-secondary-dark);
-  padding-left: 0.75rem;
   position: relative;
 }
+
+.summary-card-delete-button {
+  color: $color-secondary-dark;
+  background-color: transparent;
+  width: auto !important;
+  font-weight: bold;
+  &:hover,
+  &:active {
+    color: $color-secondary-darkest;
+    background-color: $color-secondary-lightest;
+  }
+}
+
+/* Hide mobile phone extension entry, per design */
+#edit-mobilePhone {
+  form[name="Contact Info Form"]
+    .schemaform-field-template:not(.schemaform-first-field) {
+    display: none;
+  }
+}
+
+@mixin hide-button($selector) {
+  .form-review-panel #{$selector} {
+    display: none;
+  }
+}
+
+@include hide-button("button.edit-page");
+@include hide-button(".edit-btn.primary-outline");

@@ -2,10 +2,25 @@ import { expect } from 'chai';
 import sinon from 'sinon';
 
 import {
+  checkValidations,
   requireRatedDisability,
   contactInfoValidation,
+  missingPrimaryPhone,
 } from '../../validations';
-import { errorMessages, SELECTED } from '../../constants';
+import { missingIssueName } from '../../validations/issues';
+
+import { errorMessages, SELECTED, PRIMARY_PHONE } from '../../constants';
+
+describe('checkValidations', () => {
+  it('should return error messages', () => {
+    expect(checkValidations([missingIssueName], '')).to.deep.equal([
+      errorMessages.missingIssue, // simple validation function
+    ]);
+    expect(
+      checkValidations([missingIssueName, missingIssueName], ''),
+    ).to.deep.equal([errorMessages.missingIssue, errorMessages.missingIssue]);
+  });
+});
 
 describe('requireRatedDisability', () => {
   it('should show an error if no disabilities are selected', () => {
@@ -26,7 +41,6 @@ describe('contactInfoValidation', () => {
     homePhone = true,
     mobilePhone = true,
     address = true,
-    homeless = false,
   } = {}) => ({
     veteran: {
       email: email ? 'placeholder' : '',
@@ -34,7 +48,6 @@ describe('contactInfoValidation', () => {
       mobilePhone: mobilePhone ? { phoneNumber: 'placeholder' } : {},
       address: address ? { addressLine1: 'placeholder' } : {},
     },
-    homeless,
   });
   it('should not show an error when data is available', () => {
     const addError = sinon.spy();
@@ -45,7 +58,7 @@ describe('contactInfoValidation', () => {
     const addError = sinon.spy();
     contactInfoValidation({ addError }, null, getData({ email: false }));
     expect(addError.called).to.be.true;
-    expect(addError.args[0][0]).to.contain('add an email');
+    expect(addError.args[0][0]).to.eq(errorMessages.missingEmail);
   });
   it('should have one error when email & home phone are missing', () => {
     const addError = sinon.spy();
@@ -55,7 +68,7 @@ describe('contactInfoValidation', () => {
       getData({ email: false, homePhone: false }),
     );
     expect(addError.called).to.be.true;
-    expect(addError.firstCall.args[0]).to.contain('add an email');
+    expect(addError.firstCall.args[0]).to.eq(errorMessages.missingEmail);
   });
   it('should have multiple errors when everything is missing', () => {
     const addError = sinon.spy();
@@ -70,19 +83,30 @@ describe('contactInfoValidation', () => {
       }),
     );
     expect(addError.called).to.be.true;
-    expect(addError.firstCall.args[0]).to.contain('add an email');
-    expect(addError.secondCall.args[0]).to.contain(
-      'add a home or mobile phone',
-    );
-    expect(addError.lastCall.args[0]).to.contain('add an address');
+    expect(addError.firstCall.args[0]).to.eq(errorMessages.missingEmail);
+    expect(addError.secondCall.args[0]).to.eq(errorMessages.missingPhone);
+    expect(addError.lastCall.args[0]).to.eq(errorMessages.missingAddress);
   });
-  it('should not include address when homeless is true', () => {
-    const addError = sinon.spy();
-    contactInfoValidation(
-      { addError },
-      null,
-      getData({ address: false, homeless: true }),
-    );
-    expect(addError.called).to.be.false;
+  it('should not throw an error when addError function is missing', () => {
+    try {
+      contactInfoValidation();
+      expect(true).to.be.true;
+    } catch (error) {
+      expect(error).to.be.null;
+    }
+  });
+});
+
+describe('missingPrimaryPhone', () => {
+  it('should show an error if no primary phone selected', () => {
+    const errors = { addError: sinon.spy() };
+    missingPrimaryPhone(errors, {}, {});
+    expect(errors.addError.calledWith(errorMessages.missingPrimaryPhone)).to.be
+      .true;
+  });
+  it('should not show an error if a primary phone is selected', () => {
+    const errors = { addError: sinon.spy() };
+    missingPrimaryPhone(errors, {}, { [PRIMARY_PHONE]: 'home' });
+    expect(errors.addError.notCalled).to.be.true;
   });
 });

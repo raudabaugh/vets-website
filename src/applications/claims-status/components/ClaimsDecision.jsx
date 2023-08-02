@@ -1,11 +1,12 @@
 import React from 'react';
+import { Link } from 'react-router';
 import moment from 'moment';
 import PropTypes from 'prop-types';
 
 const formatDate = closedDate => moment(closedDate).format('MMMM D, YYYY');
 
 const headerText = closedDate =>
-  `We closed your claim on ${formatDate(closedDate)}`;
+  `We decided your claim on ${formatDate(closedDate)}`;
 
 const ClaimsDecision = ({ completedDate, showClaimLettersLink }) => (
   <>
@@ -13,25 +14,23 @@ const ClaimsDecision = ({ completedDate, showClaimLettersLink }) => (
       <h3 className="claims-alert-header vads-u-font-size--h4" slot="headline">
         {completedDate && headerText(completedDate)}
       </h3>
-      <p>
-        We finished reviewing your claim and a decision has been made.{' '}
-        {showClaimLettersLink && (
-          <>You can find your decision letter in the claim letters page.</>
-        )}
-      </p>
-      <p>
-        A decision packet will also be mailed to you. Typically, decision
-        notices are received within 10 days, but this is dependent upon U.S.
-        Postal Service timeframes.
-      </p>
+      {showClaimLettersLink ? (
+        <p>
+          You can download your decision letter online now. We also mailed you
+          this letter.
+        </p>
+      ) : (
+        <p>
+          We mailed you a decision letter. It should arrive within 10 days after
+          the date we decided your claim. It can sometimes take longer.
+        </p>
+      )}
+
       {showClaimLettersLink && (
         <p>
-          <a
-            className="vads-c-action-link--blue"
-            href="/track-claims/your-claim-letters"
-          >
+          <Link className="vads-c-action-link--blue" to="your-claim-letters">
             Get your claim letters
-          </a>
+          </Link>
         </p>
       )}
     </va-alert>
@@ -79,8 +78,8 @@ const ClaimsDecision = ({ completedDate, showClaimLettersLink }) => (
 );
 
 ClaimsDecision.propTypes = {
+  showClaimLettersLink: PropTypes.bool.isRequired,
   completedDate: PropTypes.string,
-  showClaimLettersLink: PropTypes.bool,
 };
 
 export default ClaimsDecision;

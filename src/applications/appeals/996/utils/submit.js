@@ -4,7 +4,7 @@ import {
   MAX_LENGTH,
   SUBMITTED_DISAGREEMENTS,
 } from '../constants';
-import { replaceSubmittedData } from './replace';
+import { replaceSubmittedData, fixDateFormat } from './replace';
 
 /**
  * Remove objects with empty string values; Lighthouse doesn't like `null`
@@ -96,8 +96,8 @@ export const createIssueName = ({ attributes } = {}) => {
   }
 }]
 */
-export const getContestedIssues = ({ contestedIssues = [] }) =>
-  contestedIssues.filter(issue => issue[SELECTED]).map(issue => {
+export const getContestedIssues = ({ contestedIssues } = {}) =>
+  (contestedIssues || []).filter(issue => issue[SELECTED]).map(issue => {
     const attr = issue.attributes;
     const attributes = [
       'decisionIssueId',
@@ -114,7 +114,7 @@ export const getContestedIssues = ({ contestedIssues = [] }) =>
       },
       {
         issue: createIssueName(issue),
-        decisionDate: attr.approxDecisionDate,
+        decisionDate: fixDateFormat(attr.approxDecisionDate),
       },
     );
 
@@ -158,7 +158,7 @@ export const addIncludedIssues = formData => {
           type: 'contestableIssue',
           attributes: {
             issue: replaceSubmittedData(issue.issue),
-            decisionDate: issue.decisionDate,
+            decisionDate: fixDateFormat(issue.decisionDate),
           },
         });
       }

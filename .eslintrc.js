@@ -1,3 +1,13 @@
+const babbleConfig = require('./babel.config.json');
+
+const moduleResolverAlias =
+  babbleConfig.plugins.find(plug => plug[0] === 'module-resolver')[1].alias ||
+  {};
+const aliasMap = Object.keys(moduleResolverAlias).map(alias => [
+  alias,
+  moduleResolverAlias[alias],
+]);
+
 module.exports = {
   // All rules should be disabled or they should produce errors. No warnings.
   parser: 'babel-eslint',
@@ -17,6 +27,10 @@ module.exports = {
       node: {
         moduleDirectory: ['node_modules', 'src/'],
       },
+      alias: {
+        map: aliasMap,
+        extensions: ['.js', '.ts', '.tsx', '.jsx', '.json'],
+      },
       'babel-module': {},
     },
   },
@@ -35,9 +49,8 @@ module.exports = {
     'deprecate/import': [
       'warn',
       {
-        name:
-          '@department-of-veterans-affairs/component-library/CollapsiblePanel',
-        use: '<va-accordion>',
+        name: '@department-of-veterans-affairs/component-library/TextInput',
+        use: '<va-text-input>',
       },
       {
         name: '@department-of-veterans-affairs/component-library/AlertBox',
@@ -45,8 +58,8 @@ module.exports = {
       },
       {
         name:
-          '@department-of-veterans-affairs/component-library/LoadingIndicator',
-        use: '<va-loading-indicator>',
+          '@department-of-veterans-affairs/component-library/ExpandingGroup',
+        use: 'a custom solution',
       },
       {
         name:
@@ -54,16 +67,33 @@ module.exports = {
         use: '<va-additional-info>',
       },
       {
-        name: '@department-of-veterans-affairs/component-library/ProgressBar',
-        use: '<va-progress-bar>',
+        name: '@department-of-veterans-affairs/component-library/Breadcrumbs',
+        use: '<va-breadcrumbs>',
       },
       {
-        name: '@department-of-veterans-affairs/component-library/TextArea',
-        use: '<va-textarea>',
+        name:
+          '@department-of-veterans-affairs/component-library/LoadingIndicator',
+        use: '<va-loading-indicator>',
       },
       {
-        name: '@department-of-veterans-affairs/component-library/RadioButtons',
-        use: '<va-radio>',
+        name: '@department-of-veterans-affairs/component-library/Modal',
+        use: '<va-modal>',
+      },
+      {
+        name: '@department-of-veterans-affairs/component-library/OMBInfo',
+        use: '<va-omb-info>',
+      },
+      {
+        name: '@department-of-veterans-affairs/component-library/Pagination',
+        use: '<va-pagination>',
+      },
+      {
+        name: '@department-of-veterans-affairs/component-library/Telephone',
+        use: '<va-telephone>',
+      },
+      {
+        name: '@department-of-veterans-affairs/component-library/Select',
+        use: '<va-select>',
       },
       {
         name: '@department-of-veterans-affairs/component-library/FileInput',

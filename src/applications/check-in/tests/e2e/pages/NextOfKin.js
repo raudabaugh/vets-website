@@ -3,7 +3,9 @@ import Timeouts from 'platform/testing/e2e/timeouts';
 class NextOfKin {
   validatePage = {
     dayOf: () => {
-      this.validatePageLoaded('Is this your current next of kin information?');
+      this.validatePageLoaded(
+        'Check-In Is this your current next of kin information?',
+      );
     },
     preCheckIn: () => {
       this.validatePageLoaded('Is this your current next of kin?');
@@ -43,6 +45,13 @@ class NextOfKin {
       .should('include.text', '111-222-3333')
       .next()
       .should('include.text', '444-555-6666');
+  };
+
+  validateBackButton = () => {
+    cy.get('a[data-testid="back-button"]')
+      .should('have.text', 'Back to last screen')
+      .should('have.attr', 'href')
+      .and('contain', 'emergency-contact');
   };
 
   attemptToGoToNextPage = (button = 'yes') => {

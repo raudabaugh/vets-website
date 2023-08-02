@@ -1,15 +1,19 @@
 .sidebar-navigation {
   height: 600px;
-  width: 232px;
+  width: auto;
+  max-width: 80%;
   display: flex;
   flex-direction: column;
   list-style-type: none;
   margin: 0px;
   padding: 0px;
+  @media (min-width: $medium-screen) {
+    min-width: 230px;
+  }
+
   .sidebar-navigation-header {
     display: flex;
     flex-direction: row;
-    margin-left: 0px;
     height: 54px;
     i.fa-medkit {
       color: $color-white;
@@ -44,11 +48,20 @@
     &:active,
     &:focus,
     &:hover {
-      background-color: transparent;
-      font-weight: 700;
+      background-color: $color-primary-alt-lightest;
+      border-left: 4px solid $color-link-default;
+      transition: background-color 0.1s ease-in-out,
+        border-color 0.1s ease-in-out, padding 0.1s ease-in-out;
     }
-    &:visited {
-      color: $color-link-default;
+    &.is-active {
+      background-color: $color-gray-lightest;
+      border-left: 4px solid $color-base;
+      color: $color-black;
+      font-weight: bold;
+      padding-left: units-px(1.5);
+      span {
+        margin-left: -4px;
+      }
     }
   }
   ul {
@@ -58,12 +71,17 @@
     border: 0px;
   }
   .sidebar-navigation-messages-list {
-    background-color: $color-gray-lightest;
     .sidebar-navigation-messages-list-header {
-      border-left: 5px solid;
-      font-weight: 700;
+      &.is-active {
+        background-color: $color-gray-lightest;
+        border-left: 4px solid $color-base;
+      }
       a {
         padding-top: 7px;
+        color: $color-link-default;
+        &.is-active {
+          color: $color-black;
+        }
         &:active {
           color: $color-gray-dark;
           text-decoration: underline;
@@ -71,27 +89,22 @@
       }
     }
     .sidebar-navigation-messages-list-menu {
-      padding-left: 16px;
       ul {
-        li:nth-child(1) {
+        li {
           a {
-            padding-top: 3px;
-            margin-top: 0px;
+            padding-left: 3rem;
           }
         }
       }
     }
   }
 }
-
-@media (max-width: $small-screen) {
-  .va-btn-sidebarnav-trigger {
+@media (max-width: $medium-screen) {
+  .button-wrapper {
+    position: static !important;
     z-index: 0;
-    .button-wrapper {
-      position: static;
-      padding: 0px;
-    }
   }
+
   .sidebar-navigation {
     padding: 0px;
     width: 264px;
@@ -108,14 +121,12 @@
     }
     .sidebar-navigation-header {
       height: 50px;
-      margin-left: 32px;
       i.fa-medkit {
         padding-bottom: 4px;
       }
     }
     button {
       background-color: $color-gray-lightest;
-      height: 46.64px;
     }
     .fa-times {
       width: 14px;
@@ -129,10 +140,8 @@
       padding-left: 15px;
       padding-right: 15px;
       .sidebar-navigation-messages-list-header {
-        border-left: 4px solid $color-black;
-
         a {
-          color: $color-black;
+          color: $color-link-default;
         }
       }
       .usa-sidenav-list {
@@ -154,7 +163,7 @@
           .sidebar-navigation-messages-list-menu {
             background-color: $color-white;
             display: block;
-            li {
+            .sub-list li {
               display: block;
             }
           }

@@ -1,6 +1,6 @@
 import React from 'react';
-import FinancialOverview from '../../components/FinancialOverview';
-import ResolutionDebtCards from '../../components/ResolutionDebtCards';
+import FinancialOverview from '../../components/monetary/FinancialOverview';
+import ResolutionDebtCards from '../../components/resolution/ResolutionDebtCards';
 import { validateCurrency } from '../../utils/validations';
 
 export const uiSchema = {
@@ -16,12 +16,12 @@ export const uiSchema = {
       <ul>
         <li>
           <strong>Waiver: </strong>
-          If we accept your request, we’ll stop collection on and forgive (or
-          “waive”) the debt.
+          If we approve your request, we’ll stop collection on and waive the
+          debt.
         </li>
         <li>
           <strong>Extended monthly payments: </strong>
-          If we accept your request, you can make smaller monthly payments for
+          If we approve your request, you can make smaller monthly payments for
           up to 5 years with either monthly offsets or monthly payment plan.
         </li>
         <li>
@@ -47,6 +47,7 @@ export const uiSchema = {
       resolution: {
         agreeToWaiver: {
           'ui:required': (formData, index) => {
+            if (formData['view:enhancedFinancialStatusReport']) return false;
             const { resolution, deductionCode } = formData.selectedDebts[index];
             const isCompAndPenDebt = deductionCode === '30';
             return (

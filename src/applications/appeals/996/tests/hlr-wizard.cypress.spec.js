@@ -6,6 +6,8 @@
  * @testrailinfo runName HLR-e2e-Wizard
  */
 import Timeouts from 'platform/testing/e2e/timeouts';
+import mockUserAvail from './fixtures/mocks/user_transition_availabilities.json';
+import mockVamc from './fixtures/mocks/vamc-ehr.json';
 
 import {
   BASE_URL,
@@ -50,6 +52,9 @@ describe('HLR wizard', () => {
     window.dataLayer = [];
     cy.intercept('GET', '/v0/feature_toggles?*', { data: { features: [] } });
     cy.intercept('GET', `/v1${CONTESTABLE_ISSUES_API}*`, []);
+    cy.intercept('GET', '/v0/user_transition_availabilities', mockUserAvail);
+    cy.intercept('GET', '/data/cms/vamc-ehr.json', mockVamc);
+
     sessionStorage.removeItem(WIZARD_STATUS);
     cy.visit(BASE_URL);
     cy.injectAxe();
@@ -65,7 +70,7 @@ describe('HLR wizard', () => {
   });
   // other claims flow
   it('should show other claims - C12066', () => {
-    cy.get('[type="radio"][value="other"]').check(checkOpt);
+    cy.get('va-radio-option[value="other"]').click(checkOpt);
     cy.checkStorage(SAVED_CLAIM_TYPE, undefined);
     // #8622 set by public websites accordion anchor ID
     cy.get(`a[href*="${BENEFIT_OFFICES_URL}"]`).should('exist');
@@ -90,13 +95,11 @@ describe('HLR wizard', () => {
     cy.injectAxe();
 
     const h1Text = 'Request a Higher-Level Review';
-    // starts with focus on breadcrumb
-    cy.focused().should('have.attr', 'id', 'va-breadcrumbs-list');
     cy.get('h1', { timeout: Timeouts.slow })
       .should('be.visible')
       .and('have.text', h1Text);
 
-    cy.get('[type="radio"][value="compensation"]').check(checkOpt);
+    cy.get('va-radio-option[value="compensation"]').click(checkOpt);
     cy.checkStorage(SAVED_CLAIM_TYPE, 'compensation');
     cy.checkFormChange({
       label: 'For what type of claim are you requesting a Higher-Level Review?',

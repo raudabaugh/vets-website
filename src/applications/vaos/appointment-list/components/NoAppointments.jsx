@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import PropTypes from 'prop-types';
 import NewTabAnchor from '../../components/NewTabAnchor';
 
 export default function NoAppointments({
@@ -21,13 +21,14 @@ export default function NoAppointments({
             </NewTabAnchor>{' '}
             to schedule an appointment.
           </p>
-          <Link
-            className="va-button-link vads-u-font-weight--bold vads-u-font-size--md"
-            to="/new-appointment"
-            onClick={startNewAppointmentFlow}
-          >
-            Schedule an appointment
-          </Link>
+          <div className="vaos-hide-for-print">
+            <va-link
+              className="va-button-link vads-u-font-weight--bold vads-u-font-size--md "
+              onClick={startNewAppointmentFlow}
+              href="new-appointment"
+              text="Schedule an appointment"
+            />
+          </div>
         </>
       )}
       {!showScheduleButton && (
@@ -44,3 +45,9 @@ export default function NoAppointments({
     </>
   );
 }
+
+NoAppointments.propTypes = {
+  showScheduleButton: PropTypes.bool.isRequired,
+  startNewAppointmentFlow: PropTypes.func.isRequired,
+  description: PropTypes.string,
+};

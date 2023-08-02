@@ -9,6 +9,7 @@ import {
   IS_TRACKING_UTTERANCES,
   RECENT_UTTERANCES,
   CONVERSATION_ID_KEY,
+  IS_RX_SKILL,
 } from '../../chatbox/utils';
 
 // define thunks for actions
@@ -38,6 +39,8 @@ export const processActionConnectFulfilled = ({
 
 export const processSendMessageActivity = ({ action }) => () => {
   _.assign(action.payload, { text: piiReplace(action.payload.text) });
+  const outgoingActivityEvent = new Event('bot-outgoing-activity');
+  window.dispatchEvent(outgoingActivityEvent);
 };
 
 export const processIncomingActivity = ({ action, dispatch }) => () => {
@@ -96,5 +99,22 @@ export const processIncomingActivity = ({ action, dispatch }) => () => {
   }
   if (JSON.parse(sessionStorage.getItem(IS_TRACKING_UTTERANCES))) {
     sendWindowEvent('webchat-message-activity');
+  }
+  const payload = action.payload || {};
+  const dataorEmpty = payload.activity || {};
+  const text = dataorEmpty.text || '';
+  const rxSkillWasTriggered = text.includes(
+    'You are now in the Prescriptions Bot.',
+  );
+  const rxSkillWasExited = text.includes('Returning to the main chatbot...');
+
+  if (rxSkillWasTriggered) {
+    setSessionStorageAsString(IS_RX_SKILL, true);
+    sendWindowEvent('rxSkill');
+    // window.dispatchEvent(new Event('rxSkill'));
+  }
+  if (rxSkillWasExited) {
+    setSessionStorageAsString(IS_RX_SKILL, false);
+    sendWindowEvent('rxSkill');
   }
 };

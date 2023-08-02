@@ -1,12 +1,13 @@
 import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import '../../sass/user-profile.scss';
 import { VaAlert } from '@department-of-veterans-affairs/component-library/dist/react-bindings';
-import DebtNotification from './DebtNotification';
-import DashboardWidgetWrapper from '../DashboardWidgetWrapper';
-import { fetchNotifications } from '../../actions/notifications';
 import environment from '~/platform/utilities/environment';
+import { Toggler } from '~/platform/utilities/feature-toggles/Toggler';
+import { fetchNotifications } from '../../../common/actions/notifications';
+import DebtNotificationAlert from './DebtNotificationAlert';
+import TestNotification from './TestNotification';
+import DashboardWidgetWrapper from '../DashboardWidgetWrapper';
 
 const debtTemplateId = environment.isProduction()
   ? '7efc2b8b-e59a-4571-a2ff-0fd70253e973'
@@ -28,7 +29,7 @@ export const Notifications = ({
     n => n.attributes.templateId === debtTemplateId,
   );
 
-  if (!debtNotifications || !debtNotifications.length) {
+  if (!debtNotifications || !debtNotifications.length || notificationsError) {
     return null;
   }
 
@@ -48,14 +49,28 @@ export const Notifications = ({
           </div>
         </DashboardWidgetWrapper>
       )}
-      {!notificationsError &&
-        debtNotifications.map((n, i) => (
-          <DebtNotification
-            key={i}
-            hasError={notificationsError}
-            notification={n}
-          />
-        ))}
+      {debtNotifications.map(n => (
+        <Toggler
+          toggleName={Toggler.TOGGLE_NAMES.myVaUseExperimental}
+          key={n.id}
+        >
+          <Toggler.Enabled>
+            <TestNotification
+              key={n.id}
+              hasError={notificationsError}
+              notification={n}
+            />
+          </Toggler.Enabled>
+
+          <Toggler.Disabled>
+            <DebtNotificationAlert
+              key={n.id}
+              hasError={notificationsError}
+              notification={n}
+            />
+          </Toggler.Disabled>
+        </Toggler>
+      ))}
     </div>
   );
 };
@@ -63,19 +78,7 @@ export const Notifications = ({
 Notifications.propTypes = {
   getNotifications: PropTypes.func.isRequired,
   dismissalError: PropTypes.bool,
-  notifications: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      type: PropTypes.string.isRequired,
-      attributes: PropTypes.shape({
-        createdAt: PropTypes.string.isRequired,
-        dismissed: PropTypes.bool.isRequired,
-        templateId: PropTypes.string.isRequired,
-        updatedAt: PropTypes.string,
-        vaProfileId: PropTypes.string.isRequired,
-      }),
-    }),
-  ),
+  notifications: PropTypes.array,
   notificationsError: PropTypes.bool,
 };
 

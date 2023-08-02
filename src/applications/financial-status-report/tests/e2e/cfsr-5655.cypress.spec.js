@@ -29,6 +29,10 @@ const testConfig = createTestConfig(
             { name: 'show_financial_status_report_wizard', value: true },
             { name: 'show_financial_status_report', value: true },
             { name: 'combined_financial_status_report', value: true },
+            {
+              name: 'combined_financial_status_report_enhancements',
+              value: false,
+            },
           ],
         },
       });
@@ -48,11 +52,11 @@ const testConfig = createTestConfig(
 
     pageHooks: {
       introduction: () => {
-        cy.findAllByText(/start/i, { selector: 'button' })
+        cy.get('.vads-c-action-link--green')
           .first()
           .click();
       },
-      'available-debts': ({ afterHook }) => {
+      'all-available-debts': ({ afterHook }) => {
         afterHook(() => {
           cy.get(`input[name="request-help-with-debt"]`)
             .first()
@@ -91,6 +95,37 @@ const testConfig = createTestConfig(
           cy.get('.usa-button-primary').click();
         });
       },
+      'credit-card-bills': ({ afterHook }) => {
+        afterHook(() => {
+          cy.get('#root_questions_hasCreditCardBillsYes').check();
+          cy.get('.usa-button-primary').click();
+        });
+      },
+      'your-credit-card-bills': ({ afterHook }) => {
+        afterHook(() => {
+          cy.get('#unpaidBalance')
+            .first()
+            .shadow()
+            .find('input')
+            .type('100');
+          cy.get('#amountDueMonthly')
+            .first()
+            .shadow()
+            .find('input')
+            .type('100');
+          cy.get('#amountPastDue')
+            .first()
+            .shadow()
+            .find('input')
+            .type('100');
+          cy.get('.usa-button-primary').click();
+        });
+      },
+      'credit-card-bills-summary': ({ afterHook }) => {
+        afterHook(() => {
+          cy.get('.usa-button-primary').click();
+        });
+      },
       'resolution-option/0': ({ afterHook }) => {
         afterHook(() => {
           cy.get('[type="radio"][value="monthly"]').click();
@@ -99,14 +134,23 @@ const testConfig = createTestConfig(
       },
       'resolution-comment/0': ({ afterHook }) => {
         afterHook(() => {
-          cy.get(`#root_resolutionComment`).type('10.00');
+          cy.get('[data-testid="resolution-amount"]')
+            .first()
+            .shadow()
+            .find('input')
+            .type('10.00');
           cy.get('.usa-button-primary').click();
         });
       },
       'resolution-option/1': ({ afterHook }) => {
         afterHook(() => {
           cy.get('[type="radio"][value="waiver"]').click();
-          cy.get('[type="checkbox"]').click();
+          cy.get('.usa-button-primary').click();
+        });
+      },
+      'resolution-waiver-agreement/1': ({ afterHook }) => {
+        afterHook(() => {
+          cy.get('[type=checkbox]').check();
           cy.get('.usa-button-primary').click();
         });
       },

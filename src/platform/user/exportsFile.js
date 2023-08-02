@@ -32,7 +32,6 @@ export {
   selectCernerTestResultsFacilities,
   mhvTransitionEnabled,
   mhvTransitionModalEnabled,
-  shouldRedirectToMyVA,
 } from './selectors';
 
 /* authentication */
@@ -126,14 +125,13 @@ export {
   IDME_TYPES,
   POLICY_TYPES,
   SIGNUP_TYPES,
-  AUTH_LEVEL,
-  AUTH_ERROR,
   MHV_TRANSITION_DATE,
   MHV_TRANSITION_TIME,
   ACCOUNT_TRANSITION_DISMISSED,
   LINK_TYPES,
   AUTH_PARAMS,
 } from './authentication/constants';
+export { AUTH_LEVEL, AUTH_ERRORS } from './authentication/errors';
 export {
   hasCheckedKeepAlive,
   signInServiceName,
@@ -142,6 +140,7 @@ export {
   transitionMHVAccount,
 } from './authentication/selectors';
 export { externalApplicationsConfig } from './authentication/usip-config';
+export { OAuthEnabledApplications } from './authentication/config/constants';
 export {
   loginAppUrlRE,
   getQueryParams,
@@ -172,10 +171,11 @@ export {
   default as RequiredLoginView,
   RequiredLoginLoader,
 } from './authorization/components/RequiredLoginView';
-export { MHVApp } from './authorization/containers/MHVApp';
-export {
-  RequiredTermsAcceptanceView,
-} from './authorization/containers/RequiredTermsAcceptanceView';
+// TO DO: resolve missing nested import
+// export { MHVApp } from './authorization/containers/MHVApp';
+// export {
+//   RequiredTermsAcceptanceView,
+// } from './authorization/containers/RequiredTermsAcceptanceView';
 
 /* profile */
 
@@ -198,16 +198,7 @@ export {
   FETCHING_MHV_ACCOUNT,
   FETCH_MHV_ACCOUNT_FAILURE,
   FETCH_MHV_ACCOUNT_SUCCESS,
-  CREATING_MHV_ACCOUNT,
-  CREATE_MHV_ACCOUNT_FAILURE,
-  CREATE_MHV_ACCOUNT_SUCCESS,
-  UPGRADING_MHV_ACCOUNT,
-  UPGRADE_MHV_ACCOUNT_FAILURE,
-  UPGRADE_MHV_ACCOUNT_SUCCESS,
   fetchMHVAccount,
-  createMHVAccount,
-  upgradeMHVAccount,
-  createAndUpgradeMHVAccount,
 } from './profile/actions/mhv';
 
 export {

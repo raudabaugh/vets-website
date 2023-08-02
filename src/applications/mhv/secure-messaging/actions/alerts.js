@@ -6,10 +6,19 @@ export const closeAlert = () => async dispatch => {
   });
 };
 
+export const focusOutAlert = () => async dispatch => {
+  dispatch({
+    type: Actions.Alerts.FOCUS_OUT_ALERT,
+  });
+};
+
 export const addAlert = (
   alertType,
   header,
   content,
+  className,
+  link,
+  title,
   response,
 ) => async dispatch => {
   dispatch({
@@ -18,6 +27,9 @@ export const addAlert = (
       alertType,
       header,
       content,
+      className,
+      link,
+      title,
       response,
     },
   });

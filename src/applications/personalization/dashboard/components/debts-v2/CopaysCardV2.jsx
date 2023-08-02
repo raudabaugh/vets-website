@@ -1,15 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { format } from 'date-fns';
+import { getLatestCopay } from '../../helpers';
 import CTALink from '../CTALink';
 import recordEvent from '~/platform/monitoring/record-event';
 
 export const CopaysV2 = ({ copays }) => {
-  const lastCopay =
-    copays?.sort(
-      (a, b) =>
-        new Date(b.pSStatementDateOutput) - new Date(a.pSStatementDateOutput),
-    )[0] ?? null;
+  const latestCopay = getLatestCopay(copays) ?? null;
   const copaysCount = copays?.length || 0;
   if (copaysCount < 1) {
     return (
@@ -23,9 +20,9 @@ export const CopaysV2 = ({ copays }) => {
   }
 
   return (
-    <div className="vads-u-display--flex vads-u-flex-direction--column large-screen:vads-u-flex--1 vads-u-margin-bottom--2p5">
+    <div className="vads-u-display--flex vads-u-margin-bottom--3">
       <div
-        className="vads-u-background-color--gray-lightest vads-u-padding-y--2p5 vads-u-padding-x--2p5"
+        className="vads-u-display--flex vads-u-width--full vads-u-flex-direction--column vads-u-justify-content--space-between vads-u-align-items--flex-start vads-u-background-color--gray-lightest vads-u-padding--2p5"
         data-testid="copay-card-v2"
       >
         <h3 className="vads-u-margin-top--0" data-testid="copay-due-header-v2">
@@ -34,7 +31,7 @@ export const CopaysV2 = ({ copays }) => {
         </h3>
         <p className="vads-u-margin-bottom--1 vads-u-margin-top--0">
           Updated on{' '}
-          {format(new Date(lastCopay.pSStatementDateOutput), 'MMMM dd, yyyy')}
+          {format(new Date(latestCopay.pSStatementDateOutput), 'MMMM dd, yyyy')}
         </p>
         <CTALink
           text="Manage your VA bills"
@@ -43,9 +40,9 @@ export const CopaysV2 = ({ copays }) => {
           className="vads-u-font-weight--bold"
           onClick={() =>
             recordEvent({
-              event: 'profile-navigation',
-              'profile-action': 'view-link',
-              'profile-section': 'view-manage-va-copays',
+              event: 'dashboard-navigation',
+              'dashboard-action': 'view-link',
+              'dashboard-product': 'view-manage-va-bills',
             })
           }
           testId="manage-va-copays-link-v2"

@@ -10,6 +10,7 @@ import { focusElement } from 'platform/utilities/ui';
 
 import { makeSelectApp } from '../../selectors';
 import { APP_NAMES } from '../../utils/appConstants';
+import { useDatadogRum } from '../../hooks/useDatadogRum';
 import MixedLanguageDisclaimer from '../MixedLanguageDisclaimer';
 import LanguagePicker from '../LanguagePicker';
 import Footer from './Footer';
@@ -18,6 +19,7 @@ const Wrapper = props => {
   const {
     children,
     pageTitle,
+    eyebrow,
     classNames = '',
     withBackButton = false,
     testID,
@@ -25,6 +27,8 @@ const Wrapper = props => {
   useEffect(() => {
     focusElement('h1');
   }, []);
+
+  useDatadogRum();
 
   const topPadding = withBackButton
     ? 'vads-u-padding-y--2'
@@ -43,9 +47,16 @@ const Wrapper = props => {
       >
         <MixedLanguageDisclaimer />
         <LanguagePicker withTopMargin={!withBackButton} />
-        <h1 tabIndex="-1" data-testid="header">
-          {pageTitle}
-        </h1>
+        {pageTitle && (
+          <h1 tabIndex="-1" data-testid="header">
+            {eyebrow && (
+              <span className="check-in-eyebrow vads-u-font-family--sans vads-u-font-size--base vads-u-font-weight--normal">
+                {`${eyebrow} `}
+              </span>
+            )}
+            {pageTitle}
+          </h1>
+        )}
         <DowntimeNotification
           appTitle={appTitle}
           dependencies={[downtimeDependency]}
@@ -59,9 +70,10 @@ const Wrapper = props => {
 };
 
 Wrapper.propTypes = {
-  pageTitle: PropTypes.string.isRequired,
   children: PropTypes.node,
   classNames: PropTypes.string,
+  eyebrow: PropTypes.string,
+  pageTitle: PropTypes.string,
   testID: PropTypes.string,
   withBackButton: PropTypes.bool,
 };

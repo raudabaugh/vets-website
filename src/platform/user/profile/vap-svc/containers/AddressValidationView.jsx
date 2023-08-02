@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import AlertBox from '@department-of-veterans-affairs/component-library/AlertBox';
+import { VaAlert } from '@department-of-veterans-affairs/component-library/dist/react-bindings';
 import {
   isFailedTransaction,
   isPendingTransaction,
@@ -12,7 +12,7 @@ import { hasBadAddress } from 'applications/personalization/profile/selectors';
 import { formatAddress } from 'platform/forms/address/helpers';
 import LoadingButton from 'platform/site-wide/loading-button/LoadingButton';
 import recordEvent from 'platform/monitoring/record-event';
-import { focusElement } from 'platform/utilities/ui';
+import { focusElement, waitForRenderThenFocus } from 'platform/utilities/ui';
 import * as VAP_SERVICE from '../constants';
 import {
   openModal,
@@ -26,6 +26,11 @@ import { getValidationMessageKey } from '../util';
 import { ADDRESS_VALIDATION_MESSAGES } from '../constants/addressValidationMessages';
 
 class AddressValidationView extends React.Component {
+  componentDidMount() {
+    // scroll on the alert since the web component doesn't have a focus/suto-scroll method built in like the React component
+    waitForRenderThenFocus('#address-validation-alert-heading');
+  }
+
   componentDidUpdate(prevProps) {
     // if the transaction just became pending, start calling the
     // refreshTransaction() on an interval
@@ -96,7 +101,7 @@ class AddressValidationView extends React.Component {
           : 'no',
       });
     }
-    sessionStorage.setItem('profile-has-cleared-bad-address-indicator', 'true');
+
     if (suggestedAddressSelected) {
       this.props.updateValidationKeyAndSave(
         VAP_SERVICE.API_ROUTES.ADDRESSES,
@@ -153,7 +158,11 @@ class AddressValidationView extends React.Component {
       (!confirmedSuggestions.length && !validationKey)
     ) {
       return (
-        <button className="usa-button-primary" onClick={this.onEditClick}>
+        <button
+          type="button"
+          className="usa-button-primary"
+          onClick={this.onEditClick}
+        >
           Edit Address
         </button>
       );
@@ -173,7 +182,6 @@ class AddressValidationView extends React.Component {
 
   renderAddressOption = (address, id = 'userEntered') => {
     const {
-      addressValidationError,
       confirmedSuggestions,
       selectedAddressId,
       validationKey,
@@ -183,9 +191,6 @@ class AddressValidationView extends React.Component {
     const hasConfirmedSuggestions =
       (confirmedSuggestions.length > 0 && validationKey) ||
       confirmedSuggestions.length > 1;
-    const showEditLinkErrorState = addressValidationError && validationKey;
-    const showEditLinkNonErrorState = !addressValidationError;
-    const showEditLink = showEditLinkErrorState || showEditLinkNonErrorState;
     const isFirstOptionOrEnabled =
       (isAddressFromUser && validationKey) || !isAddressFromUser;
 
@@ -212,16 +217,9 @@ class AddressValidationView extends React.Component {
           className="vads-u-margin-top--2 vads-u-display--flex vads-u-align-items--center"
         >
           <div className="vads-u-display--flex vads-u-flex-direction--column vads-u-padding-bottom--0p5">
-            <span>{street}</span>
-            <span>{cityStateZip}</span>
+            <span className="dd-privacy-hidden">{street}</span>
+            <span className="dd-privacy-hidden">{cityStateZip}</span>
             <span>{country}</span>
-
-            {isAddressFromUser &&
-              showEditLink && (
-                <button className="va-button-link" onClick={this.onEditClick}>
-                  Edit Address
-                </button>
-              )}
           </div>
         </label>
       </div>
@@ -233,25 +231,17 @@ class AddressValidationView extends React.Component {
       addressFromUser,
       addressValidationError,
       confirmedSuggestions,
-      resetAddressValidation,
       suggestedAddresses,
       transaction,
       transactionRequest,
-      validationKey,
       isLoading,
     } = this.props;
 
-    const resetDataAndCloseModal = () => {
-      resetAddressValidation();
-      this.props.closeModal();
-    };
-
-    const validationMessageKey = getValidationMessageKey(
+    const validationMessageKey = getValidationMessageKey({
       suggestedAddresses,
-      validationKey,
       addressValidationError,
       confirmedSuggestions,
-    );
+    });
 
     const addressValidationMessage =
       ADDRESS_VALIDATION_MESSAGES[validationMessageKey];
@@ -264,23 +254,19 @@ class AddressValidationView extends React.Component {
 
     return (
       <>
-        {error && (
-          <div className="vads-u-margin-bottom--1" role="alert">
-            <VAPServiceEditModalErrorMessage error={error} />
-          </div>
-        )}
         <div role="alert">
-          <AlertBox
+          <VaAlert
             className="vads-u-margin-bottom--1 vads-u-margin-top--0"
-            level={4}
             status="warning"
-            headline={addressValidationMessage.headline}
-            scrollOnShow
+            visible
           >
+            <h4 id="address-validation-alert-heading" slot="headline">
+              {addressValidationMessage.headline}
+            </h4>
             <addressValidationMessage.ModalText
               editFunction={this.onEditClick}
             />
-          </AlertBox>
+          </VaAlert>
         </div>
         <form onSubmit={this.onSubmit}>
           <span className="vads-u-font-weight--bold">You entered:</span>
@@ -294,15 +280,22 @@ class AddressValidationView extends React.Component {
             confirmedSuggestions.map((address, index) =>
               this.renderAddressOption(address, String(index)),
             )}
+
+          {error && (
+            <div className="vads-u-margin-bottom--1" role="alert">
+              <VAPServiceEditModalErrorMessage error={error} />
+            </div>
+          )}
+
           {this.renderPrimaryButton()}
 
           {!isLoading && (
             <button
               type="button"
               className="usa-button-secondary"
-              onClick={resetDataAndCloseModal}
+              onClick={this.onEditClick}
             >
-              Cancel
+              Go back to edit
             </button>
           )}
         </form>
@@ -352,9 +345,16 @@ const mapDispatchToProps = {
 };
 
 AddressValidationView.propTypes = {
-  analyticsSectionName: PropTypes.string,
+  addressFromUser: PropTypes.object.isRequired,
   addressValidationError: PropTypes.bool.isRequired,
+  addressValidationType: PropTypes.string.isRequired,
+  closeModal: PropTypes.func.isRequired,
+  createTransaction: PropTypes.func.isRequired,
+  openModal: PropTypes.func.isRequired,
   suggestedAddresses: PropTypes.array.isRequired,
+  updateSelectedAddress: PropTypes.func.isRequired,
+  updateValidationKeyAndSave: PropTypes.func.isRequired,
+  analyticsSectionName: PropTypes.string,
   confirmedSuggestions: PropTypes.arrayOf(
     PropTypes.shape({
       addressLine1: PropTypes.string.isRequired,
@@ -370,17 +370,10 @@ AddressValidationView.propTypes = {
       addressPou: PropTypes.string.isRequired,
     }),
   ),
-  addressValidationType: PropTypes.string.isRequired,
-  validationKey: PropTypes.number,
-  addressFromUser: PropTypes.object.isRequired,
   selectedAddress: PropTypes.object,
   selectedAddressId: PropTypes.string,
-  closeModal: PropTypes.func.isRequired,
-  openModal: PropTypes.func.isRequired,
-  createTransaction: PropTypes.func.isRequired,
-  updateSelectedAddress: PropTypes.func.isRequired,
-  updateValidationKeyAndSave: PropTypes.func.isRequired,
   userHasBadAddress: PropTypes.bool,
+  validationKey: PropTypes.number,
 };
 
 export default connect(

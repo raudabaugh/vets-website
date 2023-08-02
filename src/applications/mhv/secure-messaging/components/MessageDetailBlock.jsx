@@ -1,13 +1,22 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { capitalize } from 'lodash';
-import { useHistory } from 'react-router-dom';
+import { focusElement } from '@department-of-veterans-affairs/platform-utilities/ui';
+import { useHistory, useLocation } from 'react-router-dom';
+import { format, addDays } from 'date-fns';
+import { useDispatch } from 'react-redux';
 import MessageActionButtons from './MessageActionButtons';
+import ReplyButton from './ReplyButton';
 import AttachmentsList from './AttachmentsList';
-import PrintMessageThread from './PrintMessageThread';
+import { Categories, Paths, PageTitles } from '../util/constants';
+import { dateFormat, updatePageTitle } from '../util/helpers';
+import MessageThreadBody from './MessageThread/MessageThreadBody';
+import { closeAlert } from '../actions/alerts';
+import CannotReplyAlert from './shared/CannotReplyAlert';
 
 const MessageDetailBlock = props => {
+  const { message, cannotReply } = props;
   const {
+    threadId,
     messageId,
     category,
     subject,
@@ -15,107 +24,131 @@ const MessageDetailBlock = props => {
     sentDate,
     senderName,
     recipientName,
+    triageGroupName,
     attachments,
-  } = props.message;
+  } = message;
 
   const history = useHistory();
-  const casedCategory = capitalize(category);
-  const [printThread, setPrintThread] = useState('dont-print-thread');
+  const dispatch = useDispatch();
+  const location = useLocation();
+  const sentReplyDate = format(new Date(sentDate), 'MM-dd-yyyy');
+  const cannotReplyDate = addDays(new Date(sentReplyDate), 45);
+  const [hideReplyButton, setReplyButton] = useState(false);
+  const fromMe = recipientName === triageGroupName;
 
   const handleReplyButton = useCallback(
     () => {
-      history.push('/reply');
+      history.push(`${Paths.REPLY}${messageId}/`);
     },
-    [history],
+    [history, messageId],
   );
 
-  const handlePrintThreadStyleClass = option => {
-    if (option === 'print thread') {
-      setPrintThread('print-thread');
-    }
-    if (option !== 'print thread') {
-      setPrintThread('dont-print-thread');
-    }
-  };
+  useEffect(
+    () => {
+      if (new Date() > cannotReplyDate) {
+        setReplyButton(true);
+      }
+    },
+    [cannotReplyDate, hideReplyButton, sentReplyDate, sentDate],
+  );
+
+  useEffect(
+    () => {
+      return () => {
+        if (location.pathname) {
+          dispatch(closeAlert());
+        }
+      };
+    },
+    [location.pathname, dispatch],
+  );
+
+  const categoryLabel = Categories[category];
+
+  useEffect(
+    () => {
+      focusElement(document.querySelector('h1'));
+      updatePageTitle(
+        `${categoryLabel}: ${subject} ${PageTitles.PAGE_TITLE_TAG}`,
+      );
+    },
+    [categoryLabel, message, subject],
+  );
 
   return (
-    <section className="message-detail-block">
-      <header className="vads-u-display--flex vads-u-flex-direction--row message-detail-header">
-        <h2
-          className="vads-u-margin-top--1 vads-u-margin-bottom--2"
-          aria-label={`Message subject. ${casedCategory}: ${subject}`}
+    <div className="message-detail-block">
+      <header className="message-detail-header">
+        <h1
+          className="vads-u-margin-bottom--2"
+          aria-label={`Message subject. ${categoryLabel}: ${subject}`}
+          data-dd-privacy="mask"
         >
-          {casedCategory}: {subject}
-        </h2>
-        <button
-          type="button"
-          onClick={handleReplyButton}
-          className="send-button-top medium-screen:vads-u-padding-right--2"
-        >
-          <i className="fas fa-reply" aria-hidden="true" />
-          <span className="reply-button-top-text">Reply</span>
-        </button>
+          {categoryLabel}: {subject}
+        </h1>
+        <CannotReplyAlert visible={cannotReply} />
       </header>
-
-      <main className="message-detail-content">
-        <section className="message-metadata" aria-label="message details.">
+      <MessageActionButtons
+        id={messageId}
+        threadId={threadId}
+        onReply={handleReplyButton}
+        hideReplyButton={cannotReply}
+      />
+      <section
+        className="message-detail-content"
+        aria-label="Most recent message in this conversation"
+      >
+        <h2 className="sr-only">Most recent message in this conversation.</h2>
+        <div
+          className="message-metadata"
+          data-testid="message-metadata"
+          data-dd-privacy="mask"
+        >
+          <h3 className="sr-only">Message details.</h3>
           <p>
             <strong>From: </strong>
-            {senderName}
+            <span data-dd-privacy="mask">
+              {`${senderName} ${!fromMe ? `(${triageGroupName})` : ''}`}
+            </span>
           </p>
           <p>
             <strong>To: </strong>
-            {recipientName}
+            <span data-dd-privacy="mask">{recipientName}</span>
           </p>
           <p>
             <strong>Date: </strong>
-            {sentDate}
+            <span data-dd-privacy="mask">{dateFormat(sentDate)}</span>
           </p>
           <p>
             <strong>Message ID: </strong>
-            {messageId}
+            <span data-dd-privacy="mask">{messageId}</span>
           </p>
-        </section>
+        </div>
 
-        <section className="message-body" aria-label="Message body.">
-          <pre>{body}</pre>
-        </section>
+        <div className="message-body" data-dd-privacy="mask">
+          <h3 className="sr-only">Message body.</h3>
+          <MessageThreadBody expanded text={body} />
+        </div>
 
         {!!attachments &&
           attachments.length > 0 && (
             <>
-              <div className="message-body-attachments-label">
-                <strong>Attachments</strong>
-              </div>
+              <h3 className="sr-only">Message attachments.</h3>
               <AttachmentsList attachments={attachments} />
             </>
           )}
-
-        <div className="message-detail-note vads-u-text-align--center">
-          <p>
-            <i>
-              Note: This message may not be from the person you intially
-              contacted. It may have been reassigned to efficiently address your
-              original message
-            </i>
-          </p>
-        </div>
-
-        <MessageActionButtons
-          id={messageId}
-          handlePrintThreadStyleClass={handlePrintThreadStyleClass}
-          onReply={handleReplyButton}
-        />
-      </main>
-      <div className={printThread}>
-        <PrintMessageThread messageId={messageId} />
-      </div>
-    </section>
+      </section>
+      <ReplyButton
+        key="replyButton"
+        visible={!cannotReply}
+        onReply={handleReplyButton}
+      />
+    </div>
   );
 };
-
 MessageDetailBlock.propTypes = {
+  cannotReply: PropTypes.bool,
   message: PropTypes.object,
+  onReply: PropTypes.func,
 };
 
 export default MessageDetailBlock;

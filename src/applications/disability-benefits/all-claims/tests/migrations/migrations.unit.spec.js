@@ -5,6 +5,8 @@ import upgradeHasSeparationPay from '../../migrations/03-upgrade-hasSeparationPa
 import truncateOtherHomelessHousing from '../../migrations/04-truncate-otherHomelessHousing';
 import truncateOtherAtRiskHousing from '../../migrations/05-truncate-otherAtRiskHousing';
 import fixTreatedDisabilityNamesKey from '../../migrations/06-fix-treatedDisabilityNames';
+import mapServiceBranches from '../../migrations/07-map-service-branches';
+import reorderHousingIllnessRemoveFdc from '../../migrations/08-paper-sync';
 
 import formConfig from '../../config/form';
 import { MAX_HOUSING_STRING_LENGTH } from '../../constants';
@@ -179,6 +181,146 @@ describe('526 v2 migrations', () => {
         },
         metadata: { version: 1 },
       });
+    });
+  });
+
+  describe('07-map-service-branches', () => {
+    const getData = periods => ({
+      formData: {
+        serviceInformation: {
+          servicePeriods: [
+            {
+              serviceBranch: periods[0],
+              dateRange: { from: '2000-01-01', to: '2001-01-01' },
+            },
+            {
+              serviceBranch: periods[1],
+              dateRange: { from: '2001-02-01', to: '2002-01-01' },
+            },
+            {
+              serviceBranch: periods[2],
+              dateRange: { from: '2000-01-01' },
+            },
+          ],
+          'view:militaryHistoryNote': {
+            type: 'object',
+            properties: {},
+          },
+        },
+      },
+      metadata: { version: 1 },
+    });
+    it('should migrate reserves for Air Force, Army and Coast Guard', () => {
+      const list = {
+        'Air Force Reserve': 'Air Force Reserves',
+        'Army Reserve': 'Army Reserves',
+        'Coast Guard Reserve': 'Coast Guard Reserves',
+      };
+      const migratedData = mapServiceBranches(getData(Object.keys(list)));
+      expect(migratedData).to.deep.equal(getData(Object.values(list)));
+    });
+    it('should migrate reserves for Marine Corps and Navy, but not modify Army', () => {
+      const list = {
+        'Marine Corps Reserve': 'Marine Corps Reserves',
+        Army: 'Army',
+        'Navy Reserve': 'Navy Reserves',
+      };
+      const migratedData = mapServiceBranches(getData(Object.keys(list)));
+      expect(migratedData).to.deep.equal(getData(Object.values(list)));
+    });
+    it('should migrate NOAA, but not PHS or Navy', () => {
+      const list = {
+        'Public Health Service': 'Public Health Service',
+        NOAA: 'National Oceanic & Atmospheric Administration',
+        Navy: 'Navy',
+      };
+      const migratedData = mapServiceBranches(getData(Object.keys(list)));
+      expect(migratedData).to.deep.equal(getData(Object.values(list)));
+    });
+  });
+
+  describe('08-paper-sync', () => {
+    it('should not change returnUrl if user left off on the veteran info page', () => {
+      const savedData = {
+        formData: {},
+        metadata: {
+          version: 8,
+          returnUrl: '/veteran-information',
+        },
+      };
+      const migratedData = reorderHousingIllnessRemoveFdc(savedData);
+      expect(migratedData.metadata.returnUrl).to.deep.equal(
+        '/veteran-information',
+      );
+    });
+
+    it('should not change returnUrl if user left off on the contact info page', () => {
+      const savedData = {
+        formData: {},
+        metadata: {
+          version: 8,
+          returnUrl: '/contact-information',
+        },
+      };
+      const migratedData = reorderHousingIllnessRemoveFdc(savedData);
+      expect(migratedData.metadata.returnUrl).to.deep.equal(
+        '/contact-information',
+      );
+    });
+
+    it('should change returnUrl to housing-situation when user could potentially skip it', () => {
+      const savedData = {
+        formData: {},
+        metadata: {
+          version: 8,
+          returnUrl: '/claim-type',
+        },
+      };
+
+      const migratedData = reorderHousingIllnessRemoveFdc(savedData);
+
+      // TODO: #59003 Rename for prod launch
+      expect(migratedData.metadata.returnUrl).to.deep.equal(
+        '/housing-situation-1',
+      );
+    });
+
+    it('should change returnUrl to terminally-ill when user could potentially skip it', () => {
+      const savedData = {
+        formData: {
+          homelessOrAtRisk: 'homeless',
+        },
+        metadata: {
+          version: 8,
+          returnUrl: '/housing-situation',
+        },
+      };
+
+      const migratedData = reorderHousingIllnessRemoveFdc(savedData);
+
+      // TODO: #59003 Rename for prod launch
+      expect(migratedData.metadata.returnUrl).to.deep.equal(
+        '/terminally-ill-1',
+      );
+    });
+
+    it('should change returnUrl to review and submit if on the fdc page', () => {
+      const savedData = {
+        formData: {
+          isTerminallyIll: false,
+          homelessOrAtRisk: 'no',
+        },
+        metadata: {
+          version: 8,
+          returnUrl: '/fully-developed-claim',
+        },
+      };
+
+      const migratedData = reorderHousingIllnessRemoveFdc(savedData);
+
+      expect(migratedData.metadata.returnUrl).to.deep.equal(
+        '/review-and-submit',
+      );
     });
   });
 });

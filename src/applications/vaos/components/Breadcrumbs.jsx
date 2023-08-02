@@ -1,17 +1,20 @@
 import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { VaBreadcrumbs } from '@department-of-veterans-affairs/component-library/dist/react-bindings';
-import { Link, useLocation } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
+import { recordEvent } from '@department-of-veterans-affairs/platform-monitoring/exports';
 import { useSelector } from 'react-redux';
-import { selectFeatureStatusImprovement } from '../redux/selectors';
+import { selectFeatureBreadcrumbUrlUpdate } from '../redux/selectors';
+import { GA_PREFIX } from '../utils/constants';
 
 export default function VAOSBreadcrumbs({ children }) {
-  const featureStatusImprovement = useSelector(state =>
-    selectFeatureStatusImprovement(state),
+  const featureBreadcrumbUrlUpdate = useSelector(state =>
+    selectFeatureBreadcrumbUrlUpdate(state),
   );
   const location = useLocation();
   const isPast = location.pathname.includes('/past');
-  const isPending = location.pathname.includes('/pending');
+  const isPending =
+    location.pathname.includes('/pending') ||
+    location.pathname.includes('/requests');
   const breadcrumbsRef = useRef(null);
 
   useEffect(
@@ -34,54 +37,66 @@ export default function VAOSBreadcrumbs({ children }) {
     [location, breadcrumbsRef],
   );
 
+  const handleClick = gaEvent => {
+    return () => {
+      recordEvent({
+        event: `${GA_PREFIX}-breadcrumb-${gaEvent}-clicked`,
+      });
+    };
+  };
+
+  // The va-breadcrumbs component only allows for either Link components or anchor links,
+  // it will not work with the va-link component currently
   return (
-    <VaBreadcrumbs
+    <va-breadcrumbs
       role="navigation"
       aria-label="Breadcrumbs"
       ref={breadcrumbsRef}
-      className="vaos-hide-for-print"
+      class="vaos-hide-for-print"
     >
-      <a href="/" key="home">
-        Home
-      </a>
-      <a href="/health-care" key="health-care">
-        Health care
+      <a href="/" key="home" onClick={handleClick('home')}>
+        {featureBreadcrumbUrlUpdate ? 'VA.gov home' : 'Home'}
       </a>
       <a
-        href="/health-care/schedule-view-va-appointments"
-        key="schedule-view-va-appointments"
+        href={featureBreadcrumbUrlUpdate ? '/my-health' : '/health-care'}
+        key={featureBreadcrumbUrlUpdate ? '/my-health' : 'health-care'}
+        onClick={handleClick(
+          featureBreadcrumbUrlUpdate ? '/my-health' : 'health-care',
+        )}
       >
-        Schedule and manage health appointments
+        {featureBreadcrumbUrlUpdate ? 'My HealtheVet' : 'Health care'}
       </a>
-      {!featureStatusImprovement && (
-        <Link to="/" key="vaos-home">
-          VA online scheduling
-        </Link>
+      {!featureBreadcrumbUrlUpdate && (
+        <a
+          href="/health-care/schedule-view-va-appointments"
+          key="schedule-view-va-appointments"
+          onClick={handleClick('schedule-managed')}
+        >
+          Schedule and manage health appointments
+        </a>
       )}
-      {featureStatusImprovement && (
-        <Link to="/" key="vaos-home">
-          Your appointments
-        </Link>
-      )}
+      <NavLink to="/" id="vaos-home">
+        Appointments
+      </NavLink>
 
       {isPast && (
         <li className="va-breadcrumbs-li">
-          <Link to="/past" key="past">
+          <NavLink to="/past" id="past">
             Past
-          </Link>
+          </NavLink>
         </li>
       )}
 
       {isPending && (
         <li className="va-breadcrumbs-li">
-          <Link to="/pending" key="pending">
+          <NavLink to="/pending" id="pending">
             Pending
-          </Link>
+          </NavLink>
         </li>
       )}
 
       {children}
-    </VaBreadcrumbs>
+    </va-breadcrumbs>
   );
 }
 

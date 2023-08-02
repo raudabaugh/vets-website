@@ -12,10 +12,19 @@ export const PaymentsV2 = ({ lastPayment }) => {
         className="vads-u-background-color--gray-lightest vads-u-padding-y--2p5 vads-u-padding-x--2p5"
         data-testid="payment-card-v2"
       >
-        <h3 className="vads-u-margin-top--0" data-testid="deposit-header-v2">
+        <h3
+          className="vads-u-margin-top--0"
+          data-testid="deposit-header-v2"
+          aria-describedby="paycheck-type"
+        >
           +{lastPayment.payCheckAmount}
         </h3>
-        <h4 className="vads-u-margin-top--0">{lastPayment.payCheckType}</h4>
+        <p
+          className="vads-u-margin-top--0 vads-u-font-size--h4 vads-u-font-family--serif"
+          id="paycheck-type"
+        >
+          {lastPayment.payCheckType}
+        </p>
         <p className="vads-u-margin-bottom--1 vads-u-margin-top--0">
           {lastPayment.paymentMethod === 'Paper Check'
             ? 'Check mailed'
@@ -23,7 +32,7 @@ export const PaymentsV2 = ({ lastPayment }) => {
           on {format(paymentDate, 'MMMM d, yyyy')}
         </p>
         <CTALink
-          text="View your payment history"
+          text="Review your payment history"
           href="/va-payment-history/payments/"
           testId="payment-card-view-history-link-v2"
           className="vads-u-font-weight--bold"
@@ -31,7 +40,7 @@ export const PaymentsV2 = ({ lastPayment }) => {
           onClick={() => {
             recordEvent({
               event: 'nav-linkslist',
-              'links-list-header': 'View your payment history',
+              'links-list-header': 'Review your payment history',
               'links-list-section-header': 'Benefit payments',
             });
           }}

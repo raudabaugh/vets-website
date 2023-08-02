@@ -10,17 +10,17 @@ import {
 import Wizard, {
   WIZARD_STATUS_COMPLETE,
 } from 'applications/static-pages/wizard';
-import { MaintenanceAlert } from '../components/Alerts';
+import { MaintenanceAlert } from '../components/alerts/Alerts';
 import pages from './pages';
-import GetFormHelp from '../components/GetFormHelp';
+import GetFormHelp from '../components/shared/GetFormHelp';
 
 const WizardContainer = ({ setWizardStatus, showFSR }) => {
   return (
     <div className="fsr-wizard row">
       <div className="usa-width-two-thirds medium-8 columns">
         <FormTitle
-          title="Request help with VA debt (VA Form 5655)"
-          subTitle="Financial Status Report"
+          title="Request help with VA debt for overpayments and copay bills"
+          subTitle="Financial Status Report (VA Form 5655)"
         />
         <div className="wizard-container">
           <DowntimeNotification
@@ -44,20 +44,20 @@ const WizardContainer = ({ setWizardStatus, showFSR }) => {
           <p>
             If you already know this is the form you need, you can go to the
             form now.
-            <button
-              type="button"
-              className="va-button-link vads-u-display--inline-block skip-wizard-link"
-              onClick={e => {
-                e.preventDefault();
-                setWizardStatus(WIZARD_STATUS_COMPLETE);
-                recordEvent({
-                  event: `howToWizard-skip`,
-                });
-              }}
-            >
-              Request help with VA Form 5655
-            </button>
           </p>
+          <button
+            type="button"
+            className="skip-wizard-link"
+            onClick={e => {
+              e.preventDefault();
+              setWizardStatus(WIZARD_STATUS_COMPLETE);
+              recordEvent({
+                event: `howToWizard-skip`,
+              });
+            }}
+          >
+            Request help with VA Form 5655
+          </button>
           <section aria-live="polite">
             <Wizard
               pages={pages}

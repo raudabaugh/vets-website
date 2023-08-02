@@ -1,7 +1,9 @@
+import moment from 'moment';
 import { Actions } from '../util/actionTypes';
 
 const initialState = {
-  alertVisible: true,
+  alertVisible: false,
+  alertFocusOut: false,
   /**
    * The list of possible message categories
    * @type {array}
@@ -16,10 +18,15 @@ export const alertsReducer = (state = initialState, action) => {
       return {
         ...state,
         alertVisible: false,
+        alertFocusOut: false,
         alertList: state.alertList.map(alert => {
           return {
             ...alert,
-            isActive: false,
+            // to prevent setting isActive to false prematurely
+            // value of 2 seconds is arbitrary
+            isActive: moment(alert.datestamp)
+              .add(2, 'seconds')
+              .isAfter(moment(new Date())),
           };
         }),
       };
@@ -33,6 +40,9 @@ export const alertsReducer = (state = initialState, action) => {
           : action.payload.alertType[0].toUpperCase() +
             action.payload.alertType.substring(1),
         content: action.payload.content,
+        className: action.payload.className,
+        link: action.payload.link,
+        title: action.payload.title,
         response: action.payload.response,
       };
       return {
@@ -41,6 +51,11 @@ export const alertsReducer = (state = initialState, action) => {
         alertList: [...state.alertList, newAlert],
       };
     }
+    case Actions.Alerts.FOCUS_OUT_ALERT:
+      return {
+        ...state,
+        alertFocusOut: true,
+      };
     default:
       return state;
   }

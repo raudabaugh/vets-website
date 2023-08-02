@@ -14,7 +14,7 @@ import {
 } from '@@profile/actions/paymentInformation';
 import {
   cnpDirectDepositAccountInformation,
-  cnpDirectDepositAddressIsSetUp,
+  cnpDirectDepositIsEligible,
   cnpDirectDepositInformation,
   cnpDirectDepositIsSetUp,
   cnpDirectDepositLoadError,
@@ -24,8 +24,11 @@ import {
   eduDirectDepositIsSetUp,
   eduDirectDepositLoadError,
   eduDirectDepositUiState as eduDirectDepositUiStateSelector,
+  profileUseLighthouseDirectDepositEndpoint,
 } from '@@profile/selectors';
 import UpdateSuccessAlert from '@@vap-svc/components/ContactInformationFieldInfo/ContactInformationUpdateSuccessAlert';
+import { kebabCase } from 'lodash';
+import { Toggler } from '~/platform/utilities/feature-toggles';
 import recordEvent from '~/platform/monitoring/record-event';
 import LoadingButton from '~/platform/site-wide/loading-button/LoadingButton';
 
@@ -44,6 +47,7 @@ import { benefitTypes } from '~/applications/personalization/common/constants';
 
 import NotEligible from './alerts/NotEligible';
 import { BANK_INFO_UPDATED_ALERT_SETTINGS } from '../../constants';
+import { ProfileInfoCard } from '../ProfileInfoCard';
 
 export const BankInfo = ({
   isLOA3,
@@ -59,6 +63,7 @@ export const BankInfo = ({
   setFormIsDirty,
   setViewingPayments,
   showSuccessMessage,
+  useLighthouseDirectDepositEndpoint,
 }) => {
   const formPrefix = type;
   const editBankInfoButton = useRef();
@@ -74,6 +79,19 @@ export const BankInfo = ({
     formPrefix,
   );
 
+  const sectionTitle = typeIsCNP
+    ? 'Disability compensation and pension benefits'
+    : 'Education benefits';
+
+  const sectionTitleId = kebabCase(sectionTitle);
+
+  const focusOnMainHeading = headingId => {
+    const mainHeading = document.querySelector(`#${headingId}`);
+    if (mainHeading) {
+      mainHeading.setAttribute('tabindex', '-1');
+      mainHeading.focus();
+    }
+  };
   // Using computed properties that I got from the `makeFormProperties` call to
   // destructure the form data object. I learned that this was even possible
   // here: https://stackoverflow.com/a/37040344/585275
@@ -107,12 +125,7 @@ export const BankInfo = ({
   useEffect(
     () => {
       if (isEditingBankInfo && !wasEditingBankInfo) {
-        const focusableElement = editBankInfoForm.current?.querySelector(
-          'button, input, select, a, textarea',
-        );
-        if (focusableElement) {
-          focusableElement.focus();
-        }
+        focusOnMainHeading(sectionTitleId);
       }
       if (wasEditingBankInfo && !isEditingBankInfo) {
         // clear the form data when exiting edit mode so it's blank when the
@@ -122,21 +135,24 @@ export const BankInfo = ({
         editBankInfoButton.current.focus();
       }
     },
-    [isEditingBankInfo, wasEditingBankInfo],
+    [isEditingBankInfo, wasEditingBankInfo, sectionTitleId],
   );
 
   const saveBankInfo = () => {
-    const payload = {
+    const fields = {
       financialInstitutionRoutingNumber: formData[routingNumber],
       accountNumber: formData[accountNumber],
       accountType: formData[accountType],
     };
     if (typeIsCNP) {
       // NOTE: You can trigger a save error by sending undefined values in the payload
-      payload.financialInstitutionName = 'Hidden form field';
-      saveBankInformation(payload, isDirectDepositSetUp);
+      saveBankInformation({
+        fields,
+        isEnrollingInDirectDeposit: isDirectDepositSetUp,
+        useLighthouseDirectDepositEndpoint,
+      });
     } else {
-      saveBankInformation(payload);
+      saveBankInformation({ fields });
     }
   };
 
@@ -163,9 +179,6 @@ export const BankInfo = ({
     ? 'disability compensation and pension'
     : 'education';
 
-  const sectionTitle = typeIsCNP
-    ? 'Disability compensation and pension benefits'
-    : 'Education benefits';
   // When direct deposit is already set up we will show the current bank info
   const bankInfoContent = (
     <div>
@@ -296,13 +309,13 @@ export const BankInfo = ({
           formSubmit={saveBankInfo}
         >
           <LoadingButton
-            aria-label={`update your bank information for ${benefitTypeLong} benefits`}
+            aria-label={`save your bank information for ${benefitTypeLong} benefits`}
             type="submit"
             loadingText="saving bank information"
             className="usa-button-primary vads-u-margin-top--0 medium-screen:vads-u-width--auto"
             isLoading={directDepositUiState.isSaving}
           >
-            Update
+            Save
           </LoadingButton>
           <button
             aria-label={`cancel updating your bank information for ${benefitTypeLong} benefits`}
@@ -393,12 +406,26 @@ export const BankInfo = ({
           Cancel
         </button>
       </VaModal>
-      <ProfileInfoTable
-        className="vads-u-margin-y--2 medium-screen:vads-u-margin-y--4"
-        title={sectionTitle}
-        data={directDepositData()}
-        level={2}
-      />
+      <Toggler toggleName={Toggler.TOGGLE_NAMES.profileUseInfoCard}>
+        <Toggler.Enabled>
+          <ProfileInfoCard
+            className="vads-u-margin-y--2 medium-screen:vads-u-margin-y--4"
+            title={sectionTitle}
+            data={directDepositData()}
+            namedAnchor={sectionTitleId}
+            level={2}
+          />
+        </Toggler.Enabled>
+        <Toggler.Disabled>
+          <ProfileInfoTable
+            className="vads-u-margin-y--2 medium-screen:vads-u-margin-y--4"
+            title={sectionTitle}
+            data={directDepositData()}
+            namedAnchor={sectionTitleId}
+            level={2}
+          />
+        </Toggler.Disabled>
+      </Toggler>
     </>
   );
 };
@@ -413,6 +440,7 @@ BankInfo.propTypes = {
   setViewingPayments: PropTypes.func.isRequired,
   toggleEditState: PropTypes.func.isRequired,
   type: PropTypes.string.isRequired,
+  useLighthouseDirectDepositEndpoint: PropTypes.bool.isRequired,
   directDepositAccountInfo: PropTypes.shape({
     accountNumber: PropTypes.string,
     accountType: PropTypes.string,
@@ -430,6 +458,9 @@ BankInfo.propTypes = {
 
 export const mapStateToProps = (state, ownProps) => {
   const typeIsCNP = ownProps.type === benefitTypes.CNP;
+  const useLighthouseDirectDepositEndpoint = profileUseLighthouseDirectDepositEndpoint(
+    state,
+  );
   return {
     typeIsCNP,
     isLOA3: isLOA3Selector(state),
@@ -446,16 +477,18 @@ export const mapStateToProps = (state, ownProps) => {
       ? !!cnpDirectDepositLoadError(state)
       : !!eduDirectDepositLoadError(state),
     isEligibleToSetUpDirectDeposit: typeIsCNP
-      ? cnpDirectDepositAddressIsSetUp(state)
+      ? cnpDirectDepositIsEligible(state, useLighthouseDirectDepositEndpoint)
       : false,
     directDepositUiState: typeIsCNP
       ? cnpDirectDepositUiStateSelector(state)
       : eduDirectDepositUiStateSelector(state),
+    useLighthouseDirectDepositEndpoint,
   };
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => {
   const typeIsCNP = ownProps.type === benefitTypes.CNP;
+
   return {
     ...bindActionCreators(
       {

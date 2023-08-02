@@ -1,6 +1,6 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
+import BackLink from '../../../components/BackLink';
 import FacilityAddress from '../../../components/FacilityAddress';
 import AppointmentDateTime from '../AppointmentDateTime';
 import Breadcrumbs from '../../../components/Breadcrumbs';
@@ -12,6 +12,7 @@ import RescheduleOrCancelAlert from './RescheduleOrCancelAlert';
 import ProviderName from './ProviderName';
 import CCInstructions from './CCInstructions';
 import { getTypeOfCareById } from '../../../utils/appointment';
+import { useFeatureToggle } from '~/platform/utilities/feature-toggles';
 
 export default function DetailsCC({
   appointment,
@@ -22,7 +23,10 @@ export default function DetailsCC({
   const facility = appointment.communityCareProvider;
   const typeOfCare = getTypeOfCareById(appointment.vaos.apiData.serviceType);
   const { treatmentSpecialty } = facility;
-
+  const { TOGGLE_NAMES, useToggleValue } = useFeatureToggle();
+  const showBackLink = useToggleValue(
+    TOGGLE_NAMES.vaOnlineSchedulingDescriptiveBackLink,
+  );
   const ShowTypeOfCare = () => {
     if (useV2 && typeOfCare) {
       return (
@@ -56,10 +60,20 @@ export default function DetailsCC({
 
   return (
     <>
-      <Breadcrumbs>
-        <Link to={`/cc/${appointment.id}`}>Appointment detail</Link>
-      </Breadcrumbs>
-      <h1>
+      {showBackLink ? (
+        <BackLink appointment={appointment} />
+      ) : (
+        <Breadcrumbs>
+          <a
+            href={`/health-care/schedule-view-va-appointments/appointments/va/${
+              appointment.id
+            }`}
+          >
+            Appointment detail
+          </a>
+        </Breadcrumbs>
+      )}
+      <h1 className="vads-u-margin-y--2p5">
         <AppointmentDateTime appointment={appointment} />
       </h1>
       <StatusAlert appointment={appointment} />

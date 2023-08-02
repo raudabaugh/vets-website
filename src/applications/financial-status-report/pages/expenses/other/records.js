@@ -1,21 +1,20 @@
 import React from 'react';
-import ItemLoop from '../../../components/ItemLoop';
-import TableDetailsView from '../../../components/TableDetailsView';
-import CustomReviewField from '../../../components/CustomReviewField';
+import ItemLoop from '../../../components/shared/ItemLoop';
+import TableDetailsView from '../../../components/shared/TableDetailsView';
+import CustomReviewField from '../../../components/shared/CustomReviewField';
 import { validateCurrency } from '../../../utils/validations';
-import Typeahead from '../../../components/Typeahead';
+import Typeahead from '../../../components/shared/Typeahead';
 import {
   formatOptions,
   expenseTypes,
 } from '../../../constants/typeaheadOptions';
-import AdditionalInfo from '@department-of-veterans-affairs/component-library/AdditionalInfo';
 
 const AssetInfo = (
-  <AdditionalInfo triggerText="What counts as an expense?">
+  <va-additional-info trigger="What counts as an expense?">
     Many everyday living costs count as expenses. If you’re not sure about a
     specific expense, we encourage you to start typing the expense into the
     form. The form will help you fill in options that count as expenses.
-  </AdditionalInfo>
+  </va-additional-info>
 );
 
 export const uiSchema = {

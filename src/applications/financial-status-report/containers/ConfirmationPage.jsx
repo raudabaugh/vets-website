@@ -5,19 +5,12 @@ import { useSelector, connect } from 'react-redux';
 import Scroll from 'react-scroll';
 import environment from 'platform/utilities/environment';
 import { focusElement } from 'platform/utilities/ui';
-import ServiceProvidersText, {
-  ServiceProvidersTextCreateAcct,
-} from 'platform/user/authentication/components/ServiceProvidersText';
 import { getMedicalCenterNameByID } from 'platform/utilities/medical-centers/medical-centers';
-import recordEvent from '~/platform/monitoring/record-event';
-import GetFormHelp from '../components/GetFormHelp';
+import GetFormHelp from '../components/shared/GetFormHelp';
 import { deductionCodes } from '../constants/deduction-codes';
-import DownloadFormPDF from '../components/DownloadFormPDF';
-import {
-  fsrConfirmationEmailToggle,
-  DEBT_TYPES,
-  fsrReasonDisplay,
-} from '../utils/helpers';
+import DownloadFormPDF from '../components/shared/DownloadFormPDF';
+import { fsrConfirmationEmailToggle, fsrReasonDisplay } from '../utils/helpers';
+import { DEBT_TYPES } from '../constants';
 
 const { scroller } = Scroll;
 const scrollToTop = () => {
@@ -66,13 +59,14 @@ const RequestDetailsCard = ({ data, response }) => {
 
   return (
     <div className="inset">
-      <h4 className="vads-u-margin-top--0">
-        Request help for VA debt <span>(Form 5655)</span>
-      </h4>
+      <h2 className="vads-u-margin-top--0p5 vads-u-font-size-h3">
+        Request help for VA debt{' '}
+        <span className="vads-u-font-weight--normal">(Form 5655)</span>
+      </h2>
       {name && (
-        <span>
+        <p>
           for {name.first} {name.middle} {name.last} {name.suffix}
-        </span>
+        </p>
       )}
       <>
         <p>
@@ -86,12 +80,6 @@ const RequestDetailsCard = ({ data, response }) => {
           {moment(response.timestamp).format('MMMM D, YYYY')}
         </p>
         <p className="vads-u-margin-bottom--0p5">
-          <strong>Your request was sent to</strong>
-        </p>
-        <p className="vads-u-margin-y--0">Debt Management Center</p>
-        <p className="vads-u-margin-y--0">P.O. Box 11930</p>
-        <p className="vads-u-margin-y--0">St. Paul, MN 55111-0930</p>
-        <p>
           <DownloadFormPDF
             pdfContent={response.content}
             useContent={combinedFSR}
@@ -117,26 +105,15 @@ RequestDetailsCard.propTypes = {
 
 const ConfirmationPage = ({ form, download }) => {
   const showFSREmail = useSelector(state => fsrConfirmationEmailToggle(state));
-  const successVBAResponse =
-    'Document has been successfully uploaded to filenet';
 
   const { response } = form.submission;
   const { data } = form;
 
-  useEffect(
-    () => {
-      focusElement('.schemaform-title > h1');
-      if (response.vbaStatus.status === successVBAResponse) {
-        recordEvent({ event: 'cfsr-5655-vba-submitted' });
-      }
+  useEffect(() => {
+    focusElement('.schemaform-title > h1');
 
-      if (response.vhaStatus.status.includes(200)) {
-        recordEvent({ event: 'cfsr-5655-vha-submitted' });
-      }
-      scrollToTop();
-    },
-    [response],
-  );
+    scrollToTop();
+  }, []);
 
   return (
     <div>
@@ -155,11 +132,12 @@ const ConfirmationPage = ({ form, download }) => {
           </p>
         </va-alert>
       )}
-
       <p>
-        We’ll send you a letter with our decision and any next steps. If you
-        experience changes that may affect our decision (like a job loss or a
-        new job), you’ll need to submit a new request.
+        We’ll send you a letter with our decision and any next steps.{' '}
+        <strong>
+          If you experience changes that may affect our decision (like a loss or
+          new job), you’ll need to submit a new request.
+        </strong>
       </p>
 
       {response && (
@@ -176,8 +154,8 @@ const ConfirmationPage = ({ form, download }) => {
           <li className="process-step list-one">
             <h4>Sign in to VA.gov</h4>
             <p>
-              You can sign in with your existing <ServiceProvidersText />
-              account. <ServiceProvidersTextCreateAcct />
+              You can sign in with your Login.gov, ID.me, DS Logon, or My
+              HealtheVet
             </p>
           </li>
           <li className="process-step list-two">
@@ -194,16 +172,11 @@ const ConfirmationPage = ({ form, download }) => {
           <li className="process-step list-three">
             <h4>Go to your debt management portal</h4>
             <p>
-              Once you’re signed in, you can go to
+              After you sign in, you can go to
               <a href="/manage-va-debt" className="vads-u-margin--0p5">
                 Manage my VA debt
               </a>
               to check the status of your current debts.
-            </p>
-            <p>
-              If you have a question about the status of your request call us at
-              800-827-0648 (or 1-612-713-6415 from overseas). We’re here Monday
-              through Friday, 7:30 a.m. to 7:00 p.m. ET.
             </p>
           </li>
         </ol>

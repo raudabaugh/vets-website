@@ -1,3 +1,7 @@
+// START lighthouse_migration
+import featureToggleDisabled from '../fixtures/mocks/lighthouse/feature-toggle-disabled.json';
+// END lighthouse_migration
+
 const Timeouts = require('platform/testing/e2e/timeouts.js');
 
 /* eslint-disable class-methods-use-this */
@@ -13,12 +17,15 @@ class TrackClaimsPage {
         'detailRequest',
       );
     }
+
+    cy.intercept('GET', '/v0/feature_toggles?*', featureToggleDisabled);
     cy.intercept('GET', '/v0/evss_claims_async', claimsList);
     cy.login();
+
     cy.visit('/track-claims');
     cy.title().should(
       'eq',
-      'Check your claim or appeal status | Veterans Affairs',
+      'Check your claim, decision review, or appeal status | Veterans Affairs',
     );
     if (claimsList.data.length) {
       cy.get('.claim-list-item-container', { timeout: Timeouts.slow }).should(
@@ -77,7 +84,7 @@ class TrackClaimsPage {
   checkClaimsContent() {
     cy.get('.claims-container-title').should(
       'contain',
-      'Check your claim or appeal status',
+      'Check your claim, decision review, or appeal status',
     );
     cy.get('.claim-list-item-header-v2')
       .first()
@@ -104,7 +111,7 @@ class TrackClaimsPage {
     cy.get('.main va-alert')
       .should('be.visible')
       .then(alertElem => {
-        cy.wrap(alertElem).should('contain', 'We closed your claim on');
+        cy.wrap(alertElem).should('contain', 'We decided your claim on');
       });
 
     cy.get('.disability-benefits-timeline').should('not.exist');
@@ -123,10 +130,8 @@ class TrackClaimsPage {
 
     cy.url().should('contain', '/your-claims/189685/status');
 
-    // Disabled until COVID-19 message removed
-    // cy.get('.claim-completion-desc').should('contain', 'We estimated your claim would be completed by now');
     if (inProgress) {
-      cy.get('va-alert').should('contain', 'because of COVID-19');
+      cy.get('.process-step.last div').should('be.empty');
     }
   }
 
@@ -279,14 +284,16 @@ class TrackClaimsPage {
     cy.get('[data-cy="submit-files-button"]')
       .click()
       .then(() => {
-        cy.get('.usa-input-error');
+        cy.get('va-file-input')
+          .shadow()
+          .find('#error-message');
         cy.injectAxeThenAxeCheck();
       });
 
-    cy.get('.usa-input-error-message').should(
-      'contain',
-      'Please select a file first',
-    );
+    cy.get('va-file-input')
+      .shadow()
+      .find('#error-message')
+      .should('contain', 'Please select a file first');
     // File uploads don't appear to work in Nightwatch/PhantomJS
     // TODO: switch to something that does support uploads or figure out the problem
     // The above comment lifted from the old Nightwatch test.  Cypress can test file uploads, however this would need to be written in a future effort after our conversion effort is complete.

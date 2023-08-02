@@ -1,92 +1,148 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link, useLocation } from 'react-router-dom';
-// temporarily using deprecated Breadcrumbs React component due to issues with VaBreadcrumbs that are pending resolution
-// import { VaBreadcrumbs } from '@department-of-veterans-affairs/component-library/dist/react-bindings';
-import Breadcrumbs from '@department-of-veterans-affairs/component-library/Breadcrumbs';
+import { Link, useHistory, useLocation } from 'react-router-dom';
 import { setBreadcrumbs } from '../../actions/breadcrumbs';
 import * as Constants from '../../util/constants';
+import { retrieveFolder } from '../../actions/folders';
+import { navigateToFolderByFolderId } from '../../util/helpers';
 
 const SmBreadcrumbs = () => {
   const dispatch = useDispatch();
   const location = useLocation();
+  const history = useHistory();
   const messageDetails = useSelector(state => state.sm.messageDetails.message);
   const activeFolder = useSelector(state => state.sm.folders.folder);
-  const breadcrumbsRef = useRef();
   const crumbs = useSelector(state => state.sm.breadcrumbs.list);
+  const [isMobile, setIsMobile] = useState(false);
+
+  function checkScreenSize() {
+    if (window.innerWidth <= 768 && setIsMobile !== false) {
+      setIsMobile(true);
+    } else {
+      setIsMobile(false);
+    }
+  }
+
+  const [locationBasePath, locationChildPath] = useMemo(
+    () => {
+      const pathElements = location.pathname.split('/');
+      if (pathElements[0] === '') pathElements.shift();
+      return pathElements;
+    },
+    [location],
+  );
 
   useEffect(
     () => {
-      const paths = [
-        {
-          path: `/message/${messageDetails?.messageId}`,
-          label: messageDetails?.subject,
-        },
-        { path: '/reply', label: messageDetails?.subject },
-        Constants.Breadcrumbs.COMPOSE,
-        Constants.Breadcrumbs.DRAFT,
-        Constants.Breadcrumbs.DRAFTS,
-        {
-          path: `/folder/${activeFolder?.folderId}`,
-          label: activeFolder?.name,
-        },
-        Constants.Breadcrumbs.FOLDERS,
-        Constants.Breadcrumbs.SENT,
-        Constants.Breadcrumbs.TRASH,
-        {
-          ...Constants.Breadcrumbs.SEARCH,
-          child: Constants.Breadcrumbs.SEARCH_ADVANCED,
-        },
-        Constants.Breadcrumbs.FAQ,
-      ];
-
-      function handleBreadCrumbs() {
-        const arr = [];
-        arr.push({ path: 'https://www.va.gov', label: 'VA.gov home' });
-        arr.push({
-          path: 'https://www.va.gov/health-care/',
-          label: 'My Health',
-        });
-        arr.push({ path: '/', label: 'Messages' });
-
-        paths.forEach(path => {
-          if (path.path === location.pathname) {
-            arr.push(path);
-            if (path.child?.path === `${location.pathname}${location.search}`) {
-              arr.push(path.child);
-            }
-          }
-        });
-        dispatch(setBreadcrumbs(arr, location));
-      }
-      handleBreadCrumbs();
+      checkScreenSize();
     },
-    [location, dispatch, messageDetails, activeFolder],
+    [isMobile],
   );
 
+  useEffect(
+    () => {
+      if (
+        `/${locationBasePath}/` === Constants.Paths.FOLDERS &&
+        parseInt(locationChildPath, 10) < 1
+      ) {
+        navigateToFolderByFolderId(locationChildPath, history);
+      }
+    },
+    [locationBasePath, locationChildPath, history],
+  );
+
+  window.addEventListener('resize', checkScreenSize);
+
+  useEffect(
+    () => {
+      if (!locationBasePath) {
+        dispatch(setBreadcrumbs({}, location));
+        return;
+      }
+
+      const path = `/${locationBasePath}/`;
+
+      if (
+        [
+          Constants.Paths.INBOX,
+          Constants.Paths.SENT,
+          Constants.Paths.DELETED,
+          Constants.Paths.DRAFTS,
+        ].includes(path) ||
+        (path === Constants.Paths.FOLDERS && !locationChildPath)
+      ) {
+        dispatch(setBreadcrumbs(Constants.Breadcrumbs.MESSAGES, location));
+      } else if (path === Constants.Paths.FOLDERS && locationChildPath) {
+        dispatch(setBreadcrumbs(Constants.Breadcrumbs.FOLDERS, location));
+      } else if (path === Constants.Paths.COMPOSE) {
+        dispatch(setBreadcrumbs(Constants.Breadcrumbs.INBOX, location));
+      } else if (
+        path ===
+          (Constants.Paths.MESSAGE_THREAD ||
+            Constants.Paths.REPLY ||
+            Constants.Paths.COMPOSE) &&
+        activeFolder
+      ) {
+        dispatch(
+          setBreadcrumbs(
+            {
+              path: `${Constants.Paths.FOLDERS}${activeFolder.folderId}`,
+              label: `Back to ${
+                activeFolder.folderId < 1
+                  ? activeFolder.name.toLowerCase()
+                  : activeFolder.name
+              }`,
+            },
+            location,
+          ),
+        );
+      }
+    },
+    [
+      activeFolder,
+      dispatch,
+      location,
+      locationBasePath,
+      locationChildPath,
+      messageDetails?.subject,
+    ],
+  );
+
+  useEffect(
+    () => {
+      if (messageDetails && !activeFolder) {
+        dispatch(retrieveFolder(messageDetails?.threadFolderId));
+      }
+    },
+    [messageDetails, activeFolder, dispatch],
+  );
+
+  const breadcrumbSize = () => {
+    if (isMobile) {
+      return Constants.BreadcrumbViews.MOBILE_VIEW;
+    }
+    return Constants.BreadcrumbViews.DESKTOP_VIEW;
+  };
+
   return (
-    <>
-      {crumbs.length > 0 && (
-        // per exisiting issue found here https://github.com/department-of-veterans-affairs/vets-design-system-documentation/issues/1296
-        // eslint-disable-next-line @department-of-veterans-affairs/prefer-web-component-library
-        <Breadcrumbs ref={breadcrumbsRef}>
-          {crumbs?.map((crumb, i) => {
-            if (crumb.path.includes('https://')) {
-              return (
-                <a key={i} href={crumb.path}>
-                  {crumb.label}
-                </a>
-              );
-            }
-            return (
-              <Link key={i} to={crumb.path}>
-                {crumb.label}
-              </Link>
-            );
-          })}
-        </Breadcrumbs>
-      )}
-    </>
+    <div
+      className={`breadcrumbs vads-1-row ${
+        !crumbs?.label ? 'breadcrumbs--hidden' : ''
+      }`}
+    >
+      <va-breadcrumbs label="Breadcrumb">
+        {crumbs && (
+          <ul className={breadcrumbSize()}>
+            <li>
+              <span className="breadcrumb-angle vads-u-padding-right--1">
+                {'\u2039'}{' '}
+              </span>
+              <Link to={crumbs.path?.toLowerCase()}>{crumbs.label}</Link>
+            </li>
+          </ul>
+        )}
+      </va-breadcrumbs>
+    </div>
   );
 };
 

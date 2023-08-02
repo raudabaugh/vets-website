@@ -8,9 +8,8 @@ import { messageDetailsReducer } from './messageDetails';
 import { messagesReducer } from './messages';
 import { searchReducer } from './search';
 import { triageTeamsReducer } from './triageTeams';
-
-import { allMessages, message, folders } from './oldReducers';
 import { breadcrumbsReducer } from './breadcrumbs';
+import { threadsReducer } from './threads';
 
 const rootReducer = {
   sm: combineReducers({
@@ -22,11 +21,9 @@ const rootReducer = {
     messageDetails: messageDetailsReducer,
     messages: messagesReducer,
     search: searchReducer,
+    threads: threadsReducer,
     triageTeams: triageTeamsReducer,
   }),
-  allMessages,
-  message,
-  folders,
 };
 
 export default rootReducer;

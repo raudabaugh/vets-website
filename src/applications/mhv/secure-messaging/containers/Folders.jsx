@@ -1,20 +1,33 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import {
-  VaModal,
-  VaTextInput,
-} from '@department-of-veterans-affairs/component-library/dist/react-bindings';
 import { useLocation } from 'react-router-dom';
+import { focusElement } from '@department-of-veterans-affairs/platform-utilities/ui';
+import recordEvent from 'platform/monitoring/record-event';
 import { getFolders, newFolder } from '../actions/folders';
+import { closeAlert } from '../actions/alerts';
+import { PageTitles } from '../util/constants';
+import { updatePageTitle } from '../util/helpers';
 import FoldersList from '../components/FoldersList';
 import AlertBackgroundBox from '../components/shared/AlertBackgroundBox';
+import CreateFolderModal from '../components/Modals/CreateFolderModal';
 
 const Folders = () => {
   const dispatch = useDispatch();
   const location = useLocation();
   const folders = useSelector(state => state.sm.folders.folderList);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [folderName, setFolderName] = useState('');
+
+  // clear out alerts if user navigates away from this component
+  useEffect(
+    () => {
+      return () => {
+        if (location.pathname) {
+          dispatch(closeAlert());
+        }
+      };
+    },
+    [location.pathname, dispatch],
+  );
 
   useEffect(
     () => {
@@ -23,18 +36,25 @@ const Folders = () => {
     [dispatch, location, isModalVisible],
   );
 
+  useEffect(
+    () => {
+      if (!isModalVisible) {
+        focusElement(document.querySelector('h1'));
+        updatePageTitle(PageTitles.MY_FOLDERS_PAGE_TITLE_TAG);
+      }
+    },
+    [isModalVisible],
+  );
+
   const openNewModal = () => {
+    dispatch(closeAlert());
     setIsModalVisible(true);
   };
 
-  const closeNewModal = () => {
-    setIsModalVisible(false);
-  };
-
-  const confirmNewFolder = () => {
-    dispatch(newFolder(folderName));
-    dispatch(getFolders());
-    closeNewModal();
+  const confirmFolderCreate = (folderName, closeNewModal) => {
+    dispatch(newFolder(folderName))
+      .then(dispatch(getFolders()))
+      .finally(closeNewModal());
   };
 
   const content = () => {
@@ -59,27 +79,30 @@ const Folders = () => {
     }
     return (
       <>
-        <h1>My folders</h1>
+        <h1 className="vads-u-margin-bottom--2" data-testid="my-folder-header">
+          My folders
+        </h1>
         <AlertBackgroundBox closeable />
-        <button type="button" className="modal-button" onClick={openNewModal}>
-          Create new folder
-        </button>
-        <FoldersList folders={folders} />
-        <VaModal
-          className="modal"
-          visible={isModalVisible}
-          large="true"
-          modalTitle="Create new folder"
-          onCloseEvent={closeNewModal}
-        >
-          <VaTextInput
-            onInput={e => setFolderName(e.target.value)}
-            name="folder-name"
-            label="Please enter your folder name"
-          />
-          <va-button text="Confirm" onClick={confirmNewFolder} />
-          <va-button secondary="true" text="Cancel" onClick={closeNewModal} />
-        </VaModal>
+        <va-button
+          onClick={() => {
+            openNewModal();
+            recordEvent({
+              event: 'cta-button-click',
+              'button-type': 'primary',
+              'button-click-label': 'Create new folder',
+            });
+          }}
+          text="Create new folder"
+        />
+        {folders && (
+          <FoldersList folders={folders.filter(folder => folder.id > 0)} />
+        )}
+        <CreateFolderModal
+          isModalVisible={isModalVisible}
+          setIsModalVisible={setIsModalVisible}
+          onConfirm={confirmFolderCreate}
+          folders={folders}
+        />
       </>
     );
   };

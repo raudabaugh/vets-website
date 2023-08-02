@@ -6,13 +6,19 @@ const StatementOfTruth = ({ content }) => {
   const { label = '', text = [] } = content;
   return (
     <>
-      <h3 className="vads-u-margin-top--4">{`${label} statement of truth`}</h3>
+      <legend className="signature-box--legend vads-u-display--block vads-u-width--full vads-u-font-family--serif vads-u-font-size--h3 vads-u-font-weight--bold">
+        {`${label} statement of truth`}
+      </legend>
 
       {text.map((copy, idx) => {
-        return <p key={`${label}-${idx}`}>{copy}</p>;
+        return (
+          <p key={`${label}-${idx}`} data-testid="cg-statement-copy">
+            {copy}
+          </p>
+        );
       })}
 
-      <p>
+      <p data-testid="cg-privacy-copy">
         I have read and accept the{' '}
         <a
           href={links.privacyPolicy.link}

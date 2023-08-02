@@ -9,6 +9,7 @@ const COEAccess = ({ includedInFlipper }) => {
   if (includedInFlipper === undefined) {
     return <va-loading-indicator set-focus message="Loading..." />;
   }
+
   if (includedInFlipper) {
     return (
       <>
@@ -17,11 +18,12 @@ const COEAccess = ({ includedInFlipper }) => {
           className="vads-c-action-link--green"
           href="/housing-assistance/home-loans/request-coe-form-26-1880"
         >
-          Request a COE
+          Request a COE or check COE status
         </a>
       </>
     );
   }
+
   return (
     <>
       <p>You can request a COE online right now on eBenefits.</p>
@@ -30,7 +32,10 @@ const COEAccess = ({ includedInFlipper }) => {
         Premium <strong>DS Logon</strong> account. If you don’t have a Premium
         account, you can register for one there.
       </p>
-      <a href="https://www.ebenefits.va.gov/ebenefits/about/feature?feature=cert-of-eligibility-home-loan">
+      <a
+        className="vads-c-action-link--green"
+        href="https://www.ebenefits.va.gov/ebenefits/about/feature?feature=cert-of-eligibility-home-loan"
+      >
         Request a COE on eBenefits
       </a>
     </>

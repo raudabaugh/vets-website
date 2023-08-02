@@ -1,3 +1,4 @@
+@import "~@fortawesome/fontawesome-free/scss/fontawesome";
 @import "~@department-of-veterans-affairs/formation/sass/shared-variables";
 @import "~@department-of-veterans-affairs/formation/sass/modules/m-process-list";
 @import "../../../platform/forms/sass/m-schemaform";
@@ -22,6 +23,11 @@ h1:focus {
   word-break: break-word;
 }
 
+.backLinkContainer {
+  display: flex;
+  flex-direction: row;
+
+}
 .vaos__loading-overlay {
   background: $vaos-loading-overlay;
   content: " ";

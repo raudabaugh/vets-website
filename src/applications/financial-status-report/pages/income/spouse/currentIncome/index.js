@@ -1,8 +1,8 @@
 import React from 'react';
-import TableDetailsView from '../../../../components/TableDetailsView';
-import CustomReviewField from '../../../../components/CustomReviewField';
-import Typeahead from '../../../../components/Typeahead';
-import ItemLoop from '../../../../components/ItemLoop';
+import TableDetailsView from '../../../../components/shared/TableDetailsView';
+import CustomReviewField from '../../../../components/shared/CustomReviewField';
+import Typeahead from '../../../../components/shared/Typeahead';
+import ItemLoop from '../../../../components/shared/ItemLoop';
 import { validateCurrency } from '../../../../utils/validations';
 import {
   formatOptions,
@@ -21,7 +21,7 @@ export const uiSchema = {
         'ui:title': 'Gross monthly income',
         'ui:description': (
           <p className="formfield-subtitle">
-            You’ll find this in your spouse’s paycheck. It’s the amount of your
+            You’ll find this in your spouse’s pay stub. It’s the amount of your
             spouse’s pay before taxes and deductions.
           </p>
         ),
