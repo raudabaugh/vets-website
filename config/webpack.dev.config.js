@@ -1,6 +1,7 @@
 const path = require('path');
 const setupLocalProxyRewrite = require('../src/applications/proxy-rewrite/local-proxy-rewrite');
 const manifestHelpers = require('./manifest-helpers');
+const vamcEhrData = require('../src/applications/mhv/landing-page/tests/fixtures/vamc-ehr.json');
 
 function generateWebpackDevConfig(buildOptions) {
   const routes = manifestHelpers.getAppRoutes();
@@ -74,6 +75,10 @@ function generateWebpackDevConfig(buildOptions) {
       if (buildOptions['local-proxy-rewrite']) {
         setupLocalProxyRewrite(devServer, buildOptions);
       }
+
+      devServer.app.get('/data/cms/vamc-ehr.json', (_, res) =>
+        res.json(vamcEhrData),
+      );
 
       return middlewares;
     },
