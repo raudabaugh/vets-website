@@ -24,6 +24,15 @@ export const isLOA1 = state => selectProfile(state).loa.current === 1;
 export const isMultifactorEnabled = state => selectProfile(state).multifactor;
 export const selectAvailableServices = state => selectProfile(state)?.services;
 
+/**
+ * Augments state.user.profile.facilities with data from vamc-ehr.json.
+ * Valid state depends on selectDrupalStaticData(state).vamcEhrData.loading
+ * being false.
+ * **TODO**: dispatch FETCH_STATIC_DATA_FAILED and set vamcEhrData.errors when
+ *  when fetching fails.
+ * @param {Object} state
+ * @returns {Object} the current user's facilities, including a facility's EHR data.
+ */
 export const selectPatientFacilities = state =>
   selectProfile(state)?.facilities?.map(({ facilityId, isCerner }) => {
     // Derive if the user belongs to a Cerner facility in the FE maintained list.
