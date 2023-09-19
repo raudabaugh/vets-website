@@ -109,7 +109,8 @@ class ReviewCollapsibleChapter extends React.Component {
     if (chapterFormConfig.reviewTitle) {
       chapterTitle = chapterFormConfig.reviewTitle;
     }
-    return chapterTitle;
+
+    return chapterTitle || '';
   };
 
   getSchemaformPageContent = (page, props, editing) => {
@@ -328,22 +329,20 @@ class ReviewCollapsibleChapter extends React.Component {
             push
           />
         )}
-        {expandedPages
-          ? expandedPages.map(page => {
-              const pageConfig = form.pages[page.pageKey];
-              const editing = pageConfig.showPagePerItem
-                ? pageConfig.editMode[page.index]
-                : pageConfig.editMode;
+        {expandedPages?.map(page => {
+          const pageConfig = form.pages[page.pageKey];
+          const editing = pageConfig.showPagePerItem
+            ? pageConfig.editMode[page.index]
+            : pageConfig.editMode;
 
-              const showCustomPage = editing
-                ? !!pageConfig.CustomPage
-                : !!pageConfig.CustomPageReview;
+          const showCustomPage = editing
+            ? !!pageConfig.CustomPage
+            : !!pageConfig.CustomPageReview;
 
-              return showCustomPage
-                ? this.getCustomPageContent(page, props, editing)
-                : this.getSchemaformPageContent(page, props, editing);
-            })
-          : null}
+          return showCustomPage
+            ? this.getCustomPageContent(page, props, editing)
+            : this.getSchemaformPageContent(page, props, editing);
+        }) ?? null}
       </div>
     );
   };
@@ -387,7 +386,7 @@ class ReviewCollapsibleChapter extends React.Component {
       <va-accordion-item
         id={this.id}
         data-chapter={this.props.chapterKey}
-        header={chapterTitle || ''}
+        header={chapterTitle}
         subHeader={this.props.hasUnviewedPages ? subHeader : ''}
       >
         <Element name={`chapter${this.props.chapterKey}ScrollElement`} />
