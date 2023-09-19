@@ -44,7 +44,7 @@ class ReviewCollapsibleChapter extends React.Component {
 
   handleChapterClick(name) {
     if (!this.state.chapterOpen) {
-      this.props.handleOpenChapter(name);
+      this.scrollToChapter(name);
     }
 
     this.setState(prevState => ({
@@ -69,6 +69,17 @@ class ReviewCollapsibleChapter extends React.Component {
     }
     this.props.setData(newData);
   }
+
+  scrollToChapter = () => {
+    scroller.scrollTo(
+      `chapter${this.props.chapterKey}ScrollElement`,
+      window.Forms?.scroll || {
+        duration: 500,
+        delay: 2,
+        smooth: true,
+      },
+    );
+  };
 
   handleSubmit = (formData, key, path = null, index = null) => {
     // This makes sure defaulted data on a page with no changes is saved
@@ -406,9 +417,7 @@ class ReviewCollapsibleChapter extends React.Component {
           data-chapter={this.props.chapterKey}
           header={chapterTitle}
           subHeader={this.props.hasUnviewedPages ? subHeader : ''}
-          onClick={() => {
-            this.handleChapterClick(chapterTitle);
-          }}
+          onClick={this.handleChapterClick}
         >
           {this.props.hasUnviewedPages && (
             <>
@@ -448,7 +457,6 @@ ReviewCollapsibleChapter.propTypes = {
   form: PropTypes.object.isRequired,
   hasUnviewedPages: PropTypes.bool.isRequired,
   pageList: PropTypes.array.isRequired,
-  handleOpenChapter: PropTypes.func.isRequired,
   setData: PropTypes.func.isRequired,
   setFormErrors: PropTypes.func.isRequired,
   onEdit: PropTypes.func.isRequired,
