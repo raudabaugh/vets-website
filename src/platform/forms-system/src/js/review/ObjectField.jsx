@@ -234,6 +234,7 @@ ObjectField.propTypes = {
   }),
   required: PropTypes.bool,
   uiSchema: PropTypes.object,
+  onBlur: PropTypes.func,
   onChange: PropTypes.func,
 };
 
