@@ -233,6 +233,8 @@ class ReviewCollapsibleChapter extends React.Component {
                   `${page.pageKey}${
                     typeof page.index === 'number' ? page.index : ''
                   }`,
+                  'va-button',
+                  'button',
                 );
               }}
               buttonText="Update page"
