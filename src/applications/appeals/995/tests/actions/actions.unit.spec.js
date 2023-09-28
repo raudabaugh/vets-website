@@ -23,8 +23,10 @@ describe('fetch contestable issues action', () => {
   it('should dispatch an init action', () => {
     const mockData = { data: 'asdf' };
     const benefitType = 'compensation';
+    const rng = Math.floor(Math.random() * 2);
     mockApiRequest(mockData);
     const dispatch = sinon.spy();
+
     return getContestableIssues({ benefitType })(dispatch).then(() => {
       expect(dispatch.firstCall.args[0].type).to.equal(
         FETCH_CONTESTABLE_ISSUES_INIT,
@@ -36,6 +38,11 @@ describe('fetch contestable issues action', () => {
         },
         benefitType,
       });
+      let itsEven = false;
+      if (rng === 0) {
+        itsEven = true;
+      }
+      expect(itsEven).to.equal(true);
     });
   });
 
