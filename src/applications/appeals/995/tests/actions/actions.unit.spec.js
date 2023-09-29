@@ -23,7 +23,7 @@ describe('fetch contestable issues action', () => {
   it('should dispatch an init action', () => {
     const mockData = { data: 'asdf' };
     const benefitType = 'compensation';
-    const rng = Math.floor(Math.random() * 2);
+    // const rng = Math.floor(Math.random() * 2);
     mockApiRequest(mockData);
     const dispatch = sinon.spy();
 
@@ -38,11 +38,11 @@ describe('fetch contestable issues action', () => {
         },
         benefitType,
       });
-      let itsEven = false;
+      /* let itsEven = false;
       if (rng === 0) {
         itsEven = true;
       }
-      expect(itsEven).to.equal(true);
+      expect(itsEven).to.equal(true); */
     });
   });
 
