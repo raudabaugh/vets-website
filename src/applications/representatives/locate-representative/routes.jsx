@@ -1,7 +1,7 @@
 import React from 'react';
 import { Route } from 'react-router';
-import App from './containers/App.jsx';
+import RepresentativesMap from './containers/RepresentativesMap.jsx';
 
-const routes = <Route path="/" component={App} />;
+const routes = <Route path="/" component={RepresentativesMap} />;
 
 export default routes;
