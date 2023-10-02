@@ -7,8 +7,6 @@ import {
   fetchMilitaryInformation as fetchMilitaryInformationAction,
   fetchHero as fetchHeroAction,
 } from '@@profile/actions';
-import { toggleValues } from '~/platform/site-wide/feature-toggles/selectors';
-import FEATURE_FLAG_NAMES from '~/platform/utilities/feature-toggles/featureFlagNames';
 import { connectDrupalSourceOfTruthCerner } from '~/platform/utilities/cerner/dsot';
 import recordEvent from '~/platform/monitoring/record-event';
 import { focusElement } from '~/platform/utilities/ui';
@@ -88,7 +86,7 @@ const DashboardHeader = ({ showNotifications }) => {
   );
 };
 
-const LOA1Content = ({ isLOA1, isVAPatient, useLighthouseClaims }) => {
+const LOA1Content = ({ isLOA1, isVAPatient }) => {
   return (
     <Toggler toggleName={Toggler.TOGGLE_NAMES.myVaUseExperimentalFrontend}>
       <Toggler.Enabled>
@@ -99,10 +97,7 @@ const LOA1Content = ({ isLOA1, isVAPatient, useLighthouseClaims }) => {
             </div>
           </div>
 
-          <ClaimsAndAppeals
-            useLighthouseClaims={useLighthouseClaims}
-            isLOA1={isLOA1}
-          />
+          <ClaimsAndAppeals isLOA1={isLOA1} />
 
           <HealthCare isVAPatient={isVAPatient} isLOA1={isLOA1} />
           <EducationAndTraining isLOA1={isLOA1} />
@@ -129,7 +124,6 @@ DashboardHeader.propTypes = {
 LOA1Content.propTypes = {
   isLOA1: PropTypes.bool,
   isVAPatient: PropTypes.bool,
-  useLighthouseClaims: PropTypes.bool,
 };
 
 const Dashboard = ({
@@ -148,7 +142,6 @@ const Dashboard = ({
   showNameTag,
   showNotInMPIError,
   showNotifications,
-  useLighthouseClaims,
   isVAPatient,
   ...props
 }) => {
@@ -256,11 +249,7 @@ const Dashboard = ({
 
               {/* LOA1 user experience */}
               {isLOA1 && (
-                <LOA1Content
-                  isLOA1={isLOA1}
-                  isVAPatient={isVAPatient}
-                  useLighthouseClaims={useLighthouseClaims}
-                />
+                <LOA1Content isLOA1={isLOA1} isVAPatient={isVAPatient} />
               )}
 
               {/* LOA3 user experience */}
@@ -272,7 +261,7 @@ const Dashboard = ({
                   ]}
                   render={RenderClaimsWidgetDowntimeNotification}
                 >
-                  <ClaimsAndAppeals useLighthouseClaims={useLighthouseClaims} />
+                  <ClaimsAndAppeals />
                 </DowntimeNotification>
               )}
               {isLOA3 && (
@@ -296,10 +285,6 @@ const Dashboard = ({
 };
 
 const isClaimsAvailableSelector = createIsServiceAvailableSelector(
-  backendServices.EVSS_CLAIMS,
-);
-
-const isLighthouseClaimsAvailableSelector = createIsServiceAvailableSelector(
   backendServices.LIGHTHOUSE,
 );
 
@@ -314,9 +299,7 @@ const mapStateToProps = state => {
   const isVAPatient = isVAPatientSelector(state);
   const hero = state.vaProfile?.hero;
   const hasClaimsOrAppealsService =
-    isAppealsAvailableSelector(state) ||
-    isClaimsAvailableSelector(state) ||
-    isLighthouseClaimsAvailableSelector(state);
+    isAppealsAvailableSelector(state) || isClaimsAvailableSelector(state);
   const hasMHVAccount = ['OK', 'MULTIPLE'].includes(
     state.user?.profile?.mhvAccountState,
   );
@@ -358,10 +341,6 @@ const mapStateToProps = state => {
     isLOA3 &&
     isVAPatient;
 
-  const useLighthouseClaims = toggleValues(state)[
-    FEATURE_FLAG_NAMES.myVaUseLighthouseClaims
-  ];
-
   const showNotifications =
     !showMPIConnectionError && !showNotInMPIError && isLOA3;
 
@@ -380,7 +359,6 @@ const mapStateToProps = state => {
     hero,
     totalDisabilityRating: state.totalRating?.totalDisabilityRating,
     totalDisabilityRatingServerError: hasTotalDisabilityServerError(state),
-    useLighthouseClaims,
     user: state.user,
     showMPIConnectionError,
     showNotInMPIError,
@@ -422,7 +400,6 @@ Dashboard.propTypes = {
   showValidateIdentityAlert: PropTypes.bool,
   totalDisabilityRating: PropTypes.number,
   totalDisabilityRatingServerError: PropTypes.bool,
-  useLighthouseClaims: PropTypes.bool,
   user: PropTypes.object,
 };
 

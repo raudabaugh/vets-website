@@ -4,12 +4,10 @@ import moment from 'moment';
 
 import recordEvent from '~/platform/monitoring/record-event';
 import {
-  getLighthouseClaimStatusDescription,
-  getPhaseDescription,
+  getClaimStatusDescription,
   isClaimComplete,
-  isLighthouseClaimComplete,
   getClaimType,
-} from '../../utils/claims-helpers';
+} from '../../utils/claims-and-appeals-helpers';
 
 import CTALink from '../CTALink';
 
@@ -17,10 +15,6 @@ const capitalizeFirstLetter = input => {
   const capitalizedFirstLetter = input[0].toUpperCase();
   return `${capitalizedFirstLetter}${input.slice(1)}`;
 };
-
-function listPhase(phase) {
-  return phase === 8 ? 'Closed' : getPhaseDescription(phase);
-}
 
 function handleViewClaim() {
   recordEvent({
@@ -30,31 +24,21 @@ function handleViewClaim() {
   });
 }
 
-const claimInfo = (claim, useLighthouseClaims) => {
-  if (useLighthouseClaims) {
-    return {
-      inProgress: !isLighthouseClaimComplete(claim),
-      claimDate: claim.attributes.claimDate,
-      status: getLighthouseClaimStatusDescription(claim.attributes.status),
-    };
-  }
+const claimInfo = claim => {
   return {
     inProgress: !isClaimComplete(claim),
-    claimDate: claim.attributes.dateFiled,
-    status: listPhase(claim.attributes.phase),
+    claimDate: claim.attributes.claimDate,
+    status: getClaimStatusDescription(claim.attributes.status),
   };
 };
 
-const Claim = ({ claim, useLighthouseClaims = false }) => {
+const Claim = ({ claim }) => {
   if (!claim.attributes) {
     throw new TypeError(
       '`claim` prop is malformed; it should have an `attributes` property.',
     );
   }
-  const { inProgress, claimDate, status } = claimInfo(
-    claim,
-    useLighthouseClaims,
-  );
+  const { inProgress, claimDate, status } = claimInfo(claim);
   const dateRecd = moment(claimDate).format('MMMM D, YYYY');
   return (
     <div className="vads-u-padding-y--2p5 vads-u-padding-x--2p5 vads-u-background-color--gray-lightest">
@@ -95,7 +79,6 @@ const Claim = ({ claim, useLighthouseClaims = false }) => {
 
 Claim.propTypes = {
   claim: PropTypes.object.isRequired,
-  useLighthouseClaims: PropTypes.bool,
 };
 
 export default Claim;
