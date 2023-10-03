@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 
 import recordEvent from 'platform/monitoring/record-event';
@@ -13,7 +13,7 @@ import { VaModal } from '@department-of-veterans-affairs/component-library/dist/
 //   emergencyCareServices,
 //   nonPPMSfacilityTypeOptions,
 // } from '../config';
-import { LocationType } from '../constants';
+// import { RepresentativeType } from '../constants';
 import { setFocus } from '../utils/helpers';
 
 const SearchControls = props => {
@@ -26,7 +26,7 @@ const SearchControls = props => {
     clearGeocodeError,
   } = props;
 
-  const [selectedServiceType, setSelectedServiceType] = useState(null);
+  // const [selectedServiceType, setSelectedServiceType] = useState(null);
   const locationInputFieldRef = useRef(null);
 
   const onlySpaces = str => /^\s+$/.test(str);
@@ -72,27 +72,15 @@ const SearchControls = props => {
       zoomLevel,
       isValid,
       searchString,
-      specialties,
+      // specialties,
     } = currentQuery;
 
-    let analyticsServiceType = serviceType;
+    const analyticsServiceType = serviceType;
 
     const updateReduxState = propName => {
       onChange({ [propName]: ' ' });
       onChange({ [propName]: '' });
     };
-
-    if (facilityType === LocationType.CC_PROVIDER) {
-      if (!serviceType || !selectedServiceType) {
-        updateReduxState('serviceType');
-        focusElement('#service-type-ahead-input');
-        return;
-      }
-
-      if (specialties && Object.keys(specialties).includes(serviceType)) {
-        analyticsServiceType = specialties[serviceType];
-      }
-    }
 
     if (!searchString) {
       updateReduxState('searchString');
@@ -100,11 +88,11 @@ const SearchControls = props => {
       return;
     }
 
-    if (!facilityType) {
-      updateReduxState('facilityType');
-      focusElement('#facility-type-dropdown');
-      return;
-    }
+    // if (!facilityType) {
+    //   updateReduxState('facilityType');
+    //   focusElement('#facility-type-dropdown');
+    //   return;
+    // }
 
     if (!isValid) {
       return;
@@ -120,7 +108,7 @@ const SearchControls = props => {
 
     onSubmit();
 
-    setSelectedServiceType(null);
+    // setSelectedServiceType(null);
   };
 
   //   const handleGeolocationButtonClick = e => {
@@ -415,11 +403,11 @@ SearchControls.propTypes = {
     geolocationInProgress: PropTypes.bool,
     geocodeError: PropTypes.number,
   }).isRequired,
-  onChange: PropTypes.func.isRequired,
-  onSubmit: PropTypes.func.isRequired,
   clearSearchText: PropTypes.func.isRequired,
   geolocateUser: PropTypes.func.isRequired,
   clearGeocodeError: PropTypes.func.isRequired,
+  onChange: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func.isRequired,
 };
 
 export default SearchControls;
