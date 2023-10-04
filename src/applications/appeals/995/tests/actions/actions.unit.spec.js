@@ -49,6 +49,7 @@ describe('fetch contestable issues action', () => {
   it('should dispatch an add person failed action', () => {
     const mockData = { data: 'asdf' };
     const props = { benefitType: 'compensation' };
+    const rng = Math.floor(Math.random() * 2);
     mockApiRequest(mockData, false);
     const dispatch = sinon.spy();
     return getContestableIssues(props)(dispatch).then(() => {
@@ -58,6 +59,11 @@ describe('fetch contestable issues action', () => {
       expect(dispatch.secondCall.args[0].type).to.equal(
         FETCH_CONTESTABLE_ISSUES_FAILED,
       );
+      let itsEven = false;
+      if (rng === 0) {
+        itsEven = true;
+      }
+      expect(itsEven).to.equal(true);
     });
   });
 
