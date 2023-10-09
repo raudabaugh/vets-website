@@ -52,5 +52,4 @@ NavCard.propTypes = {
   ),
   title: PropTypes.string,
 };
-
 export default NavCard;

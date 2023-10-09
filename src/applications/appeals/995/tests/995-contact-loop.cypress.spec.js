@@ -45,6 +45,7 @@ describe('995 contact info loop', () => {
     cy.intercept('GET', '/v0/profile/status/*', mockTelephoneUpdateSuccess);
 
     cy.login(mockUser);
+    cy.intercept('GET', '/v0/user?*', mockUser);
     cy.intercept('GET', '/v0/profile/status', mockStatus);
     cy.intercept('GET', '/v0/maintenance_windows', []);
 
@@ -98,7 +99,10 @@ describe('995 contact info loop', () => {
 
     // Home phone
     cy.get('a[href$="home-phone"]').click();
-    cy.location('pathname').should('eq', `${BASE_URL}/edit-home-phone`);
+    cy.location('pathname').should(
+      'eq',
+      `${BASE_URL}/edit-contact-information-home-phone`,
+    );
     cy.injectAxe();
     cy.axeCheck();
 
@@ -107,7 +111,10 @@ describe('995 contact info loop', () => {
 
     // Mobile phone
     cy.get('a[href$="mobile-phone"]').click();
-    cy.location('pathname').should('eq', `${BASE_URL}/edit-mobile-phone`);
+    cy.location('pathname').should(
+      'eq',
+      `${BASE_URL}/edit-contact-information-mobile-phone`,
+    );
     cy.injectAxe();
     cy.axeCheck();
 
@@ -116,7 +123,10 @@ describe('995 contact info loop', () => {
 
     // Email
     cy.get('a[href$="email-address"]').click();
-    cy.location('pathname').should('eq', `${BASE_URL}/edit-email-address`);
+    cy.location('pathname').should(
+      'eq',
+      `${BASE_URL}/edit-contact-information-email-address`,
+    );
     cy.injectAxe();
     cy.axeCheck();
 
@@ -125,7 +135,10 @@ describe('995 contact info loop', () => {
 
     // Mailing address
     cy.get('a[href$="mailing-address"]').click();
-    cy.location('pathname').should('eq', `${BASE_URL}/edit-mailing-address`);
+    cy.location('pathname').should(
+      'eq',
+      `${BASE_URL}/edit-contact-information-mailing-address`,
+    );
     cy.injectAxe();
     cy.axeCheck();
 
@@ -136,18 +149,20 @@ describe('995 contact info loop', () => {
   // eslint-disable-next-line @department-of-veterans-affairs/axe-check-required
   it('should edit info on a new page, update & return to contact info page ', () => {
     getToContactPage();
-    cy.intercept('/v0/profile/telephones', mockTelephoneUpdateSuccess);
 
     // Contact info
 
     // Mobile phone
     cy.get('a[href$="mobile-phone"]').click();
     cy.contains('Edit mobile phone number').should('be.visible');
-    cy.location('pathname').should('eq', `${BASE_URL}/edit-mobile-phone`);
+    cy.location('pathname').should(
+      'eq',
+      `${BASE_URL}/edit-contact-information-mobile-phone`,
+    );
 
-    cy.findByLabelText(/mobile phone/i)
-      .clear()
-      .type('8885551212');
+    cy.findByLabelText(/mobile phone/i).clear();
+    cy.findByLabelText(/mobile phone/i).type('8885551212');
+
     cy.findAllByText(/save/i, { selector: 'button' })
       .first()
       .click();

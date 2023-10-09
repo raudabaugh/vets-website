@@ -15,6 +15,7 @@ import {
   mockGetEligibilityCC,
 } from '../vaos-cypress-helpers';
 
+const rootUrl = 'my-health/appointments/';
 describe('VAOS community care flow using VAOS service', () => {
   beforeEach(() => {
     vaosSetup();
@@ -28,7 +29,7 @@ describe('VAOS community care flow using VAOS service', () => {
     mockUserTransitionAvailabilities();
     mockVamcEhr();
 
-    cy.visit('health-care/schedule-view-va-appointments/appointments/');
+    cy.visit(rootUrl);
     cy.injectAxe();
 
     // Start flow
@@ -113,10 +114,7 @@ describe('VAOS community care flow using VAOS service', () => {
       .click();
 
     // Choose an appointment day and time step
-    cy.url().should(
-      'contain',
-      '/health-care/schedule-view-va-appointments/appointments/new-appointment/request-date',
-    );
+    cy.url().should('contain', `${rootUrl}new-appointment/request-date`);
     cy.axeCheckBestPractice();
     cy.contains('button', 'Next')
       .focus()
@@ -138,10 +136,7 @@ describe('VAOS community care flow using VAOS service', () => {
       .click();
 
     // What's the closest city to you step
-    cy.url().should(
-      'contain',
-      '/health-care/schedule-view-va-appointments/appointments/new-appointment/choose-closest-city',
-    );
+    cy.url().should('contain', `${rootUrl}new-appointment/choose-closest-city`);
     cy.axeCheckBestPractice();
 
     // Select city
@@ -154,7 +149,7 @@ describe('VAOS community care flow using VAOS service', () => {
     // Tell us your community care preferences step
     cy.url().should(
       'contain',
-      '/health-care/schedule-view-va-appointments/appointments/new-appointment/community-care-preferences',
+      `${rootUrl}new-appointment/community-care-preferences`,
     );
     cy.axeCheckBestPractice();
     cy.findByText(/Choose a provider/).click();
@@ -172,7 +167,7 @@ describe('VAOS community care flow using VAOS service', () => {
 
     cy.url().should(
       'contain',
-      '/health-care/schedule-view-va-appointments/appointments/new-appointment/community-care-language',
+      `${rootUrl}new-appointment/community-care-language`,
     );
     cy.axeCheckBestPractice();
     // Select preferred language
@@ -184,10 +179,7 @@ describe('VAOS community care flow using VAOS service', () => {
       .click();
 
     // Tell us the reason for this appointment step
-    cy.url().should(
-      'contain',
-      '/health-care/schedule-view-va-appointments/appointments/new-appointment/reason-appointment',
-    );
+    cy.url().should('contain', `${rootUrl}new-appointment/reason-appointment`);
     cy.axeCheckBestPractice();
     // Fill out reason input
     cy.get('#root_reasonAdditionalInfo')
@@ -203,10 +195,7 @@ describe('VAOS community care flow using VAOS service', () => {
       .click();
 
     // Your contact information step
-    cy.url().should(
-      'contain',
-      '/health-care/schedule-view-va-appointments/appointments/new-appointment/contact-info',
-    );
+    cy.url().should('contain', `${rootUrl}new-appointment/contact-info`);
     cy.axeCheckBestPractice();
     // Verify phone number
     cy.get('#root_phoneNumber').should('have.value', '5035551234');
@@ -224,10 +213,7 @@ describe('VAOS community care flow using VAOS service', () => {
       .click();
 
     // Review your appointment details step
-    cy.url().should(
-      'contain',
-      '/health-care/schedule-view-va-appointments/appointments/new-appointment/review',
-    );
+    cy.url().should('contain', `${rootUrl}new-appointment/review`);
     cy.axeCheckBestPractice();
     // Click request appointment button
     cy.findByText('Request appointment').click();
@@ -292,9 +278,7 @@ describe('VAOS community care flow using VAOS service', () => {
   it.skip('should submit form with provider chosen from list and submit request', () => {
     mockLoginApi();
 
-    cy.visit(
-      'health-care/schedule-view-va-appointments/appointments/new-appointment/',
-    );
+    cy.visit(`${rootUrl}new-appointment/`);
 
     cy.findAllByRole('link', {
       name: /Details for appointment/,
@@ -328,7 +312,7 @@ describe('VAOS community care flow using VAOS service', () => {
     // Choose where you want to receive your care step
     cy.url().should(
       'contain',
-      '/health-care/schedule-view-va-appointments/appointments/new-appointment/choose-facility-type',
+      `${rootUrl}new-appointment/choose-facility-type`,
     );
     cy.axeCheckBestPractice();
     // Select community care
@@ -341,10 +325,7 @@ describe('VAOS community care flow using VAOS service', () => {
       .click();
 
     // Choose an appointment day and time step
-    cy.url().should(
-      'contain',
-      '/health-care/schedule-view-va-appointments/appointments/new-appointment/request-date',
-    );
+    cy.url().should('contain', `${rootUrl}new-appointment/request-date`);
     cy.axeCheckBestPractice();
     cy.contains('button', 'Next')
       .focus()
@@ -366,10 +347,7 @@ describe('VAOS community care flow using VAOS service', () => {
       .click();
 
     // What's the closest city to you step
-    cy.url().should(
-      'contain',
-      '/health-care/schedule-view-va-appointments/appointments/new-appointment/choose-closest-city',
-    );
+    cy.url().should('contain', `${rootUrl}new-appointment/choose-closest-city`);
     cy.axeCheckBestPractice();
 
     // Select city
@@ -382,7 +360,7 @@ describe('VAOS community care flow using VAOS service', () => {
     // Tell us your community care preferences step
     cy.url().should(
       'contain',
-      '/health-care/schedule-view-va-appointments/appointments/new-appointment/community-care-preferences',
+      `${rootUrl}new-appointment/community-care-preferences`,
     );
     cy.axeCheckBestPractice();
     cy.findByText(/Choose a provider/).click();
@@ -400,7 +378,7 @@ describe('VAOS community care flow using VAOS service', () => {
 
     cy.url().should(
       'contain',
-      '/health-care/schedule-view-va-appointments/appointments/new-appointment/community-care-language',
+      `${rootUrl}new-appointment/community-care-language`,
     );
     cy.axeCheckBestPractice();
     // Select preferred language
@@ -412,10 +390,7 @@ describe('VAOS community care flow using VAOS service', () => {
       .click();
 
     // Tell us the reason for this appointment step
-    cy.url().should(
-      'contain',
-      '/health-care/schedule-view-va-appointments/appointments/new-appointment/reason-appointment',
-    );
+    cy.url().should('contain', `${rootUrl}new-appointment/reason-appointment`);
     cy.axeCheckBestPractice();
     // Fill out reason input
     cy.get('#root_reasonAdditionalInfo')
@@ -431,10 +406,7 @@ describe('VAOS community care flow using VAOS service', () => {
       .click();
 
     // Your contact information step
-    cy.url().should(
-      'contain',
-      '/health-care/schedule-view-va-appointments/appointments/new-appointment/contact-info',
-    );
+    cy.url().should('contain', `${rootUrl}new-appointment/contact-info`);
     cy.axeCheckBestPractice();
     // Verify phone number
     cy.get('#root_phoneNumber').should('have.value', '5035551234');
@@ -452,10 +424,7 @@ describe('VAOS community care flow using VAOS service', () => {
       .click();
 
     // Review your appointment details step
-    cy.url().should(
-      'contain',
-      '/health-care/schedule-view-va-appointments/appointments/new-appointment/review',
-    );
+    cy.url().should('contain', `${rootUrl}new-appointment/review`);
     cy.axeCheckBestPractice();
     // Click request appointment button
     cy.findByText('Request appointment').click();

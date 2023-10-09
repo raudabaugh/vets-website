@@ -1,47 +1,54 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { Link } from 'react-router';
-import { VaModal } from '@department-of-veterans-affairs/component-library/dist/react-bindings';
 
+import { VaModal } from '@department-of-veterans-affairs/component-library/dist/react-bindings';
 import set from 'platform/utilities/data/set';
 import { setData } from 'platform/forms-system/src/js/actions';
 
-import { IssueCard } from './IssueCard';
-import { SELECTED, MAX_LENGTH, LAST_ISSUE, REVIEW_ISSUES } from '../constants';
+import { FETCH_CONTESTABLE_ISSUES_FAILED } from '../actions';
+import { APP_NAME } from '../constants';
+
+import { IssueCard } from '../../shared/components/IssueCard';
 import {
   ContestableIssuesLegend,
   NoIssuesLoadedAlert,
   NoneSelectedAlert,
   MaxSelectionsAlert,
   removeModalContent,
-} from '../content/contestableIssues';
+} from '../../shared/content/contestableIssues';
+import {
+  LAST_ISSUE,
+  MAX_LENGTH,
+  REVIEW_ISSUES,
+  SELECTED,
+} from '../../shared/constants';
+import { focusIssue } from '../../shared/utils/focus';
+import { isEmptyObject } from '../../shared/utils/helpers';
 import {
   getSelected,
   someSelected,
-  isEmptyObject,
   calculateIndexOffset,
-} from '../utils/helpers';
-import { focusIssue } from '../utils/focus';
+} from '../../shared/utils/issues';
 
 /**
- * ContestableIssuesWidget (HLR v2)
- * Form system parameters passed into this widget
- * @typedef {Object}
- * @property {Boolean} autofocus - should auto focus
- * @property {Boolean} disabled -  is disabled?
- * @property {Object} formContext -  state
- * @property {String} id - ID base for form elements
- * @property {String} label - label text
- * @property {func} onBlur - blur callback
- * @property {func} onChange - on change callback
- * @property {Object} options - ui:options
- * @property {String} placeholder - placeholder text
- * @property {Boolean} readonly - readonly state
- * @property {Object} registry - contains definitions, fields, widgets & templates
- * @property {Boolean} required - Show required flag
- * @property {Object} schema - array schema
- * @property {Object[]} value - array value
+ * ContestableIssuesWidget - Form system parameters passed into this widget
+ * @param {Boolean} autofocus - should auto focus
+ * @param {Boolean} disabled -  is disabled?
+ * @param {Object} formContext -  state
+ * @param {String} id - ID base for form elements
+ * @param {String} label - label text
+ * @param {func} onBlur - blur callback
+ * @param {func} onChange - on change callback
+ * @param {Object} options - ui:options
+ * @param {String} placeholder - placeholder text
+ * @param {Boolean} readonly - readonly state
+ * @param {Object} registry - contains definitions, fields, widgets & templates
+ * @param {Boolean} required - Show required flag
+ * @param {Object} schema - array schema
+ * @param {Object[]} value - array value
+ * @return {JSX}
  */
 const ContestableIssuesWidget = props => {
   const {
@@ -49,6 +56,7 @@ const ContestableIssuesWidget = props => {
     id,
     options,
     formContext = {},
+    apiLoadStatus, // API loaded status
     additionalIssues,
     setFormData,
     formData,
@@ -58,6 +66,19 @@ const ContestableIssuesWidget = props => {
   const [showRemoveModal, setShowRemoveModal] = useState(false);
   const [removeIndex, setRemoveIndex] = useState(null);
   const [editState] = useState(window.sessionStorage.getItem(LAST_ISSUE));
+  const hasChecked = useRef(false);
+
+  useEffect(
+    () => {
+      if (
+        !hasChecked.current &&
+        apiLoadStatus === FETCH_CONTESTABLE_ISSUES_FAILED
+      ) {
+        hasChecked.current = true;
+      }
+    },
+    [apiLoadStatus, hasChecked],
+  );
 
   useEffect(
     () => {
@@ -88,7 +109,13 @@ const ContestableIssuesWidget = props => {
   const hasSelected = someSelected(items);
 
   if (onReviewPage && inReviewMode && items.length && !hasSelected) {
-    return <NoneSelectedAlert count={items.length} headerLevel={5} />;
+    return (
+      <NoneSelectedAlert
+        count={items.length}
+        headerLevel={5}
+        inReviewMode={inReviewMode}
+      />
+    );
   }
 
   const handlers = {
@@ -138,8 +165,6 @@ const ContestableIssuesWidget = props => {
       setRemoveIndex(null);
       // setTimeout needed to allow rerender
       setTimeout(() => {
-        // focusIssue is called by form config scrollAndFocusTarget, but only on
-        // page change
         focusIssue(null, null, -1);
       });
 
@@ -171,18 +196,19 @@ const ContestableIssuesWidget = props => {
   });
 
   const showNoIssues =
-    items.length === 0 && (!onReviewPage || (onReviewPage && inReviewMode));
+    !onReviewPage && apiLoadStatus === FETCH_CONTESTABLE_ISSUES_FAILED;
 
   return (
     <>
       <div name="eligibleScrollElement" />
-      {showNoIssues && <NoIssuesLoadedAlert submitted={submitted} />}
+      {showNoIssues && <NoIssuesLoadedAlert />}
       {!showNoIssues &&
-        submitted &&
-        !hasSelected && (
+        !hasSelected &&
+        (onReviewPage || submitted) && (
           <NoneSelectedAlert
             count={value.length}
             headerLevel={onReviewPage ? 4 : 3}
+            inReviewMode={inReviewMode}
           />
         )}
       <fieldset className="review-fieldset">
@@ -224,7 +250,11 @@ const ContestableIssuesWidget = props => {
           </Link>
         )}
         {showErrorModal && (
-          <MaxSelectionsAlert showModal closeModal={handlers.closeModal} />
+          <MaxSelectionsAlert
+            showModal
+            closeModal={handlers.closeModal}
+            appName={APP_NAME}
+          />
         )}
       </fieldset>
     </>
@@ -233,6 +263,7 @@ const ContestableIssuesWidget = props => {
 
 ContestableIssuesWidget.propTypes = {
   additionalIssues: PropTypes.array,
+  apiLoadStatus: PropTypes.string,
   formContext: PropTypes.shape({
     onReviewPage: PropTypes.bool,
     reviewMode: PropTypes.bool,
@@ -250,6 +281,7 @@ ContestableIssuesWidget.propTypes = {
 
 const mapStateToProps = state => ({
   formData: state.form?.data || {},
+  apiLoadStatus: state.contestableIssues?.status || '',
   additionalIssues: state.form?.data.additionalIssues || [],
 });
 const mapDispatchToProps = {

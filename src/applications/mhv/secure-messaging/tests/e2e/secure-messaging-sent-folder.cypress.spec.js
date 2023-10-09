@@ -1,6 +1,7 @@
 import SecureMessagingSite from './sm_site/SecureMessagingSite';
 import PatientInboxPage from './pages/PatientInboxPage';
 import PatientMessagesSentPage from './pages/PatientMessageSentPage';
+import { AXE_CONTEXT } from './utils/constants';
 
 describe('Secure Messaging Sent Folder checks', () => {
   beforeEach(() => {
@@ -10,33 +11,23 @@ describe('Secure Messaging Sent Folder checks', () => {
     landingPage.loadInboxMessages();
     PatientMessagesSentPage.loadMessages();
   });
-  it('Axe Check Sent Folder', () => {
-    cy.injectAxe();
-    cy.axeCheck('main', {
-      rules: {
-        'aria-required-children': {
-          enabled: false,
-        },
-      },
-    });
-  });
 
   it('Verify folder header', () => {
     cy.injectAxe();
-    cy.axeCheck('main', {
+    cy.axeCheck(AXE_CONTEXT, {
       rules: {
         'aria-required-children': {
           enabled: false,
         },
       },
     });
-    PatientMessagesSentPage.verifyFolderHeader('Sent messages');
+    PatientMessagesSentPage.verifyFolderHeader('Sent');
     PatientMessagesSentPage.verifyResponseBodyLength();
   });
 
   it('Verify filter works correctly', () => {
     cy.injectAxe();
-    cy.axeCheck('main', {
+    cy.axeCheck(AXE_CONTEXT, {
       rules: {
         'aria-required-children': {
           enabled: false,
@@ -50,7 +41,7 @@ describe('Secure Messaging Sent Folder checks', () => {
 
   it('Verify clear filter btn works correctly', () => {
     cy.injectAxe();
-    cy.axeCheck('main', {
+    cy.axeCheck(AXE_CONTEXT, {
       rules: {
         'aria-required-children': {
           enabled: false,
@@ -65,7 +56,7 @@ describe('Secure Messaging Sent Folder checks', () => {
 
   it('Check sorting works properly', () => {
     cy.injectAxe();
-    cy.axeCheck('main', {
+    cy.axeCheck(AXE_CONTEXT, {
       rules: {
         'aria-required-children': {
           enabled: false,

@@ -16,6 +16,7 @@ import {
   mockVamcEhr,
 } from '../vaos-cypress-helpers';
 
+const rootUrl = 'my-health/appointments/';
 describe('VAOS appointment list', () => {
   describe('appointments details', () => {
     beforeEach(() => {
@@ -38,6 +39,7 @@ describe('VAOS appointment list', () => {
             id: 1,
             kind: 'cc',
             status: 'booked',
+            localStartTime: moment().format('YYYY-MM-DDTHH:mm:ss.000ZZ'),
             start: moment().format('YYYY-MM-DDTHH:mm:ss'),
           },
         },
@@ -45,7 +47,7 @@ describe('VAOS appointment list', () => {
 
       mockAppointmentsApi({ data, apiVersion: 2 });
 
-      cy.visit('health-care/schedule-view-va-appointments/appointments/');
+      cy.visit(rootUrl);
       cy.injectAxe();
 
       cy.wait(['@v2:get:appointments']);
@@ -72,6 +74,7 @@ describe('VAOS appointment list', () => {
             id: 1,
             kind: 'clinic',
             status: 'booked',
+            localStartTime: moment().format('YYYY-MM-DDTHH:mm:ss.000ZZ'),
             start: moment().format('YYYY-MM-DDTHH:mm:ss'),
           },
         },
@@ -80,7 +83,7 @@ describe('VAOS appointment list', () => {
       mockAppointmentsApi({ data, apiVersion: 2 });
       mockFacilityApi({ id: 'vha_442GC', apiVersion: 1 });
 
-      cy.visit('health-care/schedule-view-va-appointments/appointments/');
+      cy.visit(rootUrl);
       cy.injectAxe();
 
       cy.wait(['@v2:get:appointments']);
@@ -124,6 +127,7 @@ describe('VAOS appointment list', () => {
             //   },
             // },
             locationId: '983',
+            localStartTime: moment().format('YYYY-MM-DDTHH:mm:ss.000ZZ'),
             start: moment().format('YYYY-MM-DDTHH:mm:ss'),
             status: 'booked',
           },
@@ -140,7 +144,7 @@ describe('VAOS appointment list', () => {
         apiVersion: 2,
       });
 
-      cy.visit('health-care/schedule-view-va-appointments/appointments/');
+      cy.visit(rootUrl);
       cy.injectAxe();
 
       cy.wait(['@v2:get:appointments']);
@@ -185,6 +189,7 @@ describe('VAOS appointment list', () => {
               },
             },
             locationId: '983',
+            localStartTime: moment().format('YYYY-MM-DDTHH:mm:ss.000ZZ'),
             start: moment().format('YYYY-MM-DDTHH:mm:ss'),
             status: 'booked',
             telehealth: {
@@ -200,7 +205,7 @@ describe('VAOS appointment list', () => {
       mockAppointmentsApi({ data, apiVersion: 2 });
       mockFacilityApi({ id: 'vha_442', apiVersion: 1 });
 
-      cy.visit('health-care/schedule-view-va-appointments/appointments/');
+      cy.visit(rootUrl);
       cy.injectAxe();
 
       cy.wait(['@v2:get:appointments']);
@@ -227,8 +232,12 @@ describe('VAOS appointment list', () => {
             clinic: '308',
             id: 1,
             kind: 'telehealth',
+            localStartTime: moment().format('YYYY-MM-DDTHH:mm:ss.000ZZ'),
             start: moment().format('YYYY-MM-DDTHH:mm:ss'),
             status: 'booked',
+            extension: {
+              patientHasMobileGfe: false,
+            },
             telehealth: {
               url: null,
               atlas: {
@@ -254,7 +263,7 @@ describe('VAOS appointment list', () => {
       mockAppointmentsApi({ data, apiVersion: 2 });
       mockFacilityApi({ id: 'vha_442', apiVersion: 1 });
 
-      cy.visit('health-care/schedule-view-va-appointments/appointments/');
+      cy.visit(rootUrl);
       cy.injectAxe();
 
       cy.wait(['@v2:get:appointments']);
@@ -281,6 +290,7 @@ describe('VAOS appointment list', () => {
             clinic: '308',
             id: 1,
             kind: 'telehealth',
+            localStartTime: moment().format('YYYY-MM-DDTHH:mm:ss.000ZZ'),
             start: moment().format('YYYY-MM-DDTHH:mm:ss'),
             status: 'booked',
             telehealth: {
@@ -296,7 +306,7 @@ describe('VAOS appointment list', () => {
       mockAppointmentsApi({ data, apiVersion: 2 });
       mockFacilityApi({ id: 'vha_442', apiVersion: 1 });
 
-      cy.visit('health-care/schedule-view-va-appointments/appointments/');
+      cy.visit(rootUrl);
       cy.injectAxe();
 
       cy.wait(['@v2:get:appointments']);
@@ -323,6 +333,7 @@ describe('VAOS appointment list', () => {
             id: 1,
             kind: 'clinic',
             status: 'booked',
+            localStartTime: moment().format('YYYY-MM-DDTHH:mm:ss.000ZZ'),
             start: moment().format('YYYY-MM-DDTHH:mm:ss'),
             cancellable: true,
           },
@@ -333,7 +344,7 @@ describe('VAOS appointment list', () => {
       mockFacilityApi({ id: 'vha_442GC', apiVersion: 1 });
       mockCancelReasonsApi({ facilityId: '983' });
 
-      cy.visit('health-care/schedule-view-va-appointments/appointments/');
+      cy.visit(rootUrl);
       cy.injectAxe();
 
       cy.wait(['@v2:get:appointments']);
@@ -365,7 +376,7 @@ describe('VAOS appointment list', () => {
       mockLoginApi();
       mockUserTransitionAvailabilities();
 
-      cy.visit('health-care/schedule-view-va-appointments/appointments/');
+      cy.visit(rootUrl);
       cy.injectAxe();
 
       cy.wait(['@v2:get:appointments']);
@@ -403,6 +414,7 @@ describe('VAOS appointment list', () => {
             id: 1,
             kind: 'clinic',
             status: 'booked',
+            localStartTime: moment().format('YYYY-MM-DDTHH:mm:ss.000ZZ'),
             start: moment().format('YYYY-MM-DDTHH:mm:ss'),
           },
         },
@@ -432,6 +444,7 @@ describe('VAOS appointment list', () => {
             ],
             serviceType: '408',
             status: 'proposed',
+            localStartTime: moment().format('YYYY-MM-DDTHH:mm:ss.000ZZ'),
             start: moment().format('YYYY-MM-DDTHH:mm:ss'),
           },
         },
@@ -446,7 +459,7 @@ describe('VAOS appointment list', () => {
       mockUserTransitionAvailabilities();
       mockVamcEhr();
 
-      cy.visit('health-care/schedule-view-va-appointments/appointments');
+      cy.visit(rootUrl);
       cy.wait(['@v2:get:appointments']);
       cy.injectAxe();
 
@@ -502,6 +515,9 @@ describe('VAOS appointment list', () => {
           attributes: {
             id: 1,
             status: 'booked',
+            localStartTime: moment()
+              .subtract(1, 'month')
+              .format('YYYY-MM-DDTHH:mm:ss.000ZZ'),
             start: moment()
               .subtract(1, 'month')
               .format('YYYY-MM-DDTHH:mm:ss'),
@@ -517,7 +533,7 @@ describe('VAOS appointment list', () => {
       mockLoginApi();
       mockUserTransitionAvailabilities();
 
-      cy.visit('health-care/schedule-view-va-appointments/appointments/');
+      cy.visit(rootUrl);
       cy.injectAxe();
 
       cy.wait(['@v2:get:appointments']);
@@ -593,6 +609,9 @@ describe('VAOS appointment list', () => {
           attributes: {
             id: 1,
             status: 'cancelled',
+            localStartTime: moment()
+              .subtract(30, 'days')
+              .format('YYYY-MM-DDTHH:mm:ss.000ZZ'),
             start: moment()
               .subtract(30, 'days')
               .format('YYYY-MM-DDTHH:mm:ss'),
@@ -602,7 +621,7 @@ describe('VAOS appointment list', () => {
 
       mockAppointmentsApi({ data, apiVersion: 2 });
 
-      cy.visit('health-care/schedule-view-va-appointments/appointments/');
+      cy.visit(rootUrl);
       cy.injectAxe();
 
       cy.wait(['@v2:get:appointments']);
@@ -631,6 +650,9 @@ describe('VAOS appointment list', () => {
           attributes: {
             id: 1,
             status: 'cancelled',
+            localStartTime: moment()
+              .subtract(30, 'days')
+              .format('YYYY-MM-DDTHH:mm:ss.000ZZ'),
             start: moment()
               .subtract(30, 'days')
               .format('YYYY-MM-DDTHH:mm:ss'),
@@ -640,7 +662,7 @@ describe('VAOS appointment list', () => {
 
       mockAppointmentsApi({ data, apiVersion: 2 });
 
-      cy.visit('health-care/schedule-view-va-appointments/appointments/');
+      cy.visit(rootUrl);
       cy.injectAxe();
 
       cy.wait(['@v2:get:appointments']);

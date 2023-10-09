@@ -17,18 +17,6 @@ const analyticsEvents = {
       prefix: 'accordion',
     },
   ],
-  AdditionalInfo: [
-    {
-      action: 'expand',
-      event: 'int-additional-info-expand',
-      prefix: 'additional-info',
-    },
-    {
-      action: 'collapse',
-      event: 'int-additional-info-collapse',
-      prefix: 'additional-info',
-    },
-  ],
   AlertBox: [
     {
       action: 'linkClick',
@@ -43,29 +31,12 @@ const analyticsEvents = {
       prefix: 'breadcrumbs',
     },
   ],
-  Checkbox: [
-    {
-      action: 'change',
-      event: 'int-checkbox-option-click',
-      prefix: 'checkbox',
-    },
-  ],
   LoadingIndicator: [
     {
       action: 'displayed',
       event: 'loading-indicator-displayed',
       prefix: 'loading-indicator',
     },
-  ],
-  Select: [
-    {
-      action: 'change',
-      event: 'int-select-box-option-click',
-      prefix: 'select',
-    },
-  ],
-  TextArea: [
-    { action: 'blur', event: 'int-text-area-blur', prefix: 'text-area' },
   ],
   TextInput: [
     { action: 'blur', event: 'int-text-input-blur', prefix: 'text-input' },

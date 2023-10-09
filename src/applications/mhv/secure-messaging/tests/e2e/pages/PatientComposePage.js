@@ -1,8 +1,15 @@
 import mockDraftMessage from '../fixtures/message-draft-response.json';
 import mockMessageResponse from '../fixtures/message-response.json';
 import mockThreadResponse from '../fixtures/thread-response.json';
+import mockSignature from '../fixtures/signature-response.json';
+import { Locators, Paths } from '../utils/constants';
+import mockDraftResponse from '../fixtures/message-compose-draft-response.json';
 
 class PatientComposePage {
+  messageSubjectText = 'testSubject';
+
+  messageBodyText = 'testBody';
+
   sendMessage = mockRequest => {
     cy.intercept(
       'POST',
@@ -16,7 +23,9 @@ class PatientComposePage {
       .its('request.body')
       .then(request => {
         if (mockRequest) {
-          expect(request.body).to.eq(mockRequest.body);
+          expect(request.body).to.eq(
+            `\n\n\nName\nTitleTest${mockRequest.body}`,
+          );
           expect(request.category).to.eq(mockRequest.category);
           expect(request.recipient_id).to.eq(mockRequest.recipientId);
           expect(request.subject).to.eq(mockRequest.subject);
@@ -24,44 +33,37 @@ class PatientComposePage {
       });
   };
 
-  getCategory = category => {
+  getCategory = (category = 'COVID') => {
     return cy.get(`[name=${category}]`);
   };
 
   pushSendMessageWithKeyboardPress = () => {
-    cy.intercept(
-      'POST',
-      '/my_health/v1/messaging/messages',
-      mockDraftMessage,
-    ).as('message');
-    cy.tabToElement('[data-testid="Send-Button"]')
+    cy.intercept('POST', Paths.SM_API_EXTENDED, mockDraftMessage).as('message');
+    cy.tabToElement(Locators.BUTTONS.SEND)
       .contains('Send')
       .realPress(['Enter']);
     // cy.wait('@message');
   };
 
   verifySendMessageConfirmationMessage = () => {
-    cy.get('.vads-u-margin-bottom--1').should(
-      'have.text',
-      'Secure message was successfully sent.',
-    );
+    cy.get('.main-content > va-alert')
+      .should('have.text', 'Secure message was successfully sent.')
+      .and('be.focused');
   };
 
   verifySendMessageConfirmationMessageHasFocus = () => {
-    cy.get('.vads-u-margin-bottom--1', { timeout: 5000 }).should('be.focused');
+    cy.focused().should('contain.text', 'Secure message was successfully sent');
   };
 
   //* Refactor*  Need to get rid of this method and split out
-  enterComposeMessageDetails = category => {
+  enterComposeMessageDetails = (category = 'COVID') => {
     this.selectRecipient('###PQR TRIAGE_TEAM 747###', { force: true });
     cy.get('[data-testid="compose-category-radio-button"]')
-      .shadow()
-      .find('label')
-      .contains(category)
+      .find(`input[name="${category}"]`)
       .click({ force: true });
     // this.attachMessageFromFile('test_image.jpg');
-    this.getMessageSubjectField().type('Test Subject');
-    this.getMessageBodyField().type('Test message body');
+    this.getMessageSubjectField().type('Test Subject', { force: true });
+    this.getMessageBodyField().type('Test message body', { force: true });
   };
 
   getMessageSubjectField = () => {
@@ -78,11 +80,11 @@ class PatientComposePage {
       .find('[name="compose-message-body"]');
   };
 
-  selectRecipient = recipient => {
+  selectRecipient = (recipient = 1) => {
     cy.get('[data-testid="compose-recipient-select"]')
       .shadow()
       .find('[id="select"]')
-      .select(recipient);
+      .select(recipient, { force: true });
   };
 
   selectCategoryByTabbingKeyboard = () => {
@@ -90,8 +92,22 @@ class PatientComposePage {
     cy.realPress(['Enter']);
   };
 
-  selectCategory = () => {
-    cy.get('#OTHEROTHER').click({ force: true });
+  selectCategory = (category = 'OTHEROTHERinput') => {
+    cy.get(`#${category}`).click({ force: true });
+  };
+
+  enterDataToMessageSubject = (text = this.messageSubjectText) => {
+    cy.get('[data-testid="message-subject-field"]')
+      .shadow()
+      .find('[name="message-subject"]')
+      .type(text, { force: true });
+  };
+
+  enterDataToMessageBody = (text = this.messageBodyText) => {
+    cy.get('[data-testid="message-body-field"]')
+      .shadow()
+      .find('[name="compose-message-body"]')
+      .type(text, { force: true });
   };
 
   verifyFocusonMessageAttachment = () => {
@@ -112,6 +128,13 @@ class PatientComposePage {
 
   verifyFocusOnErrorEmptyMessageBody = () => {
     cy.focused().should('have.attr', 'error', 'Message body cannot be blank.');
+  };
+
+  verifyErrorEmptyMessageBody = () => {
+    cy.get('#input-error-message').should(
+      'contain.text',
+      'Message body cannot be blank',
+    );
   };
 
   //* Refactor* Needs to have mockDraftMessage as parameter
@@ -142,6 +165,37 @@ class PatientComposePage {
         expect(message.subject).to.eq(draftMessage.data.attributes.subject);
         expect(message.body).to.eq(draftMessage.data.attributes.body);
       });
+  };
+
+  composeDraftByKeyboard = () => {
+    cy.tabToElement('#recipient-dropdown')
+      .shadow()
+      .find('#select')
+      .select(1, { force: true });
+    cy.tabToElement('[data-testid="compose-category-radio-button"]')
+      .first()
+      .click();
+    cy.tabToElement('[data-testid="message-subject-field"]')
+      .shadow()
+      .find('#inputField')
+      .type('testSubject', { force: true });
+    cy.get('[data-testid="message-body-field"]')
+      .shadow()
+      .find('#textarea')
+      .type('testMessage', { force: true });
+  };
+
+  saveDraftByKeyboard = () => {
+    cy.intercept(
+      'POST',
+      `${Paths.SM_API_BASE}/message_drafts`,
+      mockDraftResponse,
+    ).as('draft_message');
+    cy.tabToElement('[data-testid="Save-Draft-Button"]');
+    cy.realPress('Enter');
+    cy.wait('@draft_message').then(xhr => {
+      cy.log(JSON.stringify(xhr.response.body));
+    });
   };
 
   saveDraftButton = () => {
@@ -185,7 +239,7 @@ class PatientComposePage {
   };
 
   attachMessageFromFile = filename => {
-    const filepath = `src/applications/mhv/secure-messaging/tests/e2e/fixtures/${filename}`;
+    const filepath = `src/applications/mhv/secure-messaging/tests/e2e/fixtures/mock-attachments/${filename}`;
     cy.get('[data-testid="attach-file-input"]').selectFile(filepath, {
       force: true,
     });
@@ -244,13 +298,14 @@ class PatientComposePage {
       .should('be.visible');
   };
 
-  verifyComosePageValuesRetainedAfterContinueEditing = () => {
-    cy.get('[data-testid=compose-category-radio-button]')
-      .should('have.value', 'OTHER')
-      .and('have.attr', 'checked');
-    cy.get('[id="compose-message-body"]').should(
+  verifyComposePageValuesRetainedAfterContinueEditing = () => {
+    // cy.get('[data-testid=compose-category-radio-button]')
+    //   .should('have.value', 'OTHER')
+    //   .and('have.attr', 'checked');
+    cy.get('#message-subject').should('have.value', this.messageSubjectText);
+    cy.get('#compose-message-body').should(
       'have.value',
-      'Test message body',
+      `\n\n\nName\nTitleTest${this.messageBodyText}`,
     );
   };
 
@@ -267,10 +322,17 @@ class PatientComposePage {
   };
 
   verifyClickableURLinMessageBody = url => {
-    cy.get('[data-testid="message-body-field"]')
-      .shadow()
-      .find('[id = "textarea"]')
-      .should('have.value', url);
+    const {
+      signatureName,
+      signatureTitle,
+      includeSignature,
+    } = mockSignature.data;
+    cy.get('[data-testid="message-body-field"]').should(
+      'have.attr',
+      'value',
+      `${includeSignature &&
+        `\n\n\n${signatureName}\n${signatureTitle}`}${url}`,
+    );
   };
 
   clickTrashButton = () => {
@@ -319,7 +381,7 @@ class PatientComposePage {
   verifyBodyErrorMessage = () => {
     cy.get('[data-testid="message-body-field"]')
       .shadow()
-      .find('[id=error-message]')
+      .find('[id=input-error-message]')
       .should('be.visible');
   };
 

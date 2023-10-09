@@ -17,6 +17,7 @@ import {
 } from '../vaos-cypress-helpers';
 import * as newApptTests from '../vaos-cypress-schedule-appointment-helpers';
 
+const rootUrl = 'my-health/appointments/';
 describe('VAOS direct schedule flow using VAOS service', () => {
   const start = moment()
     .addBusinessDay(5, 'days')
@@ -95,7 +96,7 @@ describe('VAOS direct schedule flow using VAOS service', () => {
     mockLoginApi();
     mockSchedulingConfigurationApi({ typeOfCareId: 'primaryCare' });
 
-    cy.visit('health-care/schedule-view-va-appointments/appointments/');
+    cy.visit(rootUrl);
     cy.wait('@mockUser');
     cy.injectAxe();
     cy.axeCheckBestPractice();
@@ -179,7 +180,7 @@ describe('VAOS direct schedule flow using VAOS service', () => {
       isRequest: true,
     });
 
-    cy.visit('health-care/schedule-view-va-appointments/appointments/');
+    cy.visit(rootUrl);
     cy.injectAxe();
     cy.axeCheckBestPractice();
 
@@ -272,7 +273,7 @@ describe('VAOS direct schedule flow using VAOS service', () => {
       isRequest: true,
     });
 
-    cy.visit('health-care/schedule-view-va-appointments/appointments/');
+    cy.visit(rootUrl);
     cy.injectAxe();
 
     // Start flow

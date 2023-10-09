@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import _ from 'lodash';
 import moment from 'moment';
-import ItemList from '../shared/ItemList';
 import { vitalTypeDisplayNames } from '../../util/constants';
 
 const VitalListItem = props => {
@@ -16,21 +15,23 @@ const VitalListItem = props => {
           className="record-list-item vads-u-padding-y--2 vads-u-border-color--gray-light vads-u-border--0 vads-u-background-color--gray-lightest card"
           data-testid="record-list-item"
         >
-          <h4>{vitalTypeDisplayNames[record.type]}</h4>
+          <h3 className="vads-u-font-size--h4 vads-u-margin--0 vads-u-line-height--4">
+            {vitalTypeDisplayNames[record.type]}
+          </h3>
           <div className="vads-u-line-height--3">
-            Result: {record.measurement}
+            Result: <span data-dd-privacy="mask">{record.measurement}</span>
           </div>
-          <div className="vads-u-line-height--3">
+          <div className="vads-u-line-height--3" data-dd-privacy="mask">
             {moment(record.date).format('LLL')}
           </div>
           <div className="location-collapsed vads-u-line-height--3">
-            Location: {record.location}
+            Location: <span data-dd-privacy="mask">{record.location}</span>
           </div>
           <div className="print-only">
-            Provider notes: <ItemList list={record.notes} />
+            Provider notes: <span data-dd-privacy="mask">{record.notes}</span>
           </div>
           <Link
-            to={`/vitals/${_.kebabCase(record.type)}`}
+            to={`/vitals/${_.kebabCase(record.type)}-history`}
             className="vads-u-margin-y--0p5 no-print"
           >
             <strong>

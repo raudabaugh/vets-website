@@ -6,7 +6,9 @@ import sinon from 'sinon';
 import { $, $$ } from 'platform/forms-system/src/js/utilities/ui';
 
 import { ContestableIssuesWidget } from '../../components/ContestableIssuesWidget';
-import { SELECTED } from '../../constants';
+import { FETCH_CONTESTABLE_ISSUES_FAILED } from '../../actions';
+
+import { SELECTED } from '../../../shared/constants';
 
 describe('<ContestableIssuesWidget>', () => {
   const getProps = ({
@@ -14,6 +16,7 @@ describe('<ContestableIssuesWidget>', () => {
     submitted = false,
     onChange = () => {},
     setFormData = () => {},
+    apiLoadStatus = '',
   } = {}) => ({
     id: 'id',
     value: [
@@ -28,6 +31,7 @@ describe('<ContestableIssuesWidget>', () => {
       submitted,
     },
     setFormData,
+    apiLoadStatus,
   });
 
   it('should render a list of check boxes (IssueCard component)', () => {
@@ -139,6 +143,32 @@ describe('<ContestableIssuesWidget>', () => {
 
     await waitFor(() => {
       expect(setFormDataSpy.called).to.be.false;
+    });
+  });
+
+  it('should show "no loaded issues" alert when api fails', async () => {
+    const props = getProps({ apiLoadStatus: FETCH_CONTESTABLE_ISSUES_FAILED });
+    const { container } = render(
+      <ContestableIssuesWidget {...props} additionalIssues={[]} value={[]} />,
+    );
+
+    expect($$('va-alert', container).length).to.equal(1);
+    expect($('va-alert', container).innerHTML).to.contain(
+      'We can’t load your issues right now',
+    );
+  });
+
+  it('should not show no loaded issues alert after remove all additional items', async () => {
+    const props = getProps();
+    const { container, rerender } = render(
+      <ContestableIssuesWidget {...props} value={[]} />,
+    );
+
+    rerender(
+      <ContestableIssuesWidget {...props} additionalIssues={[]} value={[]} />,
+    );
+    await waitFor(() => {
+      expect($$('va-alert', container).length).to.equal(0);
     });
   });
 });

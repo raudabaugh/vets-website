@@ -130,11 +130,11 @@ const SpousePayrollDeductionInputList = props => {
           <h3 className="vads-u-margin--0">
             Your spouse’s job at {employerName}
           </h3>
+          <p className="vads-u-margin-bottom--neg1 vads-u-margin-top--3 vads-u-padding-bottom--0p25 vads-u-font-family--sans vads-u-font-weight--normal vads-u-font-size--base">
+            How much does your spouse pay monthly for each of their payroll
+            deductions?
+          </p>
         </legend>
-        <p>
-          How much does your spouse pay monthly for each of their payroll
-          deductions?
-        </p>
         {selectedDeductions?.map((deduction, key) => (
           <div
             key={deduction.name + key}
@@ -157,6 +157,34 @@ const SpousePayrollDeductionInputList = props => {
             />
           </div>
         ))}
+        <va-additional-info
+          trigger="How to calculate your spouse's monthly deductions"
+          class="vads-u-margin-top--2"
+          uswds
+        >
+          <p>
+            First, find the total deduction amount on your spouse’s pay stub.
+            Then follow the step that applies to your spouse:
+          </p>
+          <ol className="vads-u-margin--0 vads-u-padding-left--4 vads-u-padding-top--2 vads-u-padding-bottom--0p25">
+            <li>
+              <strong>If your spouse is paid weekly,</strong> multiply your
+              spouse’s deduction amount by 4.
+            </li>
+            <li>
+              <strong>If your spouse is paid every other week,</strong> multiply
+              spouse’s your deduction amount by 26. Then divide the total by 12.
+            </li>
+            <li>
+              <strong>If your spouse is paid twice a month,</strong> multiply
+              your spouse’s deduction amount by 2.
+            </li>
+            <li>
+              <strong>If your spouse is paid monthly,</strong> enter the
+              deduction amount from your spouse’s pay stub.
+            </li>
+          </ol>
+        </va-additional-info>
       </fieldset>
       {onReviewPage ? updateButton : navButtons}
     </form>
