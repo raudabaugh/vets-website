@@ -39,16 +39,17 @@ class PatientComposePage {
 
   pushSendMessageWithKeyboardPress = () => {
     cy.intercept('POST', Paths.SM_API_EXTENDED, mockDraftMessage).as('message');
-    cy.tabToElement(Locators.BUTTONS.SEND)
-      .contains('Send')
-      .realPress(['Enter']);
+    cy.get('[data-testid="message-body-field"]').click();
+    cy.tabToElement(Locators.BUTTONS.SEND);
+    cy.realPress(['Enter']);
     // cy.wait('@message');
   };
 
-  verifySendMessageConfirmationMessage = () => {
-    cy.get('.main-content > va-alert')
-      .should('have.text', 'Secure message was successfully sent.')
-      .and('be.focused');
+  verifySendMessageConfirmationMessageText = () => {
+    cy.get('.main-content > va-alert').should(
+      'have.text',
+      'Secure message was successfully sent.',
+    );
   };
 
   verifySendMessageConfirmationMessageHasFocus = () => {
@@ -59,9 +60,7 @@ class PatientComposePage {
   enterComposeMessageDetails = (category = 'COVID') => {
     this.selectRecipient('###PQR TRIAGE_TEAM 747###', { force: true });
     cy.get('[data-testid="compose-category-radio-button"]')
-      .shadow()
-      .find(`va-radio-option[name="${category}"]`)
-      .contains(category)
+      .find(`input[name="${category}"]`)
       .click({ force: true });
     // this.attachMessageFromFile('test_image.jpg');
     this.getMessageSubjectField().type('Test Subject', { force: true });
@@ -117,7 +116,9 @@ class PatientComposePage {
   };
 
   verifyFocusOnErrorMessageToSelectRecipient = () => {
-    cy.focused().should('have.attr', 'error', 'Please select a recipient.');
+    return cy
+      .focused()
+      .should('have.attr', 'error', 'Please select a recipient.');
   };
 
   verifyFocusOnErrorMessageToSelectCategory = () => {
@@ -169,6 +170,20 @@ class PatientComposePage {
       });
   };
 
+  keyboardNavToMessageBodyField = () => {
+    return cy
+      .get('[data-testid="message-body-field"]')
+      .shadow()
+      .find('#textarea');
+  };
+
+  keyboardNavToMessageSubjectField = () => {
+    return cy
+      .tabToElement('[data-testid="message-subject-field"]')
+      .shadow()
+      .find('#inputField');
+  };
+
   composeDraftByKeyboard = () => {
     cy.tabToElement('#recipient-dropdown')
       .shadow()
@@ -193,6 +208,7 @@ class PatientComposePage {
       `${Paths.SM_API_BASE}/message_drafts`,
       mockDraftResponse,
     ).as('draft_message');
+    cy.get('[data-testid="message-body-field"]').click();
     cy.tabToElement('[data-testid="Save-Draft-Button"]');
     cy.realPress('Enter');
     cy.wait('@draft_message').then(xhr => {
@@ -367,7 +383,7 @@ class PatientComposePage {
   };
 
   verifyDeleteDraftSuccessfulMessage = () => {
-    cy.get('.vads-u-margin-bottom--1').should(
+    cy.get('.main-content > va-alert').should(
       'have.text',
       'Message conversation was successfully moved to Trash.',
     );
