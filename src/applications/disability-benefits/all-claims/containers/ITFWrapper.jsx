@@ -15,7 +15,7 @@ const fetchWaitingStates = [requestStates.notCalled, requestStates.pending];
 
 export class ITFWrapper extends React.Component {
   static defaultProps = {
-    noITFPages: [/\/start/, /\/introduction/, /\/confirmation/],
+    noITFPages: [/.*/, /\/start/, /\/introduction/, /\/confirmation/],
   };
 
   // When we first enter the form...
